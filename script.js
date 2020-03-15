@@ -38,11 +38,48 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
   }
+  var chLastDate = actualData[0].lastDate;
+  var h3 = document.createElement("h3");
+  var text = document.createTextNode("Aktueller Stand der positiv getesteten Fälle ("+chLastDate+") und Veränderung gegenüber dem Vortag");
+  h3.appendChild(text);
+  document.getElementById("last").append(h3);
+  var sortedActual = Array.from(actualData).sort(function(a, b){return b.actual-a.actual});
+  var p = document.createElement("p");
+  for(var i=0; i<sortedActual.length; i++) {
+    var actual = sortedActual[i];
+    var now = actual.actual;
+    var last = actual.last;
+    var diff = now-last;
+    var diffStr = diff>=0 ? "+"+diff : diff;
+    var lastDate = actual.lastDate;
+    var changeRatio = Math.round(diff/last * 100);
+    var changeRatioStr = changeRatio>=0 ? " / +"+changeRatio+"%" : " / "+changeRatio+"%";
+    if(!last || last==0) changeRatioStr = "";
+    var alert = "";
+    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
+    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
+    var image = document.createElement("img");
+    image.height = 15;
+    image.src = "wappen/"+actual.canton+".png";
+    p.appendChild(image);
+    var text = document.createTextNode(" "+now+" ("+diffStr+changeRatioStr+")");
+    var a = document.createElement("a");
+    a.href = "#div_"+actual.canton;
+    p.appendChild(document.createTextNode(alert));
+    a.appendChild(document.createTextNode(" "+actual.canton+":"));
+    p.appendChild(a);
+    p.appendChild(text);
+    p.appendChild(document.createElement("br"));
+  }
+  document.getElementById("last").append(p);
 });
+
+var actualData = [];
 
 function barChartCases(place) {
   var filteredData = data.filter(function(d) { if(d.canton==place) return d});
   var div = document.createElement("div");
+  div.id="div_"+place;
   var h2 = document.createElement("h2");
   var image = document.createElement("img");
   image.width = 20;
@@ -61,6 +98,17 @@ function barChartCases(place) {
   var dateLabels = filteredData.map(function(d) {return d.date});
   var testedPos = filteredData.map(function(d) {if(d.tested_pos=="NA") return 0; return d.tested_pos});
   var confirmed = filteredData.map(function(d) {if(d.confirmed=="NA") return 0; return d.confirmed});
+  var actual = {};
+  actual.canton = place;
+  actual.actual = parseInt(testedPos[testedPos.length-1]);
+  if(testedPos.length<2) {
+    actual.last = 0
+  }
+  else {
+    actual.last = parseInt(testedPos[testedPos.length-2]);
+  }
+  actual.lastDate = dateLabels[dateLabels.length-1];
+  actualData.push(actual);
   var chart = new Chart(place, {
     type: 'bar',
     options: {
