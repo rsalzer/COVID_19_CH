@@ -49,8 +49,14 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
   h3.appendChild(text);
   document.getElementById("last").append(h3);
   var sortedActual = Array.from(actualData).sort(function(a, b){return b.actual-a.actual});
-  var table = document.createElement("table");
+  var firstTable = document.createElement("table");
+  firstTable.id = "firstTable";
+  var secondTable = document.createElement("table");
+  secondTable.id = "secondTable";
   for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    if(i<sortedActual.length/2) table = firstTable;
+    else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.actual;
     var last = actual.last;
@@ -89,7 +95,8 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
     tr.appendChild(td);
     table.appendChild(tr);
   }
-  document.getElementById("last").append(table);
+  document.getElementById("last").append(firstTable);
+  document.getElementById("last").append(secondTable);
 });
 
 var actualData = [];
