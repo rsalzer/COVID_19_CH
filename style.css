@@ -5,3 +5,8 @@ body {
 a {
   color:#00F;
 }
+
+td {
+  text-align: right;
+  padding-right: 8px;
+}

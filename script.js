@@ -33,6 +33,11 @@ var names = {
   "FL": "Fürstentum Lichtenstein"
 };
 
+d3.json('https://api.github.com/repos/openZH/covid_19/commits?path=COVID19_Cases_Cantons_CH_total.csv&page=1&per_page=1', function(error, data) {
+  var lastUpdateDiv = document.getElementById('latestUpdate');
+  lastUpdateDiv.innerHTML = "<i>Letztes Update der Daten: "+data[0].commit.committer.date.substring(0,10)+" ("+data[0].commit.message+")</i>";
+});
+
 d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_Cantons_CH_total.csv', function (error, csvdata) {
   data = csvdata;
   for(var i=0; i<cantons.length; i++) {
@@ -44,7 +49,7 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
   h3.appendChild(text);
   document.getElementById("last").append(h3);
   var sortedActual = Array.from(actualData).sort(function(a, b){return b.actual-a.actual});
-  var p = document.createElement("p");
+  var table = document.createElement("table");
   for(var i=0; i<sortedActual.length; i++) {
     var actual = sortedActual[i];
     var now = actual.actual;
@@ -53,7 +58,7 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
     var diffStr = diff>=0 ? "+"+diff : diff;
     var lastDate = actual.lastDate;
     var changeRatio = Math.round(diff/last * 100);
-    var changeRatioStr = changeRatio>=0 ? " / +"+changeRatio+"%" : " / "+changeRatio+"%";
+    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
     if(!last || last==0) changeRatioStr = "";
     var alert = "";
     if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
@@ -61,17 +66,30 @@ d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_C
     var image = document.createElement("img");
     image.height = 15;
     image.src = "wappen/"+actual.canton+".png";
-    p.appendChild(image);
-    var text = document.createTextNode(" "+now+" ("+diffStr+changeRatioStr+")");
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.appendChild(image);
+    var text = document.createTextNode(now);
     var a = document.createElement("a");
     a.href = "#div_"+actual.canton;
-    p.appendChild(document.createTextNode(alert));
+    td.appendChild(document.createTextNode(alert));
     a.appendChild(document.createTextNode(" "+actual.canton+":"));
-    p.appendChild(a);
-    p.appendChild(text);
-    p.appendChild(document.createElement("br"));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(diffStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(changeRatioStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    table.appendChild(tr);
   }
-  document.getElementById("last").append(p);
+  document.getElementById("last").append(table);
 });
 
 var actualData = [];
