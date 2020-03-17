@@ -35,7 +35,76 @@ var names = {
 
 d3.json('https://api.github.com/repos/openZH/covid_19/commits?path=COVID19_Cases_Cantons_CH_total.csv&page=1&per_page=1', function(error, data) {
   var lastUpdateDiv = document.getElementById('latestUpdate');
-  lastUpdateDiv.innerHTML = "<i>Letztes Update der Daten: "+data[0].commit.committer.date.substring(0,10)+" ("+data[0].commit.message+")</i>";
+  lastUpdateDiv.innerHTML = "<i>Letztes Update der offiziellen Daten: "+data[0].commit.committer.date.substring(0,10)+" ("+data[0].commit.message+")</i>";
+});
+
+d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_cases_switzerland.csv', function(error, csvdata) {
+  var div = document.getElementById("inofficial");
+  var canvas = document.createElement("canvas");
+  //canvas.className  = "myClass";
+  canvas.id = 'chinofficial';
+  canvas.height=300;
+  canvas.width=300+csvdata.length*30;
+  div.appendChild(canvas);
+  var dateLabels = csvdata.map(function(d) {return d.Date});
+  var testedPos = csvdata.map(function(d) {return d.CH});
+  var chart = new Chart('chinofficial', {
+    type: 'bar',
+    options: {
+      responsive: false,
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Unbestätigte Fälle Schweiz'
+      },
+      tooltips: {
+						mode: "index",
+						intersect: true,
+			},
+      scales: {
+        xAxes: [{
+                  stacked: true,
+                  id: "bar-x-axis1"
+                }],
+      yAxes: [{
+        stacked: false,
+        ticks: {
+          beginAtZero: true,
+          suggestedMax: 10,
+        },
+      }]
+  },
+      plugins: {
+        labels: {
+          render: function (args) {
+               var index = args.index;
+               var value = args.value;
+               if(index==0) return "";
+               var lastValue = args.dataset.data[index-1];
+               var percentageChange = value/lastValue - 1;
+               var rounded = Math.round(percentageChange * 100);
+               var label = ""+rounded;
+               if(rounded >= 0) label = "+"+label+"%";
+               else label = "-"+label+"%";
+               return label;
+            }
+          }
+        }
+    },
+    data: {
+      labels: dateLabels,
+      datasets: [
+        {
+          data: testedPos,
+          backgroundColor: '#F15F36',
+          borderWidth: 1,
+          label: "Positiv getestet"
+        }
+      ]
+    }
+  });
 });
 
 d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_Cantons_CH_total.csv', function (error, csvdata) {
@@ -140,6 +209,9 @@ function barChartCases(place) {
       responsive: false,
       legend: {
         display: false
+      },
+      plugins: {
+        labels: false
       },
       title: {
         display: true,
