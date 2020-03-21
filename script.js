@@ -1,6 +1,6 @@
 var data;
 
-var cantons = ['CH', 'AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
+var cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
 
 var names = {
   "CH": "Ganze Schweiz",
@@ -33,10 +33,195 @@ var names = {
   "FL": "Fürstentum Lichtenstein"
 };
 
+var actualData = [];
+var data = [];
+
+getCanton(0);
+
+function getCanton(i) {
+  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
+  if(cantons[i] == "FL") {
+    url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_FL_total.csv'
+  }
+  d3.csv(url, function(error, csvdata) {
+      if(error!=null) {
+        console.log(error.responseURL+" not found");
+        actualData.push({
+          date: "Keine Daten",
+          ncumul_conf: "",
+          abbreviation_canton_and_fl: cantons[i]
+        });
+      }
+      else {
+        for(var x=0; x<csvdata.length; x++) {
+          data.push(csvdata[x]);
+        }
+        var latestData = csvdata[csvdata.length-1];
+        if(latestData.ncumul_conf)
+          actualData.push(latestData);
+        else {
+          if(csvdata.length>1 && csvdata[csvdata.length-2].ncumul_conf) //Special case for FR
+            actualData.push(csvdata[csvdata.length-2]);
+          else {
+            actualData.push(latestData);
+          }
+        }
+        console.log("added "+csvdata.length+" rows for "+cantons[i]);
+      }
+      if(i<cantons.length-1) {
+        getCanton(i+1);
+      }
+      else {
+        processData();
+      }
+  });
+}
+
+function processData() {
+  console.log("Plotting data");
+  processActualData();
+}
+
+function processActualData() {
+  var h3 = document.createElement("h3");
+  var text = document.createTextNode("Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone");
+  h3.appendChild(text);
+  document.getElementById("last").append(h3);
+  var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+  var head = "<tr><th>Kanton</th><th>Datum</th><th># Fälle</th></tr>"
+  var firstTable = document.createElement("table");
+  firstTable.innerHTML = head;
+  firstTable.id = "firstTable";
+  var secondTable = document.createElement("table");
+  secondTable.id = "secondTable";
+  secondTable.innerHTML = head;
+  var total = 0;
+  for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    if(i<sortedActual.length/2) table = firstTable;
+    else table = secondTable;
+    var actual = sortedActual[i];
+    var now = actual.ncumul_conf;
+    if(actual.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    /*
+    var last = actual.last;
+    var diff = now-last;
+    var diffStr = diff>=0 ? "+"+diff : diff;
+    var lastDate = actual.lastDate;
+    var changeRatio = Math.round(diff/last * 100);
+    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
+    if(!last || last==0) changeRatioStr = "";
+    var alert = "";
+    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
+    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
+    */
+    var image = document.createElement("img");
+    image.height = 15;
+    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.appendChild(image);
+    var a = document.createElement("a");
+    a.href = "#div_"+actual.canton;
+    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(document.createTextNode(actual.date));
+    tr.appendChild(td);
+    td = document.createElement("td");
+    var text = document.createTextNode(now);
+    td.appendChild(text);
+    tr.appendChild(td);
+    /*
+    td = document.createElement("td");
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(diffStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(changeRatioStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    */
+    table.appendChild(tr);
+  }
+  document.getElementById("last").append(firstTable);
+  document.getElementById("last").append(secondTable);
+  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
+}
+
+/*
+d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_AG_total.csv', function (error, csvdata) {
+  data = csvdata;
+  for(var i=0; i<cantons.length; i++) {
+    barChartCases(cantons[i]);
+  }
+  var chLastDate = actualData[0].lastDate;
+  var h3 = document.createElement("h3");
+  var text = document.createTextNode("Aktueller Stand der positiv getesteten Fälle");
+  h3.appendChild(text);
+  document.getElementById("last").append(h3);
+  var sortedActual = Array.from(actualData).sort(function(a, b){return b.actual-a.actual});
+  var firstTable = document.createElement("table");
+  firstTable.id = "firstTable";
+  var secondTable = document.createElement("table");
+  secondTable.id = "secondTable";
+  for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    if(i<sortedActual.length/2) table = firstTable;
+    else table = secondTable;
+    var actual = sortedActual[i];
+    var now = actual.actual;
+    var last = actual.last;
+    var diff = now-last;
+    var diffStr = diff>=0 ? "+"+diff : diff;
+    var lastDate = actual.lastDate;
+    var changeRatio = Math.round(diff/last * 100);
+    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
+    if(!last || last==0) changeRatioStr = "";
+    var alert = "";
+    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
+    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
+    var image = document.createElement("img");
+    image.height = 15;
+    image.src = "wappen/"+actual.canton+".png";
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.appendChild(image);
+    var text = document.createTextNode(now);
+    var a = document.createElement("a");
+    a.href = "#div_"+actual.canton;
+    td.appendChild(document.createTextNode(alert));
+    a.appendChild(document.createTextNode(" "+actual.canton+":"));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(diffStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(changeRatioStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    table.appendChild(tr);
+  }
+  document.getElementById("last").append(firstTable);
+  document.getElementById("last").append(secondTable);
+});
+
+/*
 d3.json('https://api.github.com/repos/openZH/covid_19/commits?path=COVID19_Cases_Cantons_CH_total.csv&page=1&per_page=1', function(error, data) {
   var lastUpdateDiv = document.getElementById('latestUpdate');
   lastUpdateDiv.innerHTML = "<i>Letztes Update der offiziellen Daten: "+data[0].commit.committer.date.substring(0,10)+" ("+data[0].commit.message+")</i>";
 });
+*/
+
 
 d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_cases_switzerland.csv', function(error, csvdata) {
   var div = document.getElementById("inofficial");
@@ -106,69 +291,6 @@ d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/
     }
   });
 });
-
-d3.csv('https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Cases_Cantons_CH_total.csv', function (error, csvdata) {
-  data = csvdata;
-  for(var i=0; i<cantons.length; i++) {
-    barChartCases(cantons[i]);
-  }
-  var chLastDate = actualData[0].lastDate;
-  var h3 = document.createElement("h3");
-  var text = document.createTextNode("Aktueller Stand der positiv getesteten Fälle ("+chLastDate+") und Veränderung gegenüber dem Vortag");
-  h3.appendChild(text);
-  document.getElementById("last").append(h3);
-  var sortedActual = Array.from(actualData).sort(function(a, b){return b.actual-a.actual});
-  var firstTable = document.createElement("table");
-  firstTable.id = "firstTable";
-  var secondTable = document.createElement("table");
-  secondTable.id = "secondTable";
-  for(var i=0; i<sortedActual.length; i++) {
-    var table;
-    if(i<sortedActual.length/2) table = firstTable;
-    else table = secondTable;
-    var actual = sortedActual[i];
-    var now = actual.actual;
-    var last = actual.last;
-    var diff = now-last;
-    var diffStr = diff>=0 ? "+"+diff : diff;
-    var lastDate = actual.lastDate;
-    var changeRatio = Math.round(diff/last * 100);
-    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
-    if(!last || last==0) changeRatioStr = "";
-    var alert = "";
-    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
-    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
-    var image = document.createElement("img");
-    image.height = 15;
-    image.src = "wappen/"+actual.canton+".png";
-    var tr = document.createElement("tr");
-    var td = document.createElement("td");
-    td.appendChild(image);
-    var text = document.createTextNode(now);
-    var a = document.createElement("a");
-    a.href = "#div_"+actual.canton;
-    td.appendChild(document.createTextNode(alert));
-    a.appendChild(document.createTextNode(" "+actual.canton+":"));
-    td.appendChild(a);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(diffStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(changeRatioStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    table.appendChild(tr);
-  }
-  document.getElementById("last").append(firstTable);
-  document.getElementById("last").append(secondTable);
-});
-
-var actualData = [];
 
 function barChartCases(place) {
   var filteredData = data.filter(function(d) { if(d.canton==place) return d});
