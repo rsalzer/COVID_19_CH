@@ -257,12 +257,13 @@ function barChartCases(place) {
   else {
     canvas.id = place;
     canvas.height=300;
-    canvas.width=300+filteredData.length*40;
+    canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
   }
   document.getElementsByTagName('body')[0].appendChild(div);
   if(!filteredData || filteredData.length<2) return;
-  var dateLabels = filteredData.map(function(d) {
+  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
+  var dateLabels = moreFilteredData.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
     var month = parseInt(dateSplit[1])-1;
@@ -270,7 +271,7 @@ function barChartCases(place) {
     var date = new Date(year,month,day);
     return date;
   });
-  var cases = filteredData.map(function(d) {return d.ncumul_conf});
+  var cases = moreFilteredData.map(function(d) {return d.ncumul_conf});
   var chart = new Chart(canvas.id, {
     type: 'line',
     options: {
