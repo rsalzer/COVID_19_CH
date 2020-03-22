@@ -91,6 +91,7 @@ function getCanton(i) {
 }
 
 function processData() {
+  document.getElementById("loadingspinner").style.display = 'none';
   console.log("Plotting data");
   processActualData();
   processActualDeaths();
