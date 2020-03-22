@@ -30,7 +30,7 @@ var names = {
   "VS": "Kanton Wallis",
   "ZG": "Kanton Zug",
   "ZH": "Kanton Zürich",
-  "FL": "Fürstentum Lichtenstein"
+  "FL": "Fürstentum Liechtenstein"
 };
 
 var actualData = [];
