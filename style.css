@@ -19,10 +19,17 @@ td {
 
 /* Spinner: */
 
-.lds-ring {
+#loadingspinner {
   margin: auto;
-  /*display: inline-block;
-   position: relative; */
+  width: 100px;
+  padding: 10px;
+  line-height: 50px;
+  text-align: center;
+}
+
+.lds-ring {
+  display: inline-block;
+  position: relative;
   width: 80px;
   height: 80px;
 }
