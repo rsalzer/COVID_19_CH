@@ -34,6 +34,7 @@ var names = {
 };
 
 var actualData = [];
+var actualDeaths = [];
 var data = [];
 
 getCanton(0);
@@ -51,12 +52,24 @@ function getCanton(i) {
           ncumul_conf: "",
           abbreviation_canton_and_fl: cantons[i]
         });
+        actualDeaths.push({
+          date: "Keine Daten",
+          ncumul_deceased: "",
+          abbreviation_canton_and_fl: cantons[i]
+        });
       }
       else {
         for(var x=0; x<csvdata.length; x++) {
           data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
+        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased!="") return d});
+        if(filteredDataForDeaths.length==0) {
+          actualDeaths.push(latestData);
+        }
+        else {
+          actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
+        }
         if(latestData.ncumul_conf)
           actualData.push(latestData);
         else {
@@ -80,6 +93,7 @@ function getCanton(i) {
 function processData() {
   console.log("Plotting data");
   processActualData();
+  processActualDeaths();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
   }
@@ -105,6 +119,77 @@ function processActualData() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_conf;
+    if(actual.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    /*
+    var last = actual.last;
+    var diff = now-last;
+    var diffStr = diff>=0 ? "+"+diff : diff;
+    var lastDate = actual.lastDate;
+    var changeRatio = Math.round(diff/last * 100);
+    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
+    if(!last || last==0) changeRatioStr = "";
+    var alert = "";
+    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
+    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
+    */
+    var image = document.createElement("img");
+    image.height = 15;
+    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.appendChild(image);
+    var a = document.createElement("a");
+    a.href = "#div_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(document.createTextNode(actual.date));
+    tr.appendChild(td);
+    td = document.createElement("td");
+    var text = document.createTextNode(now);
+    td.appendChild(text);
+    tr.appendChild(td);
+    /*
+    td = document.createElement("td");
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(diffStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(changeRatioStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    */
+    table.appendChild(tr);
+  }
+  document.getElementById("last").append(firstTable);
+  document.getElementById("last").append(secondTable);
+  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
+}
+
+function processActualDeaths() {
+  var h3 = document.createElement("h3");
+  var text = document.createTextNode("Verstorbene gemäss Daten der Kantone");
+  h3.appendChild(text);
+  document.getElementById("last").append(h3);
+  var sortedActual = Array.from(actualDeaths).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
+  var head = "<tr><th>Kanton</th><th>Datum</th><th># Fälle</th></tr>"
+  var firstTable = document.createElement("table");
+  firstTable.innerHTML = head;
+  firstTable.id = "firstTable";
+  var secondTable = document.createElement("table");
+  secondTable.id = "secondTable";
+  secondTable.innerHTML = head;
+  var total = 0;
+  for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    if(i<sortedActual.length/2) table = firstTable;
+    else table = secondTable;
+    var actual = sortedActual[i];
+    var now = actual.ncumul_deceased;
     if(actual.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
     /*
     var last = actual.last;
