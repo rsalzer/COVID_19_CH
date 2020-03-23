@@ -151,6 +151,21 @@ function processActualData() {
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
+    td = document.createElement("td");
+    td.style["font-size"] = "small";
+    if(actual.source.substring(0,2)=="ht") {
+      a = document.createElement("a");
+      a.href = actual.source;
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
+    else {
+      a = document.createElement("a");
+      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
+    tr.appendChild(td);
     /*
     td = document.createElement("td");
     td.appendChild(text);
@@ -221,6 +236,21 @@ function processActualDeaths() {
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.style["font-size"] = "small";
+    if(actual.source.substring(0,2)=="ht") {
+      a = document.createElement("a");
+      a.href = actual.source;
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
+    else {
+      a = document.createElement("a");
+      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
     tr.appendChild(td);
     /*
     td = document.createElement("td");
