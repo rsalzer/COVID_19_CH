@@ -440,6 +440,7 @@ function barChartCases(place) {
         {
           data: cases,
           fill: false,
+          cubicInterpolationMode: 'monotone',
           spanGaps: true,
           borderColor: '#F15F36',
           backgroundColor: '#F15F36',
