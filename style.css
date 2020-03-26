@@ -7,7 +7,7 @@ a {
 }
 
 td {
-  text-align: right;
+  text-align: center;
   padding-right: 8px;
 }
 
@@ -15,8 +15,11 @@ td {
   float: left;
   margin-right: 20px;
 }
-
-
+/*
+#last {
+  height: 1000px;
+  position: relative;
+}
 /* Spinner: */
 
 #loadingspinner {

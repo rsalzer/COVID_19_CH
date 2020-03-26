@@ -35,6 +35,7 @@ var names = {
 
 var actualData = [];
 var actualDeaths = [];
+var actualHospitalisation = [];
 var data = [];
 
 getCanton(0);
@@ -57,6 +58,11 @@ function getCanton(i) {
           ncumul_deceased: "",
           abbreviation_canton_and_fl: cantons[i]
         });
+        /*actualHospitalisation.push({
+          date: "Keine Daten",
+          ncumul_deceased: "",
+          abbreviation_canton_and_fl: cantons[i]
+        });*/
       }
       else {
         for(var x=0; x<csvdata.length; x++) {
@@ -69,6 +75,13 @@ function getCanton(i) {
         }
         else {
           actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
+        }
+        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.ncumul_hosp!="") return d});
+        if(filteredDataForHospitalisation.length==0) {
+          //actualHospitalisation.push(latestData);
+        }
+        else {
+          actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
         }
         if(latestData.ncumul_conf)
           actualData.push(latestData);
@@ -95,6 +108,7 @@ function processData() {
   console.log("Plotting data");
   processActualData();
   processActualDeaths();
+  processActualHospitalisation();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
   }
@@ -272,6 +286,110 @@ function processActualDeaths() {
   document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
+function processActualHospitalisation() {
+  var h3 = document.createElement("h3");
+  var text = document.createTextNode("Fälle in Spitalbehandlung");
+  h3.appendChild(text);
+  document.getElementById("last").append(h3);
+  var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.ncumul_hosp-a.ncumul_hosp});
+  var head = "<tr><th>Kanton</th><th>Datum</th><th>Hospitalisiert</th><th>In Intensivbehandlung</th><th>Künstlich beatmet</th></tr>"
+  /*
+  var firstTable = document.createElement("table");
+  firstTable.innerHTML = head;
+  firstTable.id = "firstTable";
+  */
+  var secondTable = document.createElement("table");
+  secondTable.id = "secondTable";
+  secondTable.innerHTML = head;
+
+  var total = 0;
+  var totalicu = 0;
+  var totalvent = 0;
+  for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    //if(i<sortedActual.length/2)
+    table = secondTable;
+    //else table = secondTable;
+    var actual = sortedActual[i];
+    var now = actual.ncumul_hosp;
+    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && actual.ncumul_ICU!="") totalicu+=parseInt(actual.ncumul_ICU);
+    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && actual.ncumul_vent!="") totalvent+=parseInt(actual.ncumul_vent);
+    /*
+    var last = actual.last;
+    var diff = now-last;
+    var diffStr = diff>=0 ? "+"+diff : diff;
+    var lastDate = actual.lastDate;
+    var changeRatio = Math.round(diff/last * 100);
+    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
+    if(!last || last==0) changeRatioStr = "";
+    var alert = "";
+    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
+    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
+    */
+    var image = document.createElement("img");
+    image.height = 15;
+    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    td.appendChild(image);
+    var a = document.createElement("a");
+    a.href = "#div_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(document.createTextNode(actual.date));
+    tr.appendChild(td);
+    td = document.createElement("td");
+    var text = document.createTextNode(now);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(actual.ncumul_ICU);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(actual.ncumul_vent);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.style["font-size"] = "small";
+    if(actual.source.substring(0,2)=="ht") {
+      a = document.createElement("a");
+      a.href = actual.source;
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
+    else {
+      a = document.createElement("a");
+      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
+      a.appendChild(document.createTextNode("(Quelle)"));
+      td.appendChild(a);
+    }
+    tr.appendChild(td);
+    /*
+    td = document.createElement("td");
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(diffStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(changeRatioStr);
+    td.appendChild(text);
+    tr.appendChild(td);
+    */
+    table.appendChild(tr);
+  }
+  document.getElementById("last").append(secondTable);
+  document.getElementById("last").append(document.createElement("p"));
+  //document.getElementById("last").append(secondTable);
+  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total+ " / "+totalicu+" / "+totalvent));
+
+}
+
 /*
 d3.json('https://api.github.com/repos/openZH/covid_19/commits?path=COVID19_Cases_Cantons_CH_total.csv&page=1&per_page=1', function(error, data) {
   var lastUpdateDiv = document.getElementById('latestUpdate');
@@ -353,6 +471,7 @@ d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/
 function barChartCases(place) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
   var div = document.createElement("div");
+  div.height = 400;
   div.id="div_"+place;
   var h2 = document.createElement("h2");
   var image = document.createElement("img");
@@ -376,7 +495,7 @@ function barChartCases(place) {
     canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
   }
-  document.getElementsByTagName('body')[0].appendChild(div);
+  document.getElementById("cantons").appendChild(div);
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
