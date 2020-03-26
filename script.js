@@ -195,9 +195,13 @@ function processActualData() {
     */
     table.appendChild(tr);
   }
+  var tr = document.createElement("tr");
+  tr.id = "latestrow";
+  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td>";
+  secondTable.append(tr);
   document.getElementById("last").append(firstTable);
   document.getElementById("last").append(secondTable);
-  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
+  //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
 function processActualDeaths() {
@@ -281,9 +285,13 @@ function processActualDeaths() {
     */
     table.appendChild(tr);
   }
+  var tr = document.createElement("tr");
+  tr.id = "latestrow";
+  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td>";
+  secondTable.append(tr);
   document.getElementById("last").append(firstTable);
   document.getElementById("last").append(secondTable);
-  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
+  //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
 function processActualHospitalisation() {
@@ -383,10 +391,14 @@ function processActualHospitalisation() {
     */
     table.appendChild(tr);
   }
+  var tr = document.createElement("tr");
+  tr.id = "latestrow";
+  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td><td>"+totalicu+"</td><td>"+totalvent+"</b></td>";
+  secondTable.append(tr);
   document.getElementById("last").append(secondTable);
   document.getElementById("last").append(document.createElement("p"));
   //document.getElementById("last").append(secondTable);
-  document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total+ " / "+totalicu+" / "+totalvent));
+  //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total+ " / "+totalicu+" / "+totalvent));
 
 }
 
