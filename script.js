@@ -308,7 +308,7 @@ function processActualHospitalisation() {
   firstTable.id = "firstTable";
   */
   var secondTable = document.createElement("table");
-  secondTable.class = "hospitalisationtable"
+  secondTable.classList.add("hospitalisationtable");
   secondTable.id = "secondTable";
   secondTable.innerHTML = head;
 
