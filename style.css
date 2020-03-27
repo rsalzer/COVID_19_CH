@@ -11,6 +11,11 @@ td {
   padding-right: 8px;
 }
 
+table {
+  width: 100%;
+  max-width: 400px;
+}
+
 canvas {
   width: 100%;
   max-width: 1000px;
