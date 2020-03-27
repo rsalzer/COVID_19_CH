@@ -111,6 +111,7 @@ function processData() {
   processActualHospitalisation();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
+    barChartHospitalisations(cantons[i]);
   }
 }
 
@@ -307,6 +308,7 @@ function processActualHospitalisation() {
   firstTable.id = "firstTable";
   */
   var secondTable = document.createElement("table");
+  secondTable.class = "hospitalisationtable"
   secondTable.id = "secondTable";
   secondTable.innerHTML = head;
 
@@ -581,6 +583,129 @@ function barChartCases(place) {
 					}
         }
       ]
+    }
+  });
+}
+
+function barChartHospitalisations(place) {
+  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place && d.ncumul_hosp!="") return d});
+  if(filteredData.length==0) return;
+  var div = document.getElementById("div_"+place);
+  var canvas = document.createElement("canvas");
+  //canvas.className  = "myClass";
+  if(filteredData.length==1) {
+    var text = filteredData[0].date+": "+filteredData[0].ncumul_hosp+" hospitalisiert";
+    if(filteredData[0].ncumul_ICU!="") text+=" , "+filteredData[0].ncumul_ICU+" in Intensivbehandlung";
+    if(filteredData[0].ncumul_vent!="") text+=" , "+filteredData[0].ncumul_vent+" künstlich beatmet";
+    div.appendChild(document.createElement("br"));
+    div.appendChild(document.createTextNode(text));
+  }
+  else {
+    canvas.id = "hosp"+place;
+    canvas.height=300;
+    //canvas.width=350+filteredData.length*40;
+    div.appendChild(canvas);
+  }
+  if(!filteredData || filteredData.length<2) return;
+  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_hosp!="") return d});
+  var dateLabels = moreFilteredData.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    return date;
+  });
+  var datasets = [];
+  var casesHosp = moreFilteredData.map(function(d) {return d.ncumul_hosp});
+  datasets.push({
+    label: 'Hospitalisiert',
+    data: casesHosp,
+    fill: false,
+    cubicInterpolationMode: 'monotone',
+    spanGaps: true,
+    borderColor: '#CCCC00',
+    backgroundColor: '#CCCC00',
+    datalabels: {
+      align: 'end',
+      anchor: 'end'
+    }
+  });
+  var filteredForICU = moreFilteredData.filter(function(d) { if(d.ncumul_ICU!="") return d});
+  if(filteredForICU.length>0) {
+    var casesICU = moreFilteredData.map(function(d) {if(d.ncumul_ICU=="") return null; return d.ncumul_ICU});
+    datasets.push({
+      label: 'In Intensivbehandlung',
+      data: casesICU,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#CF5F5F',
+      backgroundColor: '#CF5F5F',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
+  var filteredForVent = moreFilteredData.filter(function(d) { if(d.ncumul_vent!="") return d});
+  if(filteredForVent.length>0) {
+    var casesVent = moreFilteredData.map(function(d) {if(d.ncumul_vent=="") return null; return d.ncumul_vent});
+    datasets.push({
+      label: 'Künstlich beatmet',
+      data: casesVent,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#115F5F',
+      backgroundColor: '#115F5F',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
+  var chart = new Chart(canvas.id, {
+    type: 'line',
+    options: {
+      responsive: false,
+      legend: {
+        display: true,
+        position: 'bottom'
+      },
+      title: {
+        display: true,
+        text: 'Hospitalisierte Fälle'
+      },
+      tooltips: {
+            mode: 'index',
+            axis: 'y'
+      },
+      scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    tooltipFormat: 'D.MM.YYYY',
+                    unit: 'day',
+                    displayFormats: {
+                        day: 'D.MM'
+                    }
+                }
+            }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                suggestedMax: 10,
+              },
+            }]
+        },
+      plugins: {
+          datalabels: false
+      }
+    },
+    data: {
+      labels: dateLabels,
+      datasets: datasets
     }
   });
 }

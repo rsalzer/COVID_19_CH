@@ -16,6 +16,10 @@ table {
   max-width: 400px;
 }
 
+.hospitalisationtable {
+  max-width: 1000px;
+}
+
 canvas {
   width: 100%;
   max-width: 1000px;
