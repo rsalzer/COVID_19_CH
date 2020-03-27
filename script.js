@@ -135,7 +135,9 @@ function processActualData() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_conf;
-    if(actual.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    if(actual.abbreviation_canton_and_fl!="FL" && now!="") {
+      total+=parseInt(now);
+    }
     /*
     var last = actual.last;
     var diff = now-last;
@@ -226,7 +228,7 @@ function processActualDeaths() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_deceased;
-    if(actual.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
     /*
     var last = actual.last;
     var diff = now-last;
@@ -323,9 +325,9 @@ function processActualHospitalisation() {
     //else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_hosp;
-    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && actual.ncumul_ICU!="") totalicu+=parseInt(actual.ncumul_ICU);
-    if(actualHospitalisation.abreviation_canton_and_fl!="FL" && actual.ncumul_vent!="") totalvent+=parseInt(actual.ncumul_vent);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_ICU!="") totalicu+=parseInt(actual.ncumul_ICU);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_vent!="") totalvent+=parseInt(actual.ncumul_vent);
     /*
     var last = actual.last;
     var diff = now-last;
