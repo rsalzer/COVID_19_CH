@@ -198,7 +198,8 @@ function processActualData() {
   }
   var tr = document.createElement("tr");
   tr.id = "latestrow";
-  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td>";
+  var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+formattedTotal+"</td>";
   secondTable.append(tr);
   document.getElementById("last").append(firstTable);
   document.getElementById("last").append(secondTable);
@@ -588,8 +589,9 @@ function barChartCases(place) {
 }
 
 function barChartHospitalisations(place) {
-  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place && d.ncumul_hosp!="") return d});
-  if(filteredData.length==0) return;
+  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
+  var hospitalFiltered = filteredData.filter(function(d) { if(d.ncumul_hosp!="") return d});
+  if(hospitalFiltered.length==0) return;
   var div = document.getElementById("div_"+place);
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
@@ -607,7 +609,7 @@ function barChartHospitalisations(place) {
     div.appendChild(canvas);
   }
   if(!filteredData || filteredData.length<2) return;
-  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_hosp!="") return d});
+  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
@@ -617,7 +619,7 @@ function barChartHospitalisations(place) {
     return date;
   });
   var datasets = [];
-  var casesHosp = moreFilteredData.map(function(d) {return d.ncumul_hosp});
+  var casesHosp = moreFilteredData.map(function(d) {if(d.ncumul_hosp=="") return null; return d.ncumul_hosp});
   datasets.push({
     label: 'Hospitalisiert',
     data: casesHosp,
