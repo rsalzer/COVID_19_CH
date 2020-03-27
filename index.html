@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Corona Fälle in der Schweiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="twitter:card" value="summary">
     <meta name="twitter:creator" content="@rob_salzer">
     <meta property="og:title" content="Corona Fälle in der Schweiz">
@@ -26,28 +27,157 @@
     </script>
   </head>
   <body>
-    <h2>Corona-Fälle in der Schweiz</h2>
-    <p>
-      Code auf <a href="https://github.com/rsalzer/COVID_19_CH">GitHub</a>, Daten der einzelnen Kantone bereitgstellt durch <a href="https://github.com/openZH/covid_19">das Statistische Amt des Kanton Zürichs und vielen Helfern</a><br/>
-      <a href="https://rsalzer.github.io/COVID_19_KT_ZH/">Detailliertere Visualisierung für den Kanton Zürich</a><br/>
-      <a href="https://rsalzer.github.io/COVID_19_AGE">Visualisierung der Altersdaten</a><br/>
-      Feedback, Anregungen, Verbesserungsvorschläge, Erweiterungen bitte auf <a href="https://github.com/rsalzer/COVID_19_CH">GitHub</a> oder direkt an <a href="https://twitter.com/rob_salzer">@rob_salzer</a>
-      <br>Ab dem 9. März gilt ein neues Testregime. Nur noch Personen, die schwere Symptome, ein erhöhtes Komplikationsrisiko, oder in direktem Kontakt mit Patienten oder Bewohnern von Alters- und Pflegeheimen stehen, werden getestet.
-    </p>
-    <div id="loadingspinner">
-    Lade Daten...<div class="lds-ring"><div></div><div></div><div></div><div></div></div>
-    </div>
-    <div id="latestUpdate"></div>
-    <!--div id="inofficial">
-      <h3>Inoffizielle Daten für die ganze Schweiz</h3>
-      <p>(Zusammengetragen von: <a href="https://github.com/daenuprobst/covid19-cases-switzerland">Daniel Probst</a>)</p>
+    <nav id="page-nav">
+  		<ul>
+  			<li class="here"><a href="#">Schweiz</a></li>
+  			<li><a title="Detailliertere Visualisierung für den Kanton Zürich" href="https://rsalzer.github.io/COVID_19_KT_ZH/">Zürich</a></li>
+  			<li><a title="Visualisierung der Altersdaten" href="https://rsalzer.github.io/COVID_19_AGE">Alter</a></li>
+  		</ul>
+	  </nav>
+    <main>
+		<header id="page-header">
+			<h1>Corona-Fälle in der Schweiz</h1>
+			<p>Daten der einzelnen Kantone bereitgstellt durch <a href="https://github.com/openZH/covid_19">das Statistische Amt des Kanton Zürichs und vielen Helfern</a> und aufbereitet durch <a href="https://twitter.com/rob_salzer">@rob_salzer</a>.</p>
+			<div class="notes">
+				<p>Ab dem 9. März gilt ein neues Testregime. Nur noch Personen, die schwere Symptome, ein erhöhtes Komplikationsrisiko, oder in direktem Kontakt mit Patienten oder Bewohnern von Alters- und Pflegeheimen stehen, werden getestet.</p>
+			</div>
+		</header>
+    <section id="index">
+			<header>
+				<h2>Übersicht</h2>
+			</header>
+      <div id="loadingspinner">
+      Lade Daten...<div class="lds-ring"><div></div><div></div><div></div><div></div></div></div>
+      <div id="loaded">
+			<div id="latest">
+				<h3>Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone</h3>
+        <div class="table-group">
+          <table>
+						<thead>
+							<tr>
+								<th>Kanton</th>
+								<th>Datum</th>
+								<th>Fälle</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody id="confirmed_1">
+              <!-- tr>
+								<td><a class="flag so" href="#detail_SO">SO</a></td>
+								<td>2020-03-26</td>
+								<td>141</td>
+								<td><a href="https://corona.so.ch/">↗</a></td>
+							</tr -->
+            </tbody>
+          </table>
+          <table>
+						<thead>
+							<tr>
+								<th>Kanton</th>
+								<th>Datum</th>
+								<th>Fälle</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody id="confirmed_2">
+              <!-- tr>
+								<td><a class="flag so" href="#detail_SO">SO</a></td>
+								<td>2020-03-26</td>
+								<td>141</td>
+								<td><a href="https://corona.so.ch/">↗</a></td>
+							</tr -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="latestDeaths">
+        <h3>Verstorbene gemäss Daten der Kantone</h3>
+        <div class="table-group">
+          <table>
+            <thead>
+              <tr>
+                <th>Kanton</th>
+                <th>Datum</th>
+                <th>Verstorbene</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="death_1">
+              <!-- tr>
+                <td><a class="flag so" href="#detail_SO">SO</a></td>
+                <td>2020-03-26</td>
+                <td>141</td>
+                <td><a href="https://corona.so.ch/">↗</a></td>
+              </tr -->
+            </tbody>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Kanton</th>
+                <th>Datum</th>
+                <th>Verstorbene</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="death_2">
+              <!-- tr>
+                <td><a class="flag so" href="#detail_SO">SO</a></td>
+                <td>2020-03-26</td>
+                <td>141</td>
+                <td><a href="https://corona.so.ch/">↗</a></td>
+              </tr -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="latestHospitalisations">
+        <h3>Fälle in Spitalbehandlung</h3>
+        <div class="table-group">
+          <!--table>
+            <thead>
+              <tr>
+                <th>Kanton</th>
+                <th>Datum</th>
+                <th>Hospitalisiert</th>
+                <th>In Intensivbehandlung</th>
+                <th>Künstlich beatmet</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="hospitalised_1">
 
-    </div -->
-    <div id="last"></div>
-    <div id="cantons"></div>
+            </tbody>
+          </table -->
+          <table>
+            <thead>
+              <tr>
+                <th>Kanton</th>
+                <th>Datum</th>
+                <th>Hospitalisiert</th>
+                <th>In Intensivbehandlung</th>
+                <th>Künstlich beatmet</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="hospitalised_2">
+            </tbody>
+          </table -->
+        </div>
+      </div>
+    </div>
+    </section>
+    <section id="detail">
+      <header>
+  				<h2>Details</h2>
+			</header>
+    </section>
+  </main>
+  <footer id="page-footer">
+		<p>Code auf <a href="https://github.com/rsalzer/COVID_19_CH">GitHub</a>. Feedback, Anregungen, Verbesserungsvorschläge, Erweiterungen bitte auf GitHub oder direkt an <a href="https://twitter.com/rob_salzer">@rob_salzer</a>. Design by <a href="https://twitter.com/superpixel">@superpixel</a></p>
+	</footer>
+  <script src="script.js"></script>
     <!--canvas id="CH" height="20" width="100" style="position: relative; z-index: 2"></canvas>
     <canvas id="AG" height="20" width="100" style="position: relative; z-index: 2"></canvas -->
-
-    <script src="script.js"></script>
   </body>
 </html>

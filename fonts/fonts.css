@@ -1,0 +1,33 @@
+/* Using IBM Plex from https://github.com/IBM/plex */
+
+/* Sans */
+@font-face {
+	font-family: "IBM Plex Sans";
+	src: url("IBMPlexSans-Regular-Latin1.woff2") format("woff2"),
+		 url("IBMPlexSans-Regular-Latin1.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: "IBM Plex Sans";
+	src: url("IBMPlexSans-Bold-Latin1.woff2") format("woff2"),
+		 url("IBMPlexSans-Bold-Latin1.woff") format("woff");
+	font-weight: bold;
+	font-style: normal;
+}
+
+/* Mono */
+@font-face {
+	font-family: "IBM Plex Mono";
+	src: url("IBMPlexMono-Regular-Latin1.woff2") format("woff2"),
+		 url("IBMPlexMono-Regular-Latin1.woff") format("woff");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: "IBM Plex Mono";
+	src: url("IBMPlexMono-Bold-Latin1.woff2") format("woff2"),
+		 url("IBMPlexMono-Bold-Latin1.woff") format("woff");
+	font-weight: bold;
+	font-style: normal;
+}

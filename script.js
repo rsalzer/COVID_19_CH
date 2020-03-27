@@ -37,7 +37,7 @@ var actualData = [];
 var actualDeaths = [];
 var actualHospitalisation = [];
 var data = [];
-
+document.getElementById("loaded").style.display = 'none';
 getCanton(0);
 
 function getCanton(i) {
@@ -104,11 +104,12 @@ function getCanton(i) {
 }
 
 function processData() {
-  document.getElementById("loadingspinner").style.display = 'none';
   console.log("Plotting data");
   processActualData();
   processActualDeaths();
   processActualHospitalisation();
+  document.getElementById("loadingspinner").style.display = 'none';
+  document.getElementById("loaded").style.display = 'block';
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
@@ -116,18 +117,9 @@ function processData() {
 }
 
 function processActualData() {
-  var h3 = document.createElement("h3");
-  var text = document.createTextNode("Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone");
-  h3.appendChild(text);
-  document.getElementById("last").append(h3);
   var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
-  var head = "<tr><th>Kanton</th><th>Datum</th><th># Fälle</th></tr>"
-  var firstTable = document.createElement("table");
-  firstTable.innerHTML = head;
-  firstTable.id = "firstTable";
-  var secondTable = document.createElement("table");
-  secondTable.id = "secondTable";
-  secondTable.innerHTML = head;
+  var firstTable = document.getElementById("confirmed_1");
+  var secondTable = document.getElementById("confirmed_2");
   var total = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
@@ -138,27 +130,12 @@ function processActualData() {
     if(actual.abbreviation_canton_and_fl!="FL" && now!="") {
       total+=parseInt(now);
     }
-    /*
-    var last = actual.last;
-    var diff = now-last;
-    var diffStr = diff>=0 ? "+"+diff : diff;
-    var lastDate = actual.lastDate;
-    var changeRatio = Math.round(diff/last * 100);
-    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
-    if(!last || last==0) changeRatioStr = "";
-    var alert = "";
-    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
-    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
-    */
-    var image = document.createElement("img");
-    image.height = 15;
-    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
     var tr = document.createElement("tr");
     var td = document.createElement("td");
-    td.appendChild(image);
     var a = document.createElement("a");
-    a.href = "#div_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    a.className = "flag "+actual.abbreviation_canton_and_fl;
+    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
@@ -169,58 +146,34 @@ function processActualData() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.style["font-size"] = "small";
     if(actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = actual.source;
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     else {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     tr.appendChild(td);
-    /*
-    td = document.createElement("td");
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(diffStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(changeRatioStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    */
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.id = "latestrow";
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+formattedTotal+"</td>";
+  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td>";
   secondTable.append(tr);
-  document.getElementById("last").append(firstTable);
-  document.getElementById("last").append(secondTable);
+  //document.getElementById("last").append(firstTable);
+  //document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
 function processActualDeaths() {
-  var h3 = document.createElement("h3");
-  var text = document.createTextNode("Verstorbene gemäss Daten der Kantone");
-  h3.appendChild(text);
-  document.getElementById("last").append(h3);
   var sortedActual = Array.from(actualDeaths).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
-  var head = "<tr><th>Kanton</th><th>Datum</th><th># Fälle</th></tr>"
-  var firstTable = document.createElement("table");
-  firstTable.innerHTML = head;
-  firstTable.id = "firstTable";
-  var secondTable = document.createElement("table");
-  secondTable.id = "secondTable";
-  secondTable.innerHTML = head;
+  var firstTable = document.getElementById("death_1");
+  var secondTable = document.getElementById("death_2");
   var total = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
@@ -229,27 +182,13 @@ function processActualDeaths() {
     var actual = sortedActual[i];
     var now = actual.ncumul_deceased;
     if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-    /*
-    var last = actual.last;
-    var diff = now-last;
-    var diffStr = diff>=0 ? "+"+diff : diff;
-    var lastDate = actual.lastDate;
-    var changeRatio = Math.round(diff/last * 100);
-    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
-    if(!last || last==0) changeRatioStr = "";
-    var alert = "";
-    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
-    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
-    */
-    var image = document.createElement("img");
-    image.height = 15;
-    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
+
     var tr = document.createElement("tr");
     var td = document.createElement("td");
-    td.appendChild(image);
     var a = document.createElement("a");
-    a.href = "#div_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    a.className = "flag "+actual.abbreviation_canton_and_fl;
+    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
@@ -260,61 +199,30 @@ function processActualDeaths() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.style["font-size"] = "small";
     if(actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = actual.source;
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     else {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     tr.appendChild(td);
-    /*
-    td = document.createElement("td");
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(diffStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(changeRatioStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    */
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.id = "latestrow";
-  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td>";
+  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td>";
   secondTable.append(tr);
-  document.getElementById("last").append(firstTable);
-  document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
 function processActualHospitalisation() {
-  var h3 = document.createElement("h3");
-  var text = document.createTextNode("Fälle in Spitalbehandlung");
-  h3.appendChild(text);
-  document.getElementById("last").append(h3);
   var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.ncumul_hosp-a.ncumul_hosp});
-  var head = "<tr><th>Kanton</th><th>Datum</th><th>Hospitalisiert</th><th>In Intensivbehandlung</th><th>Künstlich beatmet</th></tr>"
-  /*
-  var firstTable = document.createElement("table");
-  firstTable.innerHTML = head;
-  firstTable.id = "firstTable";
-  */
-  var secondTable = document.createElement("table");
-  secondTable.classList.add("hospitalisationtable");
-  secondTable.id = "secondTable";
-  secondTable.innerHTML = head;
-
+  var secondTable = document.getElementById("hospitalised_2");
   var total = 0;
   var totalicu = 0;
   var totalvent = 0;
@@ -328,27 +236,13 @@ function processActualHospitalisation() {
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_ICU!="") totalicu+=parseInt(actual.ncumul_ICU);
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_vent!="") totalvent+=parseInt(actual.ncumul_vent);
-    /*
-    var last = actual.last;
-    var diff = now-last;
-    var diffStr = diff>=0 ? "+"+diff : diff;
-    var lastDate = actual.lastDate;
-    var changeRatio = Math.round(diff/last * 100);
-    var changeRatioStr = changeRatio>=0 ? "+"+changeRatio+"%" : changeRatio+"%";
-    if(!last || last==0) changeRatioStr = "";
-    var alert = "";
-    if(lastDate!=chLastDate) alert = "(Daten vom "+lastDate+") ";
-    //console.log(lastDate+" : "+cantons[i]+": "+actual+" ("+diffStr+")");
-    */
-    var image = document.createElement("img");
-    image.height = 15;
-    image.src = "wappen/"+actual.abbreviation_canton_and_fl+".png";
+
     var tr = document.createElement("tr");
     var td = document.createElement("td");
-    td.appendChild(image);
     var a = document.createElement("a");
-    a.href = "#div_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(" "+actual.abbreviation_canton_and_fl+":"));
+    a.className = "flag "+actual.abbreviation_canton_and_fl;
+    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
@@ -367,41 +261,25 @@ function processActualHospitalisation() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.style["font-size"] = "small";
     if(actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = actual.source;
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     else {
       a = document.createElement("a");
+      a.innerHTML = "↗";
       a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      a.appendChild(document.createTextNode("(Quelle)"));
       td.appendChild(a);
     }
     tr.appendChild(td);
-    /*
-    td = document.createElement("td");
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(diffStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode(changeRatioStr);
-    td.appendChild(text);
-    tr.appendChild(td);
-    */
-    table.appendChild(tr);
+    secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.id = "latestrow";
-  tr.innerHTML = "<td><img src='wappen/CH.png' height=15/> CH</td><td>TOTAL</td><td>"+total+"</td><td>"+totalicu+"</td><td>"+totalvent+"</b></td>";
+  tr.innerHTML = "<td><span class='flag CH'><b>CH</b></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td>";
   secondTable.append(tr);
-  document.getElementById("last").append(secondTable);
-  document.getElementById("last").append(document.createElement("p"));
+
   //document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total+ " / "+totalicu+" / "+totalvent));
 
@@ -487,17 +365,17 @@ d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/
 
 function barChartCases(place) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
+  var section = document.getElementById("detail");
+  var article = document.createElement("article");
+  article.id="detail_"+place;
+  var h3 = document.createElement("h3");
+  h3.className = "flag "+place;
+  var text = document.createTextNode(names[place]);
+  h3.appendChild(text);
+  article.appendChild(h3);
   var div = document.createElement("div");
-  div.height = 400;
-  div.id="div_"+place;
-  var h2 = document.createElement("h2");
-  var image = document.createElement("img");
-  image.width = 20;
-  image.src = "wappen/"+place+".png";
-  h2.appendChild(image);
-  var text = document.createTextNode(" "+names[place]);
-  h2.appendChild(text);
-  div.appendChild(h2);
+  div.className = "canvas-dummy";
+  div.id = "container_"+place;
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
   if(filteredData.length==0) {
@@ -512,7 +390,8 @@ function barChartCases(place) {
     //canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
   }
-  document.getElementById("cantons").appendChild(div);
+  article.appendChild(div);
+  section.appendChild(article);
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
@@ -594,7 +473,8 @@ function barChartHospitalisations(place) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
   var hospitalFiltered = filteredData.filter(function(d) { if(d.ncumul_hosp!="") return d});
   if(hospitalFiltered.length==0) return;
-  var div = document.getElementById("div_"+place);
+  var div = document.getElementById("container_"+place);
+  div.className = "canvas-dummy";
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
   if(filteredData.length==1) {
@@ -607,8 +487,8 @@ function barChartHospitalisations(place) {
   else {
     canvas.id = "hosp"+place;
     canvas.height=300;
-    //canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
+    //canvas.width=350+filteredData.length*40;
   }
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
