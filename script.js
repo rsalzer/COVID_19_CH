@@ -504,7 +504,7 @@ function barChartCases(place) {
   else {
     canvas.id = place;
     canvas.height=300;
-    canvas.width=350+filteredData.length*40;
+    //canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
   }
   document.getElementById("cantons").appendChild(div);

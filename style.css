@@ -11,6 +11,11 @@ td {
   padding-right: 8px;
 }
 
+canvas {
+  width: 100%;
+  max-width: 1000px;
+}
+
 #firstTable {
   float: left;
   margin-right: 20px;
