@@ -22,7 +22,6 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'UA-160625595-2');
     </script>
   </head>
@@ -49,7 +48,7 @@
       <div id="loadingspinner">
       Lade Daten...<div class="lds-ring"><div></div><div></div><div></div><div></div></div></div>
       <div id="loaded">
-			<div id="latest">
+	  <article id="latest">
 				<h3>Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone</h3>
         <div class="table-group">
           <table>
@@ -89,8 +88,8 @@
             </tbody>
           </table>
         </div>
-      </div>
-      <div id="latestDeaths">
+      </article>
+      <article id="latestDeaths">
         <h3>Verstorbene gemäss Daten der Kantone</h3>
         <div class="table-group">
           <table>
@@ -130,10 +129,9 @@
             </tbody>
           </table>
         </div>
-      </div>
-      <div id="latestHospitalisations">
+      </article>
+      <article id="latestHospitalisations">
         <h3>Fälle in Spitalbehandlung</h3>
-        <div class="table-group">
           <!--table>
             <thead>
               <tr>
@@ -149,28 +147,27 @@
 
             </tbody>
           </table -->
-          <table>
+          <table class="wide">
             <thead>
               <tr>
-                <th>Kanton</th>
-                <th>Datum</th>
-                <th>Hospitalisiert</th>
-                <th>In Intensivbehandlung</th>
-                <th>Künstlich beatmet</th>
+                <th><span>Kanton</span></th>
+                <th><span>Datum</span></th>
+                <th><span>Hospitalisiert</span></th>
+                <th><span>In Intensivbehandlung</span></th>
+                <th><span>Künstlich beatmet</span></th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="hospitalised_2">
             </tbody>
-          </table -->
-        </div>
-      </div>
+          </table>
+        </article>
     </div>
     </section>
     <section id="detail">
       <header>
-  				<h2>Details</h2>
-			</header>
+  			<h2>Details</h2>
+	  </header>
     </section>
   </main>
   <footer id="page-footer">

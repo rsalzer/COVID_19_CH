@@ -89,7 +89,7 @@ main a {
 	color: inherit;
 }
 main p {
-	max-width: 600px;
+	max-width: 640px;
 	margin: 1em 0;
 }
 main h1 {
@@ -117,16 +117,18 @@ section header h2 {
 #index h3 {
   margin-top: 1em;
 }
-section > article {
+section article {
 	margin-bottom: 2rem;
 }
 section > article:last-child {
 	margin-bottom: 0;
 }
+section > * > article:last-child {
+	margin-bottom: 0;
+}
 .table-group table {
 	display: inline-table;
 	margin-right: 2em;
-  margin-bottom: 2em;
 }
 table {
 	font-family: "IBM Plex Mono", monospace;
@@ -135,7 +137,7 @@ table {
 }
 table td,
 table th {
-	text-align: left;
+	text-align: right;
 	padding: 0.2em 0.5em;
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
@@ -146,6 +148,15 @@ table tr > :first-child {
 table tr > :last-child {
 	padding-right: 0;
 }
+table tr td:nth-child(1),
+table tr th:nth-child(1) {
+	text-align: left;
+}
+table tr td:nth-child(2),
+table tr th:nth-child(2) {
+	text-align: left;
+	white-space: nowrap;
+}
 table tr td:nth-child(2) {
 	opacity: 0.5;
 }
@@ -153,16 +164,20 @@ table tr th:nth-child(3),
 table tr td:nth-child(3) {
 	text-align: right;
 }
-table tr th:nth-child(4),
-table tr td:nth-child(4) {
-	text-align: right;
+.table-group {
+/* 	background-color: lightblue; */
+	max-width: 640px;
 }
-table tr th:nth-child(5),
-table tr td:nth-child(5) {
-	text-align: right;
+.table-group table {
+	display: inline-table;
+	margin-right: 2em;
+	width: calc((100% - 2.3em) / 2);
+}
+.table-group table:nth-child(2) {
+	margin-right: 0;
 }
 .table-group table:nth-child(2) tr:last-child td,
-#hospitalised_2 tr:last-child td{
+#hospitalised_2 tr:last-child td {
 	opacity: 1;
 }
 table a:hover {
@@ -171,7 +186,7 @@ table a:hover {
 table img {
 	margin-right: 0.5em;
 }
-@media (max-width: 640px) {
+@media (max-width: 660px) {
 	.table-group table {
 		display: table;
 		width: 100%;
@@ -180,6 +195,52 @@ table img {
 	.table-group table:nth-child(1) tbody > tr:last-child td {
 		border-bottom: 0;
 	}
+	.table-group table:nth-child(2) thead tr th {
+		visibility: hidden;
+		height: 0px;
+		overflow: hidden;
+		line-height: 0;
+		padding-top: 0px;
+		padding-bottom: 0px;
+	}
+}
+/* !wide-table */
+table.wide {
+	width: 100%;
+	max-width: 640px;
+}
+@media (max-width: 660px) {
+	table.wide {
+		min-width: 100%;
+	}
+}
+table.wide th {
+	position: relative;
+	height: 190px;
+	vertical-align: bottom;
+}
+table.wide th span {
+	white-space: nowrap;
+	position: absolute;
+	left: 100%;
+	bottom: 0;
+	transform: rotate(-90deg);
+	transform-origin: bottom left;
+	padding-left: 0.5em;
+	padding-bottom: 0.2em;
+}
+table.wide th:nth-child(1),
+table.wide th:nth-child(2), {
+	position: static;
+}
+table.wide th:nth-child(1) span,
+table.wide th:nth-child(2) span {
+/* 	left: 0%; */
+/* 	bottom: 0; */
+/* 	transform: rotate(-90deg) translatey(1.3em); */
+	position: static;
+	transform: none;
+	padding-left: 0;
 }
 h3 {
 	margin-bottom: 1em;
@@ -201,6 +262,9 @@ canvas {
 }
 .notes {
 	font-size: 0.8em;
+}
+.notes > :last-child {
+	margin-bottom: 0;
 }
 
 /* !flags */
@@ -251,7 +315,7 @@ canvas {
 }
 #page-footer > * {
 	font-size: 0.8em;
-	max-width: 600px;
+	max-width: 640px;
 }
 
 
