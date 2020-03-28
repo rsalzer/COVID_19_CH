@@ -37,6 +37,7 @@ var actualData = [];
 var actualDeaths = [];
 var actualHospitalisation = [];
 var data = [];
+Chart.defaults.global.defaultFontFamily = "IBM Plex Sans";
 document.getElementById("loaded").style.display = 'none';
 getCanton(0);
 
