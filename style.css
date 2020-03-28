@@ -176,7 +176,8 @@ table tr td:nth-child(3) {
 .table-group table:nth-child(2) {
 	margin-right: 0;
 }
-.table-group table:nth-child(2) tr:last-child td {
+.table-group table:nth-child(2) tr:last-child td,
+#hospitalised_2 tr:last-child td {
 	opacity: 1;
 }
 table a:hover {

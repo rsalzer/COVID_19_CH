@@ -163,7 +163,7 @@ function processActualData() {
   }
   var tr = document.createElement("tr");
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td>";
+  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
   secondTable.append(tr);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);
@@ -215,7 +215,7 @@ function processActualDeaths() {
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td>";
+  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td></td>";
   secondTable.append(tr);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
@@ -277,7 +277,7 @@ function processActualHospitalisation() {
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><span class='flag CH'><b>CH</b></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td>";
+  tr.innerHTML = "<td><span class='flag CH'><b>CH</b></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
