@@ -424,6 +424,12 @@ function barChartCases(place) {
                         day: 'D.MM'
                     }
                 }
+            }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                suggestedMax: 10,
+              },
             }]
         },
       plugins: {
