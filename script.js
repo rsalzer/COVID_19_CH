@@ -421,6 +421,8 @@ function barChartCases(place) {
                 time: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
                     displayFormats: {
                         day: 'D.MM'
                     }
@@ -578,6 +580,8 @@ function barChartHospitalisations(place) {
                 time: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
                     displayFormats: {
                         day: 'D.MM'
                     }
