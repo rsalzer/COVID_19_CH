@@ -445,10 +445,16 @@ function barChartAllCH() {
         caretSize: 0,
         bodyFontFamily: 'monospace',
         callbacks: {
+          label: function(tooltipItems, data) {
+            var value = tooltipItems.value;
+            var tabbing = 6-value.length;
+            var padding = " ".repeat(tabbing);
+            return padding+value;
+          },
           afterBody: function(tooltipItems, data) {
             //console.log(tooltipItems);
             //console.log(data);
-            multistringText = [];
+            multistringText = [""];
             var index = tooltipItems[0].index;
             var dataForThisDay = dataPerDay[index];
             var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
