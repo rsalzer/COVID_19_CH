@@ -441,6 +441,8 @@ function barChartAllCH() {
         text: 'Bestätigte Fälle'
       },
       tooltips: {
+        mode: 'nearest',
+        intersect: false,
         position : 'custom',
         caretSize: 0,
         bodyFontFamily: 'monospace',
