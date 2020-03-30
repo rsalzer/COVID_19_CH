@@ -111,6 +111,7 @@ function processData() {
   processActualHospitalisation();
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
+  barChartAllCH();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
@@ -164,7 +165,7 @@ function processActualData() {
   }
   var tr = document.createElement("tr");
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  tr.innerHTML = "<td><span class='flag CH'>CH</span></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'>CH</a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
   secondTable.append(tr);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);
@@ -363,6 +364,198 @@ d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/
   });
 });
 */
+
+Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- custom is now the new option for the tooltip position
+    /** @type {Chart.Tooltip} */
+    var tooltip = this;
+
+    /* ... */
+
+    var half = eventPosition.x - 81 - 10;
+    if(half< 81 + 60) half = 81 + 60;
+    return {
+        x: half,
+        y: 30
+    };
+}
+
+function barChartAllCH() {
+  date = new Date(Date.UTC(2020, 1, 25));
+  var now = new Date();
+  //alert(now.toISOString());
+  var dataPerDay = [];
+  while(date<now) {
+    var dateString = date.toISOString();
+    dateString = dateString.substring(0,10);
+    console.log(dateString);
+    var singleDayObject = {};
+    singleDayObject.date = dateString;
+    singleDayObject.data = [];
+    for(var i=0; i<cantons.length-1; i++) { //without FL
+      var canton = cantons[i];
+      var cantonTotal = getNumConf(canton, date);
+      singleDayObject.data.push(cantonTotal);
+    }
+    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
+    singleDayObject.total = total;
+    dataPerDay.push(singleDayObject);
+    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
+  }
+  //console.log(dataPerDay);
+  var place = "CH";
+  var section = document.getElementById("detail");
+  var article = document.createElement("article");
+  article.id="detail_"+place;
+  var h3 = document.createElement("h3");
+  h3.className = "flag "+place;
+  var text = document.createTextNode(names[place]);
+  h3.appendChild(text);
+  article.appendChild(h3);
+  var div = document.createElement("div");
+  div.className = "canvas-dummy";
+  div.id = "container_"+place;
+  var canvas = document.createElement("canvas");
+  canvas.id = place;
+  canvas.height=500;
+  div.appendChild(canvas);
+  article.appendChild(div);
+  section.appendChild(article);
+  var dateLabels = dataPerDay.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    return date;
+  });
+  var cases = dataPerDay.map(function(d) {return d.total});
+  var chart = new Chart(canvas.id, {
+    type: 'line',
+    options: {
+      responsive: false,
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: 'Bestätigte Fälle'
+      },
+      tooltips: {
+        position : 'custom',
+        caretSize: 0,
+        bodyFontFamily: 'monospace',
+        callbacks: {
+          afterBody: function(tooltipItems, data) {
+            //console.log(tooltipItems);
+            //console.log(data);
+            multistringText = [];
+            var index = tooltipItems[0].index;
+            var dataForThisDay = dataPerDay[index];
+            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+            sorted.forEach(function(item) {
+              var tabbing = 5-(""+item.ncumul_conf).length;
+              var padding = " ".repeat(tabbing);
+              multistringText.push(item.canton+":"+padding+item.ncumul_conf+" ("+item.date+")");
+            });
+
+            return multistringText;
+          }
+        }
+      },
+      scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    tooltipFormat: 'D.MM.YYYY',
+                    unit: 'day',
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
+                    displayFormats: {
+                        day: 'D.MM'
+                    }
+                }
+            }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                suggestedMax: 10,
+              },
+            }]
+        },
+      plugins: {
+          datalabels: {
+  						color: 'black',
+  						font: {
+  							weight: 'bold'
+  						},
+  						formatter: function(value, context) {
+                var index = context.dataIndex;
+                if(index==0) return "";
+                var lastValue = context.dataset.data[index-1];
+                var percentageChange = value/lastValue - 1;
+                var rounded = Math.round(percentageChange * 100);
+                var label = ""+rounded;
+                if(rounded >= 0) label = "+"+label+"%";
+                else label = "-"+label+"%";
+
+                var change = value-lastValue;
+                var label = change>0 ? "+"+change : change;
+                return label;
+              }
+  					}
+          }
+    },
+    data: {
+      labels: dateLabels,
+      datasets: [
+        {
+          data: cases,
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          spanGaps: true,
+          borderColor: '#F15F36',
+          backgroundColor: '#F15F36',
+          datalabels: {
+						align: 'end',
+						anchor: 'end'
+					}
+        }
+      ]
+    }
+  });
+}
+
+function getNumConf(canton, date) {
+  var dateString = date.toISOString();
+  dateString = dateString.substring(0,10);
+  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d.ncumul_conf!="") return d});
+  if(filteredData.length>0) {
+    if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
+    return {
+      canton: canton,
+      date: dateString,
+      ncumul_conf: parseInt(filteredData[filteredData.length-1].ncumul_conf)
+    }
+  }
+  for(var i=1; i<=10; i++) {
+    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()-1));
+    dateString = date.toISOString().substring(0,10);
+    filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d.ncumul_conf!="") return d});
+    if(filteredData.length>0) {
+      if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
+      return {
+        canton: canton,
+        date: dateString,
+        ncumul_conf: parseInt(filteredData[filteredData.length-1].ncumul_conf)
+      }
+    }
+  }
+  return {
+    canton: canton,
+    date: "Keine Daten",
+    ncumul_conf: 0
+  }
+}
 
 function barChartCases(place) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
