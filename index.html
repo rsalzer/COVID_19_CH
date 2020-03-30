@@ -17,12 +17,32 @@
     <!-- script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script -->
     <link rel="stylesheet" type="text/css" href="style.css">
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-160625595-2"></script>
+    <!-- script async src="https://www.googletagmanager.com/gtag/js?id=UA-160625595-2"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'UA-160625595-2');
+    </script -->
+    <script>
+      var gaProperty = 'UA-160625595-2';
+      var disableStr = 'ga-disable-' + gaProperty;
+      if (document.cookie.indexOf(disableStr + '=true') > -1) {
+          window[disableStr] = true;
+      }
+      function gaOptout() {
+          document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+          window[disableStr] = true;
+          alert('Das Tracking ist jetzt deaktiviert');
+      }
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-160625595-2', 'auto');
+      ga('set', 'anonymizeIp', true);
+      ga('send', 'pageview');
     </script>
   </head>
   <body>
@@ -175,7 +195,8 @@
 		<p>
       Code auf <a href="https://github.com/rsalzer/COVID_19_CH">GitHub</a>.<br/>
       Feedback, Anregungen, Verbesserungsvorschläge, Erweiterungen bitte auf GitHub oder direkt an <a href="https://twitter.com/rob_salzer">@rob_salzer</a>.<br/>
-      Design by <a href="https://twitter.com/superpixel">@superpixel</a>
+      Design by <a href="https://twitter.com/superpixel">@superpixel</a><br/>
+      Diese Seite nutzt Google Analytics. <a href="javascript:gaOptout()">Hier klicken für ein Opt-out</a>
     </p>
 	</footer>
   <script src="script.js"></script>
