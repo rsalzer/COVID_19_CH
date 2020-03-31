@@ -175,10 +175,10 @@ var
 		return localize.call(this_val);
 	}
 
-  // if (!(this_val in notified)) {
-	//	console.log(`"${this_val}": "(to be translated)",`)
-  //	notified[this_val] = true;
-  // }
+  if (!(this_val in notified)) {
+	  console.log(`"${this_val}": "(to be translated)",`)
+    notified[this_val] = true;
+  }
 	return this_val;
 }
 ;

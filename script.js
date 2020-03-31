@@ -51,17 +51,17 @@ function getCanton(i) {
       if(error!=null) {
         console.log(error.responseURL+" not found");
         actualData.push({
-          date: "Keine Daten",
+          date: _("Keine Daten"),
           ncumul_conf: "",
           abbreviation_canton_and_fl: cantons[i]
         });
         actualDeaths.push({
-          date: "Keine Daten",
+          date: _("Keine Daten"),
           ncumul_deceased: "",
           abbreviation_canton_and_fl: cantons[i]
         });
         /*actualHospitalisation.push({
-          date: "Keine Daten",
+          date: _("Keine Daten"),
           ncumul_deceased: "",
           abbreviation_canton_and_fl: cantons[i]
         });*/
@@ -316,7 +316,7 @@ d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/
       },
       title: {
         display: true,
-        text: 'Unbestätigte Fälle Schweiz'
+        text: _('Unbestätigte Fälle Schweiz')
       },
       tooltips: {
 						mode: "index",
@@ -412,7 +412,7 @@ function barChartAllCH() {
   article.id="detail_"+place;
   var h3 = document.createElement("h3");
   h3.className = "flag "+place;
-  var text = document.createTextNode(names[place]);
+  var text = document.createTextNode(_(names[place]));
   h3.appendChild(text);
   article.appendChild(h3);
   var div = document.createElement("div");
@@ -442,7 +442,7 @@ function barChartAllCH() {
       },
       title: {
         display: true,
-        text: 'Bestätigte Fälle'
+        text: _('Bestätigte Fälle')
       },
       tooltips: {
         mode: 'nearest',
@@ -564,7 +564,7 @@ function getNumConf(canton, date) {
   }
   return {
     canton: canton,
-    date: "Keine Daten",
+    date: _("Keine Daten"),
     ncumul_conf: 0
   }
 }
@@ -576,7 +576,7 @@ function barChartCases(place) {
   article.id="detail_"+place;
   var h3 = document.createElement("h3");
   h3.className = "flag "+place;
-  var text = document.createTextNode(names[place]);
+  var text = document.createTextNode(_(names[place]));
   h3.appendChild(text);
   article.appendChild(h3);
   var div = document.createElement("div");
@@ -585,10 +585,10 @@ function barChartCases(place) {
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
   if(filteredData.length==0) {
-    div.appendChild(document.createTextNode("Keine Daten"));
+    div.appendChild(document.createTextNode(_("Keine Daten")));
   }
   else if(filteredData.length==1) {
-    div.appendChild(document.createTextNode("Ein Datensatz: "+filteredData[0].ncumul_conf+" Fälle am "+filteredData[0].date));
+    div.appendChild(document.createTextNode(_("Ein Datensatz")+": "+filteredData[0].ncumul_conf+" " + _("Fälle am")+" "+filteredData[0].date));
   }
   else {
     canvas.id = place;
@@ -618,7 +618,7 @@ function barChartCases(place) {
       },
       title: {
         display: true,
-        text: 'Bestätigte Fälle'
+        text: _('Bestätigte Fälle')
       },
       scales: {
             xAxes: [{
@@ -717,7 +717,7 @@ function barChartHospitalisations(place) {
   var datasets = [];
   var casesHosp = moreFilteredData.map(function(d) {if(d.ncumul_hosp=="") return null; return d.ncumul_hosp});
   datasets.push({
-    label: 'Hospitalisiert',
+    label: _('Hospitalisiert'),
     data: casesHosp,
     fill: false,
     cubicInterpolationMode: 'monotone',
@@ -733,7 +733,7 @@ function barChartHospitalisations(place) {
   if(filteredForICU.length>0) {
     var casesICU = moreFilteredData.map(function(d) {if(d.ncumul_ICU=="") return null; return d.ncumul_ICU});
     datasets.push({
-      label: 'In Intensivbehandlung',
+      label: _('In Intensivbehandlung'),
       data: casesICU,
       fill: false,
       cubicInterpolationMode: 'monotone',
@@ -750,7 +750,7 @@ function barChartHospitalisations(place) {
   if(filteredForVent.length>0) {
     var casesVent = moreFilteredData.map(function(d) {if(d.ncumul_vent=="") return null; return d.ncumul_vent});
     datasets.push({
-      label: 'Künstlich beatmet',
+      label: _('Künstlich beatmet'),
       data: casesVent,
       fill: false,
       cubicInterpolationMode: 'monotone',
@@ -773,7 +773,7 @@ function barChartHospitalisations(place) {
       },
       title: {
         display: true,
-        text: 'Hospitalisierte Fälle'
+        text: _('Hospitalisierte Fälle')
       },
       tooltips: {
             mode: 'index',

@@ -40,3 +40,7 @@ function walk(node, func) {
         node = node.nextSibling;
     }
 };
+
+var _ = function (string) {
+  return string.toLocaleString();
+};
