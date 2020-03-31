@@ -230,7 +230,7 @@ table.wide th span {
 	padding-bottom: 0.2em;
 }
 table.wide th:nth-child(1),
-table.wide th:nth-child(2), {
+table.wide th:nth-child(2) {
 	position: static;
 }
 table.wide th:nth-child(1) span,
@@ -265,6 +265,11 @@ canvas {
 }
 .notes > :last-child {
 	margin-bottom: 0;
+}
+.difference {
+	display: inline-block;
+	opacity: 0.5;
+	width: 50px;
 }
 
 /* !flags */

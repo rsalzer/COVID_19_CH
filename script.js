@@ -75,7 +75,9 @@ function getCanton(i) {
           actualDeaths.push(latestData);
         }
         else {
-          actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
+          var actualDeath = filteredDataForDeaths[filteredDataForDeaths.length-1];
+          actualDeath.ncumul_deceased_previous = filteredDataForDeaths[filteredDataForDeaths.length-2].ncumul_deceased;
+          actualDeaths.push(actualDeath);
         }
         var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.ncumul_hosp!="") return d});
         if(filteredDataForHospitalisation.length==0) {
@@ -84,9 +86,10 @@ function getCanton(i) {
         else {
           actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
         }
-        if(latestData.ncumul_conf)
+        if(latestData.ncumul_conf) {
+          latestData.ncumul_conf_previous = csvdata[csvdata.length-2].ncumul_conf;
           actualData.push(latestData);
-        else {
+        } else {
           if(csvdata.length>1 && csvdata[csvdata.length-2].ncumul_conf) //Special case for FR
             actualData.push(csvdata[csvdata.length-2]);
           else {
@@ -129,6 +132,7 @@ function processActualData() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_conf;
+    var diff = actual.ncumul_conf - actual.ncumul_conf_previous;
     if(actual.abbreviation_canton_and_fl!="FL" && now!="") {
       total+=parseInt(now);
     }
@@ -145,7 +149,11 @@ function processActualData() {
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
+    var span = document.createElement("span");
+    span.className = "difference";
+    span.appendChild(document.createTextNode(now ? "+"+diff : ''));
     td.appendChild(text);
+    td.appendChild(span);
     tr.appendChild(td);
     td = document.createElement("td");
     if(actual.source.substring(0,2)=="ht") {
@@ -183,6 +191,7 @@ function processActualDeaths() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_deceased;
+    var diff = actual.ncumul_deceased - actual.ncumul_deceased_previous;
     if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
 
     var tr = document.createElement("tr");
@@ -198,7 +207,11 @@ function processActualDeaths() {
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
+    var span = document.createElement("span");
+    span.className = "difference";
+    span.appendChild(document.createTextNode(now ? "+"+diff : ''));
     td.appendChild(text);
+    td.appendChild(span);
     tr.appendChild(td);
     td = document.createElement("td");
     if(actual.source.substring(0,2)=="ht") {
