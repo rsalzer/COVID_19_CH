@@ -445,7 +445,7 @@ function barChartAllCH() {
         intersect: false,
         position : 'custom',
         caretSize: 0,
-        bodyFontFamily: 'monospace',
+        bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
