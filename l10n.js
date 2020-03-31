@@ -28,6 +28,8 @@ var
 // accept application/x-l10n+json and application/l10n+json
 , l10n_js_media_type = /^\s*application\/(?:vnd\.oftn\.|x-)?l10n\+json\s*(?:$|;)/i
 , XHR
+, notified = {}
+
 
 // property minification aids
 , $locale = "locale"
@@ -68,6 +70,7 @@ var
 			// Error messages are not localized as not to cause an infinite loop
 			var l10n_err = new Error("Unable to load localization data: " + uri);
 			l10n_err.name = "Localization Error";
+			console.log(`Error loading ${uri}:`, l10n_err)
 			throw l10n_err;
 		}, 0);
 	}
@@ -172,6 +175,10 @@ var
 		return localize.call(this_val);
 	}
 
+  // if (!(this_val in notified)) {
+	//	console.log(`"${this_val}": "(to be translated)",`)
+  //	notified[this_val] = true;
+  // }
 	return this_val;
 }
 ;

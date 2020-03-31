@@ -14,14 +14,10 @@ function loaded()
         var t = n.nodeValue.trim()
         if (t.toLocaleString() !== t) {
           n.nodeValue = " " + t.toLocaleString() + " "
-        } else {
-          // Useful for finding translations to do.
-          console.log(`"${t}": ""`)
         }
       }
     }
   })
-  document.title = document.title.toLocaleString();
 }
 
 function getParameterValue(parameter)

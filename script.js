@@ -33,6 +33,7 @@ var names = {
   "FL": "Fürstentum Liechtenstein"
 };
 
+var verbose = false;
 var actualData = [];
 var actualDeaths = [];
 var actualHospitalisation = [];
@@ -93,7 +94,9 @@ function getCanton(i) {
             actualData.push(latestData);
           }
         }
-        console.log("added "+csvdata.length+" rows for "+cantons[i]);
+        if (verbose) {
+          console.log("added "+csvdata.length+" rows for "+cantons[i]);
+        }
       }
       if(i<cantons.length-1) {
         getCanton(i+1);
@@ -105,7 +108,6 @@ function getCanton(i) {
 }
 
 function processData() {
-  console.log("Plotting data");
   processActualData();
   processActualDeaths();
   processActualHospitalisation();
@@ -387,7 +389,9 @@ function barChartAllCH() {
   while(date<now) {
     var dateString = date.toISOString();
     dateString = dateString.substring(0,10);
-    console.log(dateString);
+    if (verbose) {
+      console.log(dateString);
+    }
     var singleDayObject = {};
     singleDayObject.date = dateString;
     singleDayObject.data = [];
@@ -473,7 +477,7 @@ function barChartAllCH() {
       scales: {
             xAxes: [{
                 type: 'time',
-                time: {
+                ticks: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
                     min: new Date("2020-02-24T23:00:00"),
@@ -619,7 +623,7 @@ function barChartCases(place) {
       scales: {
             xAxes: [{
                 type: 'time',
-                time: {
+                ticks: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
                     min: new Date("2020-02-24T23:00:00"),
@@ -778,7 +782,7 @@ function barChartHospitalisations(place) {
       scales: {
             xAxes: [{
                 type: 'time',
-                time: {
+                ticks: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
                     min: new Date("2020-02-24T23:00:00"),
