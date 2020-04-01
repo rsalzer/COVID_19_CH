@@ -331,7 +331,7 @@ canvas {
 
 #loadingspinner {
   margin: auto;
-  width: 100px;
+  /*width: 200px;*/
   padding: 10px;
   line-height: 50px;
   text-align: center;
