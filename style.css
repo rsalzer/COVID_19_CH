@@ -58,7 +58,9 @@ body {
 /* !page-navigation */
 #page-nav {
 	padding-left: 5vw;
+	padding-right: 5vw;
 	padding-top: 1em;
+	max-width: 640px;
 }
 #page-nav ul {
 	list-style: none;
@@ -70,6 +72,12 @@ body {
 #page-nav li.here a {
 	border-bottom: 2px solid #000;
 	cursor: default;
+}
+#page-nav li:nth-child(3) {
+  margin-left: auto;
+}
+#page-nav li:last-child {
+  margin-right: 0;
 }
 #page-nav a {
 	display: block;

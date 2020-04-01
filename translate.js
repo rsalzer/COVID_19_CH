@@ -3,7 +3,9 @@
 
 function loaded()
 {
-  var lang = getParameterValue("lang");
+  var lang = window.navigator.userLanguage || window.navigator.language;
+  var langParameter = getParameterValue("lang");
+  if (langParameter != "") lang = langParameter;
   if (lang != "") String.locale = lang;
 
   walk(document, function(n) {

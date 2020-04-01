@@ -40,6 +40,9 @@ var actualHospitalisation = [];
 var data = [];
 Chart.defaults.global.defaultFontFamily = "IBM Plex Sans";
 document.getElementById("loaded").style.display = 'none';
+
+setLanguageNav();
+
 getCanton(0);
 
 function getCanton(i) {
@@ -814,4 +817,51 @@ function barChartHospitalisations(place) {
       datasets: datasets
     }
   });
+}
+
+function setLanguageNav() {
+  var lang = window.navigator.userLanguage || window.navigator.language;
+  var langParameter = getParameterValue("lang");
+  if (langParameter != "") lang = langParameter;
+  lang = lang.split("-")[0]; //not interested in de-CH de-DE etc.
+  switch(lang) {
+    case 'de':
+    case 'fr':
+      break;
+    default:
+      lang = 'en';
+  }
+
+  var href;
+  var ul = document.getElementsByTagName("ul")[0];
+  var li = document.createElement("li");
+  if(lang=="de") {
+    li.className = "here";
+    href = "#"
+  }
+  else {
+    href = "index.html?lang=de";
+  }
+  li.innerHTML = '<a href="'+href+'">DE</a>';
+  ul.appendChild(li);
+  li = document.createElement("li");
+  if(lang=="fr") {
+    li.className = "here";
+    href = "#"
+  }
+  else {
+    href = "index.html?lang=fr";
+  }
+  li.innerHTML = '<a href="'+href+'">FR</a>';
+  ul.appendChild(li);
+  li = document.createElement("li");
+  if(lang=="en") {
+    li.className = "here";
+    href = "#"
+  }
+  else {
+    href = "index.html?lang=en";
+  }
+  li.innerHTML = '<a href="'+href+'">EN</a>';
+  ul.appendChild(li);
 }
