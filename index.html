@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="de">
   <head>
     <meta charset="utf-8">
     <title>Corona Fälle in der Schweiz</title>
@@ -14,8 +14,8 @@
     <script src="https://d3js.org/d3.v3.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
-    <!-- script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script -->
     <link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="localization" hreflang="fr" href="lang/fr.json" type="application/vnd.oftn.l10n+json"/>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <!-- script async src="https://www.googletagmanager.com/gtag/js?id=UA-160625595-2"></script>
     <script>
@@ -33,7 +33,7 @@
       function gaOptout() {
           document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
           window[disableStr] = true;
-          alert('Das Tracking ist jetzt deaktiviert');
+          alert(_('Das Tracking ist jetzt deaktiviert'));
       }
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -45,7 +45,7 @@
       ga('send', 'pageview');
     </script>
   </head>
-  <body>
+  <body onload="loaded()">
     <nav id="page-nav">
   		<ul>
   			<li class="here"><a href="#">Schweiz</a></li>
@@ -200,7 +200,8 @@
     </p>
 	</footer>
   <script src="script.js"></script>
-    <!--canvas id="CH" height="20" width="100" style="position: relative; z-index: 2"></canvas>
-    <canvas id="AG" height="20" width="100" style="position: relative; z-index: 2"></canvas -->
+  <script src="l10n.js"></script>
+  <!--<script src="lang/fr.js"></script>-->
+  <script src="translate.js"></script>
   </body>
 </html>
