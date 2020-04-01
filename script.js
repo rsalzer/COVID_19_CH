@@ -477,14 +477,16 @@ function barChartAllCH() {
       scales: {
             xAxes: [{
                 type: 'time',
-                ticks: {
+                time: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
                     displayFormats: {
                         day: 'D.MM'
-                    }
+                    },
+                  ticks: {
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
+                  }
                 }
             }],
             yAxes: [{
@@ -621,17 +623,19 @@ function barChartCases(place) {
         text: _('Bestätigte Fälle')
       },
       scales: {
-            xAxes: [{
-                type: 'time',
-                ticks: {
-                    tooltipFormat: 'D.MM.YYYY',
-                    unit: 'day',
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
-                    displayFormats: {
-                        day: 'D.MM'
-                    }
-                }
+        xAxes: [{
+            type: 'time',
+            time: {
+                tooltipFormat: 'D.MM.YYYY',
+                unit: 'day',
+                displayFormats: {
+                    day: 'D.MM'
+                },
+              ticks: {
+                min: new Date("2020-02-24T23:00:00"),
+                max: new Date(),
+              }
+            }
             }],
             yAxes: [{
               ticks: {
@@ -782,14 +786,16 @@ function barChartHospitalisations(place) {
       scales: {
             xAxes: [{
                 type: 'time',
-                ticks: {
+                time: {
                     tooltipFormat: 'D.MM.YYYY',
                     unit: 'day',
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
                     displayFormats: {
                         day: 'D.MM'
-                    }
+                    },
+                  ticks: {
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
+                  }
                 }
             }],
             yAxes: [{
