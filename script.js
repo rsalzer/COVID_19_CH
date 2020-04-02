@@ -440,6 +440,11 @@ function barChartAllCH() {
     type: 'line',
     options: {
       responsive: false,
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
       legend: {
         display: false
       },
@@ -617,6 +622,11 @@ function barChartCases(place) {
   var chart = new Chart(canvas.id, {
     type: 'line',
     options: {
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
       responsive: false,
       legend: {
         display: false
@@ -774,6 +784,11 @@ function barChartHospitalisations(place) {
     type: 'line',
     options: {
       responsive: false,
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
       legend: {
         display: true,
         position: 'bottom'
