@@ -234,6 +234,11 @@ canvas {
 .toplink {
 	float: right;
 	font-size: 1.125rem;
+	border-bottom: 0px;
+	text-decoration: none;
+}
+.toplink:hover {
+	text-decoration: underline;
 }
 
 /* !flags */
