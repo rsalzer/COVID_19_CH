@@ -118,6 +118,7 @@ function processData() {
   document.getElementById("loaded").style.display = 'block';
   barChartAllCH();
   barChartAllCHDeaths();
+  barChartAllCHHospitalisations();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
@@ -707,6 +708,160 @@ function barChartAllCHDeaths() {
   });
 }
 
+function barChartAllCHHospitalisations() {
+  date = new Date(Date.UTC(2020, 1, 25));
+  var now = new Date();
+  //alert(now.toISOString());
+  var dataPerDay = [];
+  while(date<now) {
+    var dateString = date.toISOString();
+    dateString = dateString.substring(0,10);
+    if (verbose) {
+      console.log(dateString);
+    }
+    var singleDayObject = {};
+    singleDayObject.date = dateString;
+    singleDayObject.data = [];
+    for(var i=0; i<cantons.length-1; i++) { //without FL
+      var canton = cantons[i];
+      var cantonTotal = getNumConf(canton, date, "ncumul_hosp");
+      singleDayObject.data.push(cantonTotal);
+    }
+    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_hosp; }, 0);
+    singleDayObject.total = total;
+    dataPerDay.push(singleDayObject);
+    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
+  }
+  //console.log(dataPerDay);
+  var place = "CH";
+  var section = document.getElementById("detail");
+  var div = document.getElementById("container_CH");
+  var canvas = document.createElement("canvas");
+  canvas.id = place+"_hosp";
+  canvas.height=500;
+  div.appendChild(canvas);
+  var dateLabels = dataPerDay.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    return date;
+  });
+  var cases = dataPerDay.map(function(d) {return d.total});
+  var chart = new Chart(canvas.id, {
+    type: 'line',
+    options: {
+      responsive: false,
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: _('Hospitalisierte Fälle')
+      },
+      tooltips: {
+        mode: 'nearest',
+        intersect: false,
+        position : 'custom',
+        caretSize: 0,
+        bodyFontFamily: 'IBM Plex Mono',
+        callbacks: {
+          label: function(tooltipItems, data) {
+            var value = tooltipItems.value;
+            var tabbing = 6-value.length;
+            var padding = " ".repeat(tabbing);
+            return padding+value;
+          },
+          afterBody: function(tooltipItems, data) {
+            //console.log(tooltipItems);
+            //console.log(data);
+            multistringText = [""];
+            var index = tooltipItems[0].index;
+            var dataForThisDay = dataPerDay[index];
+            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_hosp-a.ncumul_hosp});
+            sorted.forEach(function(item) {
+              var tabbing = 5-(""+item.ncumul_hosp).length;
+              var padding = " ".repeat(tabbing);
+              var dateLabel = " ("+item.date+")";
+              multistringText.push(item.canton+":"+padding+item.ncumul_hosp+dateLabel);
+            });
+
+            return multistringText;
+          }
+        }
+      },
+      scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    tooltipFormat: 'D.MM.YYYY',
+                    unit: 'day',
+                    displayFormats: {
+                        day: 'D.MM'
+                    },
+                  ticks: {
+                    min: new Date("2020-02-24T23:00:00"),
+                    max: new Date(),
+                  }
+                }
+            }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                suggestedMax: 10,
+              },
+            }]
+        },
+      plugins: {
+          datalabels: {
+  						color: 'black',
+  						font: {
+  							weight: 'bold'
+  						},
+  						formatter: function(value, context) {
+                var index = context.dataIndex;
+                if(index==0) return "";
+                var lastValue = context.dataset.data[index-1];
+                var percentageChange = value/lastValue - 1;
+                var rounded = Math.round(percentageChange * 100);
+                var label = ""+rounded;
+                if(rounded >= 0) label = "+"+label+"%";
+                else label = "-"+label+"%";
+
+                var change = value-lastValue;
+                var label = change>0 ? "+"+change : change;
+                if(change==0) return "";
+                return label;
+              }
+  					}
+          }
+    },
+    data: {
+      labels: dateLabels,
+      datasets: [
+        {
+          data: cases,
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          spanGaps: true,
+          borderColor: '#CCCC00',
+          backgroundColor: '#CCCC00',
+          datalabels: {
+						align: 'end',
+						anchor: 'end'
+					}
+        }
+      ]
+    }
+  });
+}
+
 function getNumConf(canton, date, variable) {
   var dateString = date.toISOString();
   dateString = dateString.substring(0,10);
@@ -720,7 +875,7 @@ function getNumConf(canton, date, variable) {
     obj[variable] = parseInt(filteredData[filteredData.length-1][variable]);
     return obj;
   }
-  for(var i=1; i<=10; i++) {
+  for(var i=1; i<=50; i++) {
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()-1));
     dateString = date.toISOString().substring(0,10);
     filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d[variable]!="") return d});
@@ -751,6 +906,11 @@ function barChartCases(place) {
   h3.className = "flag "+place;
   var text = document.createTextNode(_(names[place]));
   h3.appendChild(text);
+  var a = document.createElement("a");
+  a.href = "#top";
+  a.innerHTML = "&#x2191;&#xFE0E;";
+  a.className = "toplink";
+  h3.appendChild(a);
   article.appendChild(h3);
   var div = document.createElement("div");
   div.className = "canvas-dummy";
