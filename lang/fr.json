@@ -1,9 +1,9 @@
 {
-	  "Corona Fälle in der Schweiz": "Cas de coronavirus en Suisse",
-	  "Corona-Fälle in der Schweiz": "Cas de coronavirus en Suisse",
-	  "Alter": "Par âges",
-	  "Schweiz": "Suisse",
-	  "Feedback, Anregungen, Verbesserungsvorschläge, Erweiterungen bitte auf GitHub oder direkt an": "Commentaires, suggestions, suggestions d'amélioration, extensions s'il vous plaît sur GitHub ou directement à",
+    "Corona Fälle in der Schweiz": "Cas de coronavirus en Suisse",
+    "Corona-Fälle in der Schweiz": "Cas de coronavirus en Suisse",
+    "Alter": "Par âges",
+    "Schweiz": "Suisse",
+    "Feedback, Anregungen, Verbesserungsvorschläge, Erweiterungen bitte auf GitHub oder direkt an": "Commentaires, suggestions, suggestions d'amélioration, extensions s'il vous plaît sur GitHub ou directement à",
     "Kanton": "canton",
     "Datum": "date",
     "Fälle": "cas",
@@ -60,7 +60,8 @@
     "Fälle am": "Cas sûrs",
     "Bestätigte Fälle": "Cas confirmés",
     "Hospitalisierte Fälle": "Cas hospitalisés",
+    "Linear": "Linéaire",
+    "Logarithmisch": "Logarithmique",
     "Das Tracking ist jetzt deaktiviert": "La récolte de données est maintenant désactivée",
-	  "": ""
+    "": ""
 }
-

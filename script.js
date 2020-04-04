@@ -1,8 +1,8 @@
 var data;
 
-var cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
+const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
 
-var names = {
+const names = {
   "CH": "Ganze Schweiz",
   "AG": "Kanton Aargau",
   "AI": "Kanton Appenzell Innerhoden",
@@ -31,6 +31,11 @@ var names = {
   "ZG": "Kanton Zug",
   "ZH": "Kanton Zürich",
   "FL": "Fürstentum Liechtenstein"
+};
+
+const cartesianAxesTypes = {
+  LINEAR: 'linear',
+  LOGARITHMIC: 'logarithmic'
 };
 
 var verbose = false;
@@ -482,70 +487,51 @@ function barChartAllCH() {
           }
         }
       },
-      scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    tooltipFormat: 'D.MM.YYYY',
-                    unit: 'day',
-                    displayFormats: {
-                        day: 'D.MM'
-                    },
-                  ticks: {
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
-                  }
-                }
-            }],
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                suggestedMax: 10,
-              },
-            }]
-        },
+      scales: getScales(),
       plugins: {
-          datalabels: {
-  						color: 'black',
-  						font: {
-  							weight: 'bold'
-  						},
-  						formatter: function(value, context) {
-                var index = context.dataIndex;
-                if(index==0) return "";
-                var lastValue = context.dataset.data[index-1];
-                var percentageChange = value/lastValue - 1;
-                var rounded = Math.round(percentageChange * 100);
-                var label = ""+rounded;
-                if(rounded >= 0) label = "+"+label+"%";
-                else label = "-"+label+"%";
+        datalabels: {
+            color: 'black',
+            font: {
+              weight: 'bold'
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1];
+              var percentageChange = value/lastValue - 1;
+              var rounded = Math.round(percentageChange * 100);
+              var label = ""+rounded;
+              if(rounded >= 0) label = "+"+label+"%";
+              else label = "-"+label+"%";
 
-                var change = value-lastValue;
-                var label = change>0 ? "+"+change : change;
-                if(change==0) return "";
-                return label;
-              }
-  					}
+              var change = value-lastValue;
+              var label = change>0 ? "+"+change : change;
+              if(change==0) return "";
+              return label;
+            }
           }
-    },
-    data: {
-      labels: dateLabels,
-      datasets: [
-        {
-          data: cases,
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          borderColor: '#F15F36',
-          backgroundColor: '#F15F36',
-          datalabels: {
-						align: 'end',
-						anchor: 'end'
-					}
         }
-      ]
-    }
-  });
+  },
+  data: {
+    labels: dateLabels,
+    datasets: [
+      {
+        data: cases,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: '#F15F36',
+        backgroundColor: '#F15F36',
+        datalabels: {
+          align: 'end',
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+});
+
+  addAxisButtons(canvas, chart);
 }
 
 function barChartAllCHDeaths() {
@@ -640,70 +626,51 @@ function barChartAllCHDeaths() {
           }
         }
       },
-      scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    tooltipFormat: 'D.MM.YYYY',
-                    unit: 'day',
-                    displayFormats: {
-                        day: 'D.MM'
-                    },
-                  ticks: {
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
-                  }
-                }
-            }],
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                suggestedMax: 10,
-              },
-            }]
-        },
+      scales: getScales(),
       plugins: {
-          datalabels: {
-  						color: 'black',
-  						font: {
-  							weight: 'bold'
-  						},
-  						formatter: function(value, context) {
-                var index = context.dataIndex;
-                if(index==0) return "";
-                var lastValue = context.dataset.data[index-1];
-                var percentageChange = value/lastValue - 1;
-                var rounded = Math.round(percentageChange * 100);
-                var label = ""+rounded;
-                if(rounded >= 0) label = "+"+label+"%";
-                else label = "-"+label+"%";
+        datalabels: {
+            color: 'black',
+            font: {
+              weight: 'bold'
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1];
+              var percentageChange = value/lastValue - 1;
+              var rounded = Math.round(percentageChange * 100);
+              var label = ""+rounded;
+              if(rounded >= 0) label = "+"+label+"%";
+              else label = "-"+label+"%";
 
-                var change = value-lastValue;
-                var label = change>0 ? "+"+change : change;
-                if(change==0) return "";
-                return label;
-              }
-  					}
+              var change = value-lastValue;
+              var label = change>0 ? "+"+change : change;
+              if(change==0) return "";
+              return label;
+            }
           }
-    },
-    data: {
-      labels: dateLabels,
-      datasets: [
-        {
-          data: cases,
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          borderColor: '#010101',
-          backgroundColor: '#010101',
-          datalabels: {
-						align: 'end',
-						anchor: 'end'
-					}
         }
-      ]
-    }
-  });
+  },
+  data: {
+    labels: dateLabels,
+    datasets: [
+      {
+        data: cases,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: '#010101',
+        backgroundColor: '#010101',
+        datalabels: {
+          align: 'end',
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+});
+
+  addAxisButtons(canvas, chart);
 }
 
 function barChartAllCHHospitalisations() {
@@ -794,70 +761,51 @@ function barChartAllCHHospitalisations() {
           }
         }
       },
-      scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    tooltipFormat: 'D.MM.YYYY',
-                    unit: 'day',
-                    displayFormats: {
-                        day: 'D.MM'
-                    },
-                  ticks: {
-                    min: new Date("2020-02-24T23:00:00"),
-                    max: new Date(),
-                  }
-                }
-            }],
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                suggestedMax: 10,
-              },
-            }]
-        },
+      scales: getScales(),
       plugins: {
-          datalabels: {
-  						color: 'black',
-  						font: {
-  							weight: 'bold'
-  						},
-  						formatter: function(value, context) {
-                var index = context.dataIndex;
-                if(index==0) return "";
-                var lastValue = context.dataset.data[index-1];
-                var percentageChange = value/lastValue - 1;
-                var rounded = Math.round(percentageChange * 100);
-                var label = ""+rounded;
-                if(rounded >= 0) label = "+"+label+"%";
-                else label = "-"+label+"%";
+        datalabels: {
+            color: 'black',
+            font: {
+              weight: 'bold'
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1];
+              var percentageChange = value/lastValue - 1;
+              var rounded = Math.round(percentageChange * 100);
+              var label = ""+rounded;
+              if(rounded >= 0) label = "+"+label+"%";
+              else label = "-"+label+"%";
 
-                var change = value-lastValue;
-                var label = change>0 ? "+"+change : change;
-                if(change==0) return "";
-                return label;
-              }
-  					}
+              var change = value-lastValue;
+              var label = change>0 ? "+"+change : change;
+              if(change==0) return "";
+              return label;
+            }
           }
-    },
-    data: {
-      labels: dateLabels,
-      datasets: [
-        {
-          data: cases,
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          borderColor: '#CCCC00',
-          backgroundColor: '#CCCC00',
-          datalabels: {
-						align: 'end',
-						anchor: 'end'
-					}
         }
-      ]
-    }
-  });
+  },
+  data: {
+    labels: dateLabels,
+    datasets: [
+      {
+        data: cases,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: '#CCCC00',
+        backgroundColor: '#CCCC00',
+        datalabels: {
+          align: 'end',
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+});
+
+  addAxisButtons(canvas, chart);
 }
 
 function getNumConf(canton, date, variable) {
@@ -956,69 +904,50 @@ function barChartCases(place) {
         display: true,
         text: _('Bestätigte Fälle')
       },
-      scales: {
-        xAxes: [{
-            type: 'time',
-            time: {
-                tooltipFormat: 'D.MM.YYYY',
-                unit: 'day',
-                displayFormats: {
-                    day: 'D.MM'
-                }
-            },
-          ticks: {
-            min: new Date("2020-02-24T23:00:00"),
-            max: new Date(),
-          }
-            }],
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                suggestedMax: 10,
-              },
-            }]
-        },
+      scales: getScales(),
       plugins: {
-          datalabels: {
-  						color: 'black',
-  						font: {
-  							weight: 'bold'
-  						},
-  						formatter: function(value, context) {
-                var index = context.dataIndex;
-                if(index==0) return "";
-                var lastValue = context.dataset.data[index-1];
-                var percentageChange = value/lastValue - 1;
-                var rounded = Math.round(percentageChange * 100);
-                var label = ""+rounded;
-                if(rounded >= 0) label = "+"+label+"%";
-                else label = "-"+label+"%";
+        datalabels: {
+            color: 'black',
+            font: {
+              weight: 'bold'
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1];
+              var percentageChange = value/lastValue - 1;
+              var rounded = Math.round(percentageChange * 100);
+              var label = ""+rounded;
+              if(rounded >= 0) label = "+"+label+"%";
+              else label = "-"+label+"%";
 
-                var change = value-lastValue;
-                var label = change>0 ? "+"+change : change;
-                return label;
-              }
-  					}
+              var change = value-lastValue;
+              var label = change>0 ? "+"+change : change;
+              return label;
+            }
           }
-    },
-    data: {
-      labels: dateLabels,
-      datasets: [
-        {
-          data: cases,
-          fill: false,
-          cubicInterpolationMode: 'monotone',
-          spanGaps: true,
-          borderColor: '#F15F36',
-          backgroundColor: '#F15F36',
-          datalabels: {
-						align: 'end',
-						anchor: 'end'
-					}
         }
-      ]
-    }
-  });
+  },
+  data: {
+    labels: dateLabels,
+    datasets: [
+      {
+        data: cases,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: '#F15F36',
+        backgroundColor: '#F15F36',
+        datalabels: {
+          align: 'end',
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+});
+
+  addAxisButtons(canvas, chart);
 }
 
 function barChartHospitalisations(place) {
@@ -1122,30 +1051,9 @@ function barChartHospitalisations(place) {
             mode: 'index',
             axis: 'y'
       },
-      scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    tooltipFormat: 'D.MM.YYYY',
-                    unit: 'day',
-                    displayFormats: {
-                        day: 'D.MM'
-                    }
-                },
-                ticks: {
-                  min: new Date("2020-02-24T23:00:00"),
-                  max: new Date(),
-                }
-            }],
-            yAxes: [{
-              ticks: {
-                beginAtZero: true,
-                suggestedMax: 10,
-              },
-            }]
-        },
+      scales: getScales(),
       plugins: {
-          datalabels: false
+        datalabels: false
       }
     },
     data: {
@@ -1153,6 +1061,34 @@ function barChartHospitalisations(place) {
       datasets: datasets
     }
   });
+
+  addAxisButtons(canvas, chart);
+}
+
+function getScales() {
+  return {
+    xAxes: [{
+      type: 'time',
+      time: {
+        tooltipFormat: 'DD.MM.YYYY',
+        unit: 'day',
+        displayFormats: {
+          day: 'DD.MM'
+        },
+        ticks: {
+          min: new Date("2020-02-24T23:00:00"),
+          max: new Date(),
+        }
+      }
+    }],
+    yAxes: [{
+      type: cartesianAxesTypes.LINEAR,
+      ticks: {
+        beginAtZero: true,
+        suggestedMax: 10,
+      },
+    }]
+  };
 }
 
 function setLanguageNav() {
@@ -1200,4 +1136,41 @@ function setLanguageNav() {
   }
   li.innerHTML = '<a href="'+href+'">EN</a>';
   ul.appendChild(li);
+}
+
+function addAxisButtons(elementAfter, chart) {
+  var div = document.createElement('div');
+  div.className = "chartButtons";
+  addAxisButton(div, chart, 'Logarithmisch', cartesianAxesTypes.LOGARITHMIC, false);
+  addAxisButton(div, chart, 'Linear', cartesianAxesTypes.LINEAR, true);
+  elementAfter.before(div);
+}
+
+function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
+  var button = document.createElement('button');
+  button.className = "chartButton";
+  if (isActive) button.classList.add('active');
+  button.innerHTML = name;
+  button.addEventListener('click', function() {
+    this.classList.add('active');
+    getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
+
+    chart.options.scales.yAxes[0].type = cartesianAxisType;
+    chart.update();
+  });
+  container.append(button);
+}
+
+function getSiblings(element, selector) {
+	var siblings = [];
+  var sibling = element.parentNode.firstChild;
+  
+	while (sibling) {
+		if (sibling.nodeType === 1 && sibling !== element && sibling.matches(selector)) {
+			siblings.push(sibling);
+		}
+		sibling = sibling.nextSibling
+	}
+
+	return siblings;
 }
