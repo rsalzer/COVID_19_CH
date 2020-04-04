@@ -88,14 +88,12 @@ function getCanton(i) {
         else {
           actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
         }
-        if(latestData.ncumul_conf)
+        var filteredDataForCases = csvdata.filter(function(d) { if(d.ncumul_conf!="") return d});
+        if(filteredDataForCases.length==0) {
           actualData.push(latestData);
+        }
         else {
-          if(csvdata.length>1 && csvdata[csvdata.length-2].ncumul_conf) //Special case for FR
-            actualData.push(csvdata[csvdata.length-2]);
-          else {
-            actualData.push(latestData);
-          }
+          actualData.push(filteredDataForCases[filteredDataForCases.length-1]);
         }
         if (verbose) {
           console.log("added "+csvdata.length+" rows for "+cantons[i]);
