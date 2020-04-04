@@ -45,6 +45,15 @@ setLanguageNav();
 
 getCanton(0);
 
+d3.csv("https://raw.githubusercontent.com/RamiKrispin/coronavirus-csv/master/coronavirus_dataset.csv", function(error, csvdata) {
+    if(error!=null) {
+      console.log(error.responseURL+" not found");
+    }
+    var today = csvdata.filter(function(d) { if(d.date=="2020-04-03" && d.type=="confirmed") return d});
+    var sorted = Array.from(today).sort(function(a, b){return b.cases-a.cases});
+    console.log(sorted);
+});
+
 function getCanton(i) {
   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
   if(cantons[i] == "FL") {

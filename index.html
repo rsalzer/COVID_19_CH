@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="css/flag-icon.min.css">
 	  <link rel="localization" hreflang="fr" href="lang/fr.json" type="application/vnd.oftn.l10n+json"/>
     <link rel="localization" hreflang="en" href="lang/en.json" type="application/vnd.oftn.l10n+json"/>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -70,8 +71,28 @@
       <div id="loadingspinner">Lade Daten...<br/><div class="lds-ring"><div></div><div></div><div></div><div></div></div></div>
       <div id="loaded">
 	  <article id="latest">
-				<h3>Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone</h3>
-        <div class="table-group">
+      <h3>Die Schweiz im internationalen Vergleich</h3>
+      <p>Quelle: John Hopkins Universität</p>
+      <div class="table-group">
+        <table>
+          <thead>
+            <tr>
+              <th>Land</th>
+              <th>Datum</th>
+              <th>Fälle</th>
+            </tr>
+          </thead>
+          <tbody id="international">
+            <tr>
+              <td><a class="flag flag-icon-ch flag-icon-squared" href="#detail_SO">SO</a></td>
+              <td>2020-03-26</td>
+              <td>141</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+			<h3>Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone</h3>
+      <div class="table-group">
           <table>
 						<thead>
 							<tr>
@@ -82,8 +103,8 @@
 							</tr>
 						</thead>
 						<tbody id="confirmed_1">
-              <!-- tr>
-								<td><a class="flag so" href="#detail_SO">SO</a></td>
+              <!--tr>
+								<td><a class="flag flag-icon-ch flag-icon-squared" href="#detail_SO">SO</a></td>
 								<td>2020-03-26</td>
 								<td>141</td>
 								<td><a href="https://corona.so.ch/">↗</a></td>
