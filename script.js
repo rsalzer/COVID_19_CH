@@ -135,8 +135,10 @@ d3.csv("https://covid.ourworldindata.org/data/ecdc/total_deaths.csv", function(e
     // Create a new array with only the first 5 items
     var sorted = items.slice(2, 22);
     console.log(sorted);
+    /*
     var p = document.getElementById("source");
     p.appendChild(document.createTextNode("("+date+")"));
+    */
     var firstTable = document.getElementById("international2");
     for(var i=0; i<sorted.length; i++) {
       var single = sorted[i];
