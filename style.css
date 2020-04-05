@@ -121,7 +121,8 @@ table tr th:nth-child(2) {
 	text-align: left;
 	white-space: nowrap;
 }
-table tr td:nth-child(2) {
+table tr td:nth-child(2),
+#international tr td {
 	opacity: 0.5;
 }
 table tr th:nth-child(3),
@@ -141,7 +142,8 @@ table tr td:nth-child(3) {
 	margin-right: 0;
 }
 .table-group table:nth-child(2) tr:last-child td,
-#hospitalised_2 tr:last-child td {
+#hospitalised_2 tr:last-child td,
+#international .ch td{
 	opacity: 1;
 }
 table a:hover {

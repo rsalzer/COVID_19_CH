@@ -50,14 +50,62 @@ setLanguageNav();
 
 getCanton(0);
 
-d3.csv("https://raw.githubusercontent.com/RamiKrispin/coronavirus-csv/master/coronavirus_dataset.csv", function(error, csvdata) {
+function getWorldData(chTotal) {
+d3.csv("https://covid.ourworldindata.org/data/ecdc/total_cases.csv", function(error, csvdata) {
     if(error!=null) {
       console.log(error.responseURL+" not found");
     }
-    var today = csvdata.filter(function(d) { if(d.date=="2020-04-03" && d.type=="confirmed") return d});
-    var sorted = Array.from(today).sort(function(a, b){return b.cases-a.cases});
+    d3.json("https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-abbreviation.json", function(error2, json) {
+    console.log(json);
+    var today = csvdata[csvdata.length-1];
+    today.Switzerland = ""+chTotal;
+    var date = today.date;
+    var splitDate = date.split("-");
+    var year = splitDate[0];
+    var month = parseInt(splitDate[1]);
+    var day = parseInt(splitDate[2]);
+    var dateString = day+"."+month+"."+year;
+    // Create items array
+    var items = Object.keys(today).map(function(key) {
+      return [key, today[key]];
+    });
+
+    // Sort the array based on the second element
+    items.sort(function(first, second) {
+      return second[1] - first[1];
+    });
+
+    // Create a new array with only the first 5 items
+    var sorted = items.slice(2, 22);
     console.log(sorted);
+    var p = document.getElementById("source");
+    p.appendChild(document.createTextNode("("+date+")"));
+    var firstTable = document.getElementById("international");
+    for(var i=0; i<sorted.length; i++) {
+      var single = sorted[i];
+      var country = single[0];
+      var cases = single[1];
+      var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+      var lookupShort = json.filter(function(d) { if(d.country == country) return d});
+      var countryFlag = country;
+      var short;
+      if(lookupShort.length>0) {
+         short = lookupShort[0].abbreviation.toLowerCase();
+         countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+      }
+      var tr = document.createElement("tr");
+      if(short=="ch") {
+        tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+        tr.className = "ch";
+      }
+      else {
+        tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+      }
+      firstTable.appendChild(tr);
+    }
+  });
 });
+}
 
 function getCanton(i) {
   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
@@ -186,6 +234,7 @@ function processActualData() {
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
   secondTable.append(tr);
+  getWorldData(total);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
@@ -1100,6 +1149,7 @@ function getScales() {
   };
 }
 
+var language;
 function setLanguageNav() {
   var lang = window.navigator.userLanguage || window.navigator.language;
   var langParameter = getParameterValue("lang");
@@ -1112,7 +1162,7 @@ function setLanguageNav() {
     default:
       lang = 'en';
   }
-
+  language = lang;
   var href;
   var ul = document.getElementsByTagName("ul")[0];
   var li = document.createElement("li");
@@ -1173,7 +1223,7 @@ function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
 function getSiblings(element, selector) {
 	var siblings = [];
   var sibling = element.parentNode.firstChild;
-  
+
 	while (sibling) {
 		if (sibling.nodeType === 1 && sibling !== element && sibling.matches(selector)) {
 			siblings.push(sibling);
