@@ -1141,8 +1141,8 @@ function setLanguageNav() {
 function addAxisButtons(elementAfter, chart) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addAxisButton(div, chart, 'Logarithmisch', cartesianAxesTypes.LOGARITHMIC, false);
-  addAxisButton(div, chart, 'Linear', cartesianAxesTypes.LINEAR, true);
+  addAxisButton(div, chart, _('Logarithmisch'), cartesianAxesTypes.LOGARITHMIC, false);
+  addAxisButton(div, chart, _('Linear'), cartesianAxesTypes.LINEAR, true);
   elementAfter.before(div);
 }
 
