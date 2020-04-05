@@ -173,6 +173,16 @@ table img {
 		padding-top: 0px;
 		padding-bottom: 0px;
 	}
+	#international-table-group table:nth-child(2) {
+		margin-top: 1em !important;
+	}
+
+	#international-table-group table:nth-child(2) thead tr th {
+		visibility: visible !important;
+		height: 20px;
+		padding-top: 0.2em;
+		padding-bottom: 0.2em;
+	}
 }
 /* !wide-table */
 table.wide {
