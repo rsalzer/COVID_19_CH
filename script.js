@@ -1132,11 +1132,11 @@ function getScales() {
         unit: 'day',
         displayFormats: {
           day: 'DD.MM'
-        },
-        ticks: {
-          min: new Date("2020-02-24T23:00:00"),
-          max: new Date(),
         }
+      },
+      ticks: {
+        min: new Date("2020-02-24T23:00:00"),
+        max: new Date(),
       }
     }],
     yAxes: [{
