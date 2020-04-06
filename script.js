@@ -49,121 +49,79 @@ document.getElementById("loaded").style.display = 'none';
 setLanguageNav();
 
 getCanton(0);
-
+var worldData;
 function getWorldData(chTotal) {
-d3.csv("https://covid.ourworldindata.org/data/ecdc/total_cases.csv", function(error, csvdata) {
-    if(error!=null) {
-      console.log(error.responseURL+" not found");
-    }
-    d3.json("https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-abbreviation.json", function(error2, json) {
-    console.log(json);
-    var today = csvdata[csvdata.length-1];
-    today.Switzerland = ""+chTotal;
-    var date = today.date;
-    var splitDate = date.split("-");
-    var year = splitDate[0];
-    var month = parseInt(splitDate[1]);
-    var day = parseInt(splitDate[2]);
-    var dateString = day+"."+month+"."+year;
-    // Create items array
-    var items = Object.keys(today).map(function(key) {
-      return [key, today[key]];
-    });
+  d3.csv("https://open-covid-19.github.io/data/data_latest.csv", function(error, csvdata) {
+      if(error!=null) {
+        console.log(error.responseURL+" not found");
+      }
 
-    // Sort the array based on the second element
-    items.sort(function(first, second) {
-      return second[1] - first[1];
-    });
+      worldData = csvdata.filter(function(d) { if(d.Key==d.CountryCode) return d; }); //only use countries;
 
-    // Create a new array with only the first 5 items
-    var sorted = items.slice(2, 22);
-    console.log(sorted);
-    var p = document.getElementById("source");
-    p.appendChild(document.createTextNode("("+date+")"));
-    var firstTable = document.getElementById("international1");
-    for(var i=0; i<sorted.length; i++) {
-      var single = sorted[i];
-      var country = single[0];
-      var cases = single[1];
-      var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-      var lookupShort = json.filter(function(d) { if(d.country == country) return d});
-      var countryFlag = country;
-      var short;
-      if(lookupShort.length>0) {
-         short = lookupShort[0].abbreviation.toLowerCase();
-         countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+      var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
+      ch[0].Confirmed = ""+chTotal;
+
+      var sorted = Array.from(worldData).sort(function(a, b){return b.Confirmed-a.Confirmed});
+
+      var firstTable = document.getElementById("international1");
+      for(var i=0; i<20; i++) {
+        var single = sorted[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = single.CountryName.replace(" of America","");
+        var cases = single.Confirmed;
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
       }
-      var tr = document.createElement("tr");
-      if(short=="ch") {
-        tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-        tr.className = "ch";
-      }
-      else {
-        tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-      }
-      firstTable.appendChild(tr);
-    }
-  });
-});
+      getWorldDeaths(totalDeaths);
+    });
 }
 
 function getWorldDeaths(chTotal) {
-d3.csv("https://covid.ourworldindata.org/data/ecdc/total_deaths.csv", function(error, csvdata) {
-    if(error!=null) {
-      console.log(error.responseURL+" not found");
-    }
-    d3.json("https://raw.githubusercontent.com/samayo/country-json/master/src/country-by-abbreviation.json", function(error2, json) {
-    console.log(json);
-    var today = csvdata[csvdata.length-1];
-    today.Switzerland = ""+chTotal;
-    var date = today.date;
+  if(worldData==null) return;
+  var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
+  ch[0].Deaths = ""+chTotal;
+
+  var sorted = Array.from(worldData).sort(function(a, b){return b.Deaths-a.Deaths});
+
+  var firstTable = document.getElementById("international2");
+  for(var i=0; i<20; i++) {
+    var single = sorted[i];
+    var date = single.Date;
     var splitDate = date.split("-");
     var year = splitDate[0];
     var month = parseInt(splitDate[1]);
     var day = parseInt(splitDate[2]);
     var dateString = day+"."+month+"."+year;
-    // Create items array
-    var items = Object.keys(today).map(function(key) {
-      return [key, today[key]];
-    });
-
-    // Sort the array based on the second element
-    items.sort(function(first, second) {
-      return second[1] - first[1];
-    });
-
-    // Create a new array with only the first 5 items
-    var sorted = items.slice(2, 22);
-    console.log(sorted);
-    /*
-    var p = document.getElementById("source");
-    p.appendChild(document.createTextNode("("+date+")"));
-    */
-    var firstTable = document.getElementById("international2");
-    for(var i=0; i<sorted.length; i++) {
-      var single = sorted[i];
-      var country = single[0];
-      var cases = single[1];
-      var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-      var lookupShort = json.filter(function(d) { if(d.country == country) return d});
-      var countryFlag = country;
-      var short;
-      if(lookupShort.length>0) {
-         short = lookupShort[0].abbreviation.toLowerCase();
-         countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
-      }
-      var tr = document.createElement("tr");
-      if(short=="ch") {
-        tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-        tr.className = "ch";
-      }
-      else {
-        tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-      }
-      firstTable.appendChild(tr);
+    var country = single.CountryName.replace(" of America","");
+    var cases = single.Deaths;
+    var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+    var short = single.CountryCode.toLowerCase();
+    var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+    var tr = document.createElement("tr");
+    if(short=="ch") {
+      tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+      tr.className = "ch";
     }
-  });
-});
+    else {
+      tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+    }
+    firstTable.appendChild(tr);
+  }
 }
 
 function getCanton(i) {
@@ -299,6 +257,7 @@ function processActualData() {
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
+var totalDeaths;
 function processActualDeaths() {
   var sortedActual = Array.from(actualDeaths).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
   var firstTable = document.getElementById("death_1");
@@ -346,7 +305,7 @@ function processActualDeaths() {
   var tr = document.createElement("tr");
   tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td></td>";
   secondTable.append(tr);
-  getWorldDeaths(total);
+  totalDeaths = total;
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
