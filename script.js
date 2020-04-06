@@ -61,7 +61,10 @@ function getWorldData(chTotal) {
       var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
       ch[0].Confirmed = ""+chTotal;
 
-      var sorted = Array.from(worldData).sort(function(a, b){return b.Confirmed-a.Confirmed});
+      var sorted = Array.from(worldData).sort(function(a, b){return b.Confirmed-a.Confirmed}).slice(0,25);
+      //var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
+      //console.log("Sorted per Capita:");
+      //console.log(sortedPerCapita);
 
       var firstTable = document.getElementById("international1");
       for(var i=0; i<20; i++) {
@@ -91,12 +94,76 @@ function getWorldData(chTotal) {
     });
 }
 
+function getWorldDataRelative() {
+      var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
+      var firstTable = document.getElementById("relative1");
+      for(var i=0; i<20; i++) {
+        var single = sortedPerCapita[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = single.CountryName.replace(" of America","");
+        var confirmed = parseFloat(single.Confirmed);
+        var population = parseFloat(single.Population);
+        var exact = confirmed/population*1000000;
+        var rounded = Math.round(exact);
+        var cases = ""+rounded;
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
+      }
+}
+
+function getWorldDeathRelative() {
+      var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(0,25);
+      var firstTable = document.getElementById("relative2");
+      for(var i=0; i<20; i++) {
+        var single = sortedPerCapita[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = single.CountryName.replace(" of America","").replace("Islands","");
+        var confirmed = parseFloat(single.Deaths);
+        var population = parseFloat(single.Population);
+        var exact = confirmed/population*1000000;
+        var rounded = Math.round(exact);
+        var cases = ""+rounded;
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
+      }
+}
+
 function getWorldDeaths(chTotal) {
   if(worldData==null) return;
   var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
   ch[0].Deaths = ""+chTotal;
 
-  var sorted = Array.from(worldData).sort(function(a, b){return b.Deaths-a.Deaths});
+  var sorted = Array.from(worldData).sort(function(a, b){return b.Deaths-a.Deaths}).slice(0,25);
 
   var firstTable = document.getElementById("international2");
   for(var i=0; i<20; i++) {
@@ -122,6 +189,8 @@ function getWorldDeaths(chTotal) {
     }
     firstTable.appendChild(tr);
   }
+  getWorldDataRelative();
+  getWorldDeathRelative();
 }
 
 function getCanton(i) {
