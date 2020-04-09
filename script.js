@@ -76,7 +76,7 @@ function getWorldData(chTotal) {
         var day = parseInt(splitDate[2]);
         var dateString = day+"."+month+"."+year;
         var country = single.CountryName.replace(" of America","");
-        var cases = single.Confirmed;
+        var cases = ""+parseInt(single.Confirmed);
         var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
         var short = single.CountryCode.toLowerCase();
         var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
@@ -175,7 +175,7 @@ function getWorldDeaths(chTotal) {
     var day = parseInt(splitDate[2]);
     var dateString = day+"."+month+"."+year;
     var country = single.CountryName.replace(" of America","");
-    var cases = single.Deaths;
+    var cases = ""+parseInt(single.Deaths);
     var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
     var short = single.CountryCode.toLowerCase();
     var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
