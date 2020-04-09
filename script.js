@@ -194,9 +194,9 @@ function getWorldDeaths(chTotal) {
 }
 
 function getCanton(i) {
-  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
+  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
   if(cantons[i] == "FL") {
-    url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_FL_total.csv'
+    url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv'
   }
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
@@ -229,7 +229,7 @@ function getCanton(i) {
         else {
           actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
         }
-        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.ncumul_hosp!="") return d});
+        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.current_hosp!="") return d});
         if(filteredDataForHospitalisation.length==0) {
           //actualHospitalisation.push(latestData);
         }
@@ -379,7 +379,7 @@ function processActualDeaths() {
 }
 
 function processActualHospitalisation() {
-  var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.ncumul_hosp-a.ncumul_hosp});
+  var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.current_hosp-a.current_hosp});
   var secondTable = document.getElementById("hospitalised_2");
   var total = 0;
   var totalicu = 0;
@@ -390,10 +390,10 @@ function processActualHospitalisation() {
     table = secondTable;
     //else table = secondTable;
     var actual = sortedActual[i];
-    var now = actual.ncumul_hosp;
+    var now = actual.current_hosp;
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_ICU!="") totalicu+=parseInt(actual.ncumul_ICU);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.ncumul_vent!="") totalvent+=parseInt(actual.ncumul_vent);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_icu!="") totalicu+=parseInt(actual.current_icu);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_vent!="") totalvent+=parseInt(actual.current_vent);
 
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -411,11 +411,11 @@ function processActualHospitalisation() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    text = document.createTextNode(actual.ncumul_ICU);
+    text = document.createTextNode(actual.current_icu);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    text = document.createTextNode(actual.ncumul_vent);
+    text = document.createTextNode(actual.current_vent);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
@@ -835,10 +835,10 @@ function barChartAllCHHospitalisations() {
     singleDayObject.data = [];
     for(var i=0; i<cantons.length-1; i++) { //without FL
       var canton = cantons[i];
-      var cantonTotal = getNumConf(canton, date, "ncumul_hosp");
+      var cantonTotal = getNumConf(canton, date, "current_hosp");
       singleDayObject.data.push(cantonTotal);
     }
-    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_hosp; }, 0);
+    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.current_hosp; }, 0);
     singleDayObject.total = total;
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
@@ -895,12 +895,12 @@ function barChartAllCHHospitalisations() {
             multistringText = [""];
             var index = tooltipItems[0].index;
             var dataForThisDay = dataPerDay[index];
-            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_hosp-a.ncumul_hosp});
+            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.current_hosp-a.current_hosp});
             sorted.forEach(function(item) {
-              var tabbing = 5-(""+item.ncumul_hosp).length;
+              var tabbing = 5-(""+item.current_hosp).length;
               var padding = " ".repeat(tabbing);
               var dateLabel = " ("+item.date+")";
-              multistringText.push(item.canton+":"+padding+item.ncumul_hosp+dateLabel);
+              multistringText.push(item.canton+":"+padding+item.current_hosp+dateLabel);
             });
 
             return multistringText;
@@ -1098,16 +1098,16 @@ function barChartCases(place) {
 
 function barChartHospitalisations(place) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
-  var hospitalFiltered = filteredData.filter(function(d) { if(d.ncumul_hosp!="") return d});
+  var hospitalFiltered = filteredData.filter(function(d) { if(d.current_hosp!="") return d});
   if(hospitalFiltered.length==0) return;
   var div = document.getElementById("container_"+place);
   div.className = "canvas-dummy";
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
   if(filteredData.length==1) {
-    var text = filteredData[0].date+": "+filteredData[0].ncumul_hosp+" hospitalisiert";
-    if(filteredData[0].ncumul_ICU!="") text+=" , "+filteredData[0].ncumul_ICU+" in Intensivbehandlung";
-    if(filteredData[0].ncumul_vent!="") text+=" , "+filteredData[0].ncumul_vent+" künstlich beatmet";
+    var text = filteredData[0].date+": "+filteredData[0].current_hosp+" hospitalisiert";
+    if(filteredData[0].current_icu!="") text+=" , "+filteredData[0].current_icu+" in Intensivbehandlung";
+    if(filteredData[0].current_vent!="") text+=" , "+filteredData[0].current_vent+" künstlich beatmet";
     div.appendChild(document.createElement("br"));
     div.appendChild(document.createTextNode(text));
   }
@@ -1128,7 +1128,7 @@ function barChartHospitalisations(place) {
     return date;
   });
   var datasets = [];
-  var casesHosp = moreFilteredData.map(function(d) {if(d.ncumul_hosp=="") return null; return d.ncumul_hosp});
+  var casesHosp = moreFilteredData.map(function(d) {if(d.current_hosp=="") return null; return d.current_hosp});
   datasets.push({
     label: _('Hospitalisiert'),
     data: casesHosp,
@@ -1142,9 +1142,9 @@ function barChartHospitalisations(place) {
       anchor: 'end'
     }
   });
-  var filteredForICU = moreFilteredData.filter(function(d) { if(d.ncumul_ICU!="") return d});
+  var filteredForICU = moreFilteredData.filter(function(d) { if(d.current_icu!="") return d});
   if(filteredForICU.length>0) {
-    var casesICU = moreFilteredData.map(function(d) {if(d.ncumul_ICU=="") return null; return d.ncumul_ICU});
+    var casesICU = moreFilteredData.map(function(d) {if(d.current_icu=="") return null; return d.current_icu});
     datasets.push({
       label: _('In Intensivbehandlung'),
       data: casesICU,
@@ -1159,9 +1159,9 @@ function barChartHospitalisations(place) {
       }
     });
   }
-  var filteredForVent = moreFilteredData.filter(function(d) { if(d.ncumul_vent!="") return d});
+  var filteredForVent = moreFilteredData.filter(function(d) { if(d.current_vent!="") return d});
   if(filteredForVent.length>0) {
-    var casesVent = moreFilteredData.map(function(d) {if(d.ncumul_vent=="") return null; return d.ncumul_vent});
+    var casesVent = moreFilteredData.map(function(d) {if(d.current_vent=="") return null; return d.current_vent});
     datasets.push({
       label: _('Künstlich beatmet'),
       data: casesVent,
