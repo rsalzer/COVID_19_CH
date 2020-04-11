@@ -594,7 +594,7 @@ function barChartAllCH() {
   div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
-  div.scrollLeft = 900;
+  div.scrollLeft = 1100;
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
@@ -1040,7 +1040,7 @@ function barChartCases(place) {
   }
   article.appendChild(div);
   section.appendChild(article);
-  div.scrollLeft = 900;
+  div.scrollLeft = 1100;
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
