@@ -68,5 +68,7 @@
     "Land": "Country",
     "Quelle:": "Source:",
     "Todesfälle": "Deaths",
+    "Mit Kleinstaaten (<100k Einwohner)": "With small states (<100k inhabitants)",
+    "Ohne Kleinstaaten": "Without small states",
     "": ""
 }
