@@ -94,9 +94,20 @@ function getWorldData(chTotal) {
     });
 }
 
-function getWorldDataRelative() {
-      var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
+function getWorldDataRelative(withoutSmall) {
+      var all = Array.from(worldData);
+      if(withoutSmall) {
+        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
+        document.getElementById("withoutSmallButton").classList.add('active');
+        document.getElementById("withSmallButton").classList.remove('active');
+      }
+      else {
+        document.getElementById("withSmallButton").classList.add('active');
+        document.getElementById("withoutSmallButton").classList.remove('active');
+      }
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
       var firstTable = document.getElementById("relative1");
+      firstTable.innerHTML = "";
       for(var i=0; i<20; i++) {
         var single = sortedPerCapita[i];
         var date = single.Date;
@@ -124,11 +135,17 @@ function getWorldDataRelative() {
         }
         firstTable.appendChild(tr);
       }
+      getWorldDeathRelative(withoutSmall);
 }
 
-function getWorldDeathRelative() {
-      var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(0,25);
+function getWorldDeathRelative(withoutSmall) {
+      var all = Array.from(worldData);
+      if(withoutSmall) {
+        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
+      }
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(0,25);
       var firstTable = document.getElementById("relative2");
+      firstTable.innerHTML = "";
       for(var i=0; i<20; i++) {
         var single = sortedPerCapita[i];
         var date = single.Date;
@@ -189,8 +206,7 @@ function getWorldDeaths(chTotal) {
     }
     firstTable.appendChild(tr);
   }
-  getWorldDataRelative();
-  getWorldDeathRelative();
+  getWorldDataRelative(false);
 }
 
 function getCanton(i) {

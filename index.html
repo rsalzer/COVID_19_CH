@@ -219,7 +219,12 @@
             </table>
           </div>
           <h3>Die Schweiz im internationalen Vergleich (pro 1Mio. Einwohner)</h3>
+          <div>
+            <button id="withSmallButton" class="internationalButton" onclick="getWorldDataRelative(false);">Mit Kleinstaaten (<100k Einwohner)</button>
+            <button id="withoutSmallButton" class="internationalButton active" onclick="getWorldDataRelative(true);">Ohne Kleinstaaten</button>
+          </div>
           <div class="table-group" id="international-table-group">
+
             <table>
               <thead>
                 <tr>

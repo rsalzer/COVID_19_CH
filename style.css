@@ -257,6 +257,30 @@ canvas {
 	text-decoration: underline;
 }
 
+.internationalButton {
+    clear: both;
+}
+.internationalButton {
+    margin: 1em 1em 1em 0;
+    padding: 0.2em 0;
+    background-color: transparent;
+    border: 0;
+		border-bottom: 2px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    text-decoration: capitalize;
+}
+.internationalButton:hover {
+	border-bottom: 2px solid #000;
+}
+.internationalButton:focus {
+    outline: none;
+}
+.internationalButton.active {
+  cursor: default;
+	border-bottom: 2px solid #000;
+}
+
 .chartButtons {
     clear: both;
 }
