@@ -594,6 +594,7 @@ function barChartAllCH() {
   div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
+  div.scrollLeft = 900;
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
@@ -1039,6 +1040,7 @@ function barChartCases(place) {
   }
   article.appendChild(div);
   section.appendChild(article);
+  div.scrollLeft = 900;
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
@@ -1117,7 +1119,6 @@ function barChartHospitalisations(place) {
   var hospitalFiltered = filteredData.filter(function(d) { if(d.current_hosp!="") return d});
   if(hospitalFiltered.length==0) return;
   var div = document.getElementById("container_"+place);
-  div.className = "canvas-dummy";
   var canvas = document.createElement("canvas");
   //canvas.className  = "myClass";
   if(filteredData.length==1) {

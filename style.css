@@ -239,6 +239,7 @@ h3 {
 }
 canvas {
   width: 100%;
+	min-width: 1300px;
 }
 .notes {
 	font-size: 0.8em;
@@ -282,6 +283,9 @@ canvas {
 }
 
 .chartButtons {
+		overflow-x: scroll;
+		min-width: 1300px;
+		width: 100%
     clear: both;
 }
 .chartButton {
