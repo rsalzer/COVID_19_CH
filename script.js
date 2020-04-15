@@ -594,7 +594,7 @@ function barChartAllCH() {
   div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
-  div.scrollLeft = 1100;
+  div.scrollLeft = 1700;
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
@@ -1040,7 +1040,7 @@ function barChartCases(place) {
   }
   article.appendChild(div);
   section.appendChild(article);
-  div.scrollLeft = 1100;
+  div.scrollLeft = 1700;
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
@@ -1067,6 +1067,10 @@ function barChartCases(place) {
       title: {
         display: true,
         text: _('Bestätigte Fälle')
+      },
+      tooltips: {
+        mode: 'index',
+        intersect: false,
       },
       scales: getScales(),
       plugins: {
@@ -1211,8 +1215,9 @@ function barChartHospitalisations(place) {
         text: _('Hospitalisierte Fälle')
       },
       tooltips: {
-            mode: 'index',
-            axis: 'y'
+        mode: 'index',
+        intersect: false,
+        position: 'average'
       },
       scales: getScales(),
       plugins: {
