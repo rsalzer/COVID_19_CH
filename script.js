@@ -96,6 +96,7 @@ function getWorldData(chTotal) {
 
 function getWorldDataRelative(withoutSmall) {
       var all = Array.from(worldData);
+      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
       if(withoutSmall) {
         all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
         document.getElementById("withoutSmallButton").classList.add('active');
@@ -140,6 +141,7 @@ function getWorldDataRelative(withoutSmall) {
 
 function getWorldDeathRelative(withoutSmall) {
       var all = Array.from(worldData);
+      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
       if(withoutSmall) {
         all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
       }
