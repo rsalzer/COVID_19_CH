@@ -237,6 +237,13 @@ function getCanton(i) {
       }
       else {
         for(var x=0; x<csvdata.length; x++) {
+          if(csvdata[x].date.split(".").length>1) {
+            var splitDate = csvdata[x].date.split(".");
+            var day = splitDate[0];
+            var month = splitDate[1];
+            var year = splitDate[2];
+            csvdata[x].date = year+"-"+month+"-"+day;
+          }
           data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
@@ -1097,7 +1104,7 @@ function barChartHospitalisations(place) {
     //canvas.width=350+filteredData.length*40;
   }
   if(!filteredData || filteredData.length<2) return;
-  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
+  var moreFilteredData = filteredData; //.filter(function(d) { if(d.ncumul_conf!="") return d});
   var dateLabels = moreFilteredData.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
