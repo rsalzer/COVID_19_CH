@@ -631,9 +631,16 @@ function barChartAllCH() {
         callbacks: {
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
+            var index = tooltipItems.index;
+            var changeStr = "";
+            if(index>0) {
+                var change = parseInt(value)-parseInt(cases[index-1]);
+                var label = change>0 ? "+"+change : change;
+                changeStr = " ("+label+")";
+            }
             var tabbing = 6-value.length;
             var padding = " ".repeat(tabbing);
-            return padding+value;
+            return padding+value+changeStr;
           },
           afterBody: function(tooltipItems, data) {
             //console.log(tooltipItems);
@@ -654,28 +661,8 @@ function barChartAllCH() {
       },
       scales: getScales(),
       plugins: {
-        datalabels: {
-            color: 'black',
-            font: {
-              weight: 'bold'
-            },
-            formatter: function(value, context) {
-              var index = context.dataIndex;
-              if(index==0) return "";
-              var lastValue = context.dataset.data[index-1];
-              var percentageChange = value/lastValue - 1;
-              var rounded = Math.round(percentageChange * 100);
-              var label = ""+rounded;
-              if(rounded >= 0) label = "+"+label+"%";
-              else label = "-"+label+"%";
-
-              var change = value-lastValue;
-              var label = change>0 ? "+"+change : change;
-              if(change==0) return "";
-              return label;
-            }
-          }
-        }
+        datalabels: getDataLabels()
+      }
   },
   data: {
     labels: dateLabels,
@@ -765,9 +752,16 @@ function barChartAllCHDeaths() {
         callbacks: {
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
+            var index = tooltipItems.index;
+            var changeStr = "";
+            if(index>0) {
+                var change = parseInt(value)-parseInt(cases[index-1]);
+                var label = change>0 ? "+"+change : change;
+                changeStr = " ("+label+")";
+            }
             var tabbing = 6-value.length;
             var padding = " ".repeat(tabbing);
-            return padding+value;
+            return padding+value+changeStr;
           },
           afterBody: function(tooltipItems, data) {
             //console.log(tooltipItems);
@@ -793,27 +787,7 @@ function barChartAllCHDeaths() {
       },
       scales: getScales(),
       plugins: {
-        datalabels: {
-            color: 'black',
-            font: {
-              weight: 'bold'
-            },
-            formatter: function(value, context) {
-              var index = context.dataIndex;
-              if(index==0) return "";
-              var lastValue = context.dataset.data[index-1];
-              var percentageChange = value/lastValue - 1;
-              var rounded = Math.round(percentageChange * 100);
-              var label = ""+rounded;
-              if(rounded >= 0) label = "+"+label+"%";
-              else label = "-"+label+"%";
-
-              var change = value-lastValue;
-              var label = change>0 ? "+"+change : change;
-              if(change==0) return "";
-              return label;
-            }
-          }
+        datalabels: getDataLabels()
         }
   },
   data: {
@@ -904,9 +878,16 @@ function barChartAllCHHospitalisations() {
         callbacks: {
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
+            var index = tooltipItems.index;
+            var changeStr = "";
+            if(index>0) {
+                var change = parseInt(value)-parseInt(cases[index-1]);
+                var label = change>0 ? "+"+change : change;
+                changeStr = " ("+label+")";
+            }
             var tabbing = 6-value.length;
             var padding = " ".repeat(tabbing);
-            return padding+value;
+            return padding+value+changeStr;
           },
           afterBody: function(tooltipItems, data) {
             //console.log(tooltipItems);
@@ -928,28 +909,8 @@ function barChartAllCHHospitalisations() {
       },
       scales: getScales(),
       plugins: {
-        datalabels: {
-            color: 'black',
-            font: {
-              weight: 'bold'
-            },
-            formatter: function(value, context) {
-              var index = context.dataIndex;
-              if(index==0) return "";
-              var lastValue = context.dataset.data[index-1];
-              var percentageChange = value/lastValue - 1;
-              var rounded = Math.round(percentageChange * 100);
-              var label = ""+rounded;
-              if(rounded >= 0) label = "+"+label+"%";
-              else label = "-"+label+"%";
-
-              var change = value-lastValue;
-              var label = change>0 ? "+"+change : change;
-              if(change==0) return "";
-              return label;
-            }
-          }
-        }
+        datalabels: getDataLabels()
+      }
   },
   data: {
     labels: dateLabels,
@@ -1073,30 +1034,25 @@ function barChartCases(place) {
       tooltips: {
         mode: 'index',
         intersect: false,
+        bodyFontFamily: 'IBM Plex Mono',
+        callbacks: {
+          label: function(tooltipItems, data) {
+            var value = tooltipItems.value;
+            var index = tooltipItems.index;
+            var changeStr = "";
+            if(index>0) {
+                var change = parseInt(value)-parseInt(cases[index-1]);
+                var label = change>0 ? "+"+change : change;
+                changeStr = " ("+label+")";
+            }
+            return value+changeStr;
+          }
+        }
       },
       scales: getScales(),
       plugins: {
-        datalabels: {
-            color: 'black',
-            font: {
-              weight: 'bold'
-            },
-            formatter: function(value, context) {
-              var index = context.dataIndex;
-              if(index==0) return "";
-              var lastValue = context.dataset.data[index-1];
-              var percentageChange = value/lastValue - 1;
-              var rounded = Math.round(percentageChange * 100);
-              var label = ""+rounded;
-              if(rounded >= 0) label = "+"+label+"%";
-              else label = "-"+label+"%";
-
-              var change = value-lastValue;
-              var label = change>0 ? "+"+change : change;
-              return label;
-            }
-          }
-        }
+        datalabels: getDataLabels()
+      }
   },
   data: {
     labels: dateLabels,
@@ -1219,7 +1175,24 @@ function barChartHospitalisations(place) {
       tooltips: {
         mode: 'index',
         intersect: false,
-        position: 'average'
+        bodyFontFamily: 'IBM Plex Mono',
+        callbacks: {
+          label: function(tooltipItems, data) {
+            var value = tooltipItems.value;
+            var index = tooltipItems.index;
+            var datasetIndex = tooltipItems.datasetIndex;
+            var changeStr = "";
+            if(index>0) {
+                var change = parseInt(value)-parseInt(data.datasets[datasetIndex].data[index-1]);
+                var label = change>0 ? "+"+change : change;
+                changeStr = " ("+label+")";
+                if(Number.isNaN(change)) changeStr = "";
+            }
+            var tabbing = 3-value.length;
+            var padding = " ".repeat(tabbing);
+            return value+padding+changeStr;
+          }
+        }
       },
       scales: getScales(),
       plugins: {
@@ -1259,6 +1232,40 @@ function getScales() {
       },
     }]
   };
+}
+
+function getDataLabels() {
+  if(getDeviceState()==2) return false;
+  return {
+      color: 'black',
+      font: {
+        weight: 'bold'
+      },
+      formatter: function(value, context) {
+        var index = context.dataIndex;
+        if(index==0) return "";
+        var lastValue = context.dataset.data[index-1];
+        var percentageChange = value/lastValue - 1;
+        var rounded = Math.round(percentageChange * 100);
+        var label = ""+rounded;
+        if(rounded >= 0) label = "+"+label+"%";
+        else label = "-"+label+"%";
+
+        var change = value-lastValue;
+        var label = change>0 ? "+"+change : change;
+        return label;
+      }
+  };
+}
+
+// Create the state-indicator element
+var indicator = document.createElement('div');
+indicator.className = 'state-indicator';
+document.body.appendChild(indicator);
+
+// Create a method which returns device state
+function getDeviceState() {
+    return parseInt(window.getComputedStyle(indicator).getPropertyValue('z-index'), 10);
 }
 
 var language;

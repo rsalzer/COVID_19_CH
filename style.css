@@ -156,7 +156,17 @@ table a:hover {
 table img {
 	margin-right: 0.5em;
 }
+.state-indicator {
+    position: absolute;
+    top: -999em;
+    left: -999em;
+
+    z-index: 1;
+}
 @media (max-width: 660px) {
+	.state-indicator {
+	   z-index: 2;
+	}
 	.table-group table {
 		display: table;
 		width: 100%;
