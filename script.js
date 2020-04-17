@@ -1136,7 +1136,7 @@ function barChartHospitalisations(place) {
   }
   else {
     canvas.id = "hosp"+place;
-    canvas.height=300;
+    canvas.height=250;
     div.appendChild(canvas);
     //canvas.width=350+filteredData.length*40;
   }
