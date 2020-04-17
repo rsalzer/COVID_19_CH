@@ -1226,6 +1226,7 @@ function getScales() {
     }],
     yAxes: [{
       type: cartesianAxesTypes.LINEAR,
+      position: 'right',
       ticks: {
         beginAtZero: true,
         suggestedMax: 10,
