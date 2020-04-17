@@ -241,6 +241,24 @@ canvas {
   width: 100%;
 	min-width: 1800px;
 }
+.chartButtons {
+		overflow-x: scroll;
+		min-width: 1800px;
+		width: 100%
+    clear: both;
+}
+@media (max-width: 660px) {
+	canvas {
+	  width: 100%;
+		min-width: 0px;
+	}
+	.chartButtons {
+			overflow-x: scroll;
+			min-width: 0px;
+			width: 100%
+	    clear: both;
+	}
+}
 .notes {
 	font-size: 0.8em;
 }
@@ -282,12 +300,6 @@ canvas {
 	border-bottom: 2px solid #000;
 }
 
-.chartButtons {
-		overflow-x: scroll;
-		min-width: 1800px;
-		width: 100%
-    clear: both;
-}
 .chartButton {
     float: right;
     display: block;

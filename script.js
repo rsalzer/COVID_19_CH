@@ -592,7 +592,7 @@ function barChartAllCH() {
   div.id = "container_"+place;
   var canvas = document.createElement("canvas");
   canvas.id = place;
-  canvas.height=500;
+  canvas.height=470;
   div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
@@ -729,7 +729,7 @@ function barChartAllCHDeaths() {
   var div = document.getElementById("container_CH");
   var canvas = document.createElement("canvas");
   canvas.id = place+"_deaths";
-  canvas.height=500;
+  canvas.height=470;
   div.appendChild(canvas);
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
@@ -868,7 +868,7 @@ function barChartAllCHHospitalisations() {
   var div = document.getElementById("container_CH");
   var canvas = document.createElement("canvas");
   canvas.id = place+"_hosp";
-  canvas.height=500;
+  canvas.height=470;
   div.appendChild(canvas);
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
@@ -1036,7 +1036,7 @@ function barChartCases(place) {
   }
   else {
     canvas.id = place;
-    canvas.height=300;
+    canvas.height=250;
     //canvas.width=350+filteredData.length*40;
     div.appendChild(canvas);
   }
