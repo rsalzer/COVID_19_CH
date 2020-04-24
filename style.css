@@ -1,4 +1,15 @@
 @import url("fonts/fonts.css");
+:root {
+    color-scheme: light dark;
+    --color-main: #000;
+    --color-background: #fff;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+	    --color-main: #ccc;
+	    --color-background: #0F0F0F;
+    }
+}
 * {
 	margin: 0;
 	padding: 0;
@@ -8,7 +19,8 @@ html {
 	line-height: 1.3;
 }
 body {
-	color: #000;
+	color: var(--color-main);
+	background-color: var(--color-background);
 }
 
 /* !page-navigation */
@@ -27,6 +39,7 @@ body {
 }
 #page-nav li.here a {
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 	cursor: default;
 }
 #page-nav li:nth-child(3) {
@@ -43,6 +56,7 @@ body {
 }
 #page-nav a:hover {
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 }
 
 /* !main */
@@ -61,6 +75,7 @@ main h1 {
 }
 section header {
 	background-image: linear-gradient(#000, #000);
+	background-image: linear-gradient(var(--color-main), var(--color-main));
 	background-size: 64px 2px;
 	background-repeat: repeat-x;
 	background-position: center center;
@@ -73,7 +88,9 @@ section header h2 {
 	max-width: none;
 	margin: 2rem 0;
 	color: #000;
+	color: var(--color-main);
 	background-color: #fff;
+	background-color: var(--color-background);
 }
 #index h3:first-child {
   margin-top: 0;
@@ -105,6 +122,12 @@ table th {
 	padding: 0.2em 0.5em;
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
+}
+@media (prefers-color-scheme: dark) {
+	table td,
+	table th {
+		border-color: #333;
+	}
 }
 table tr > :first-child {
 	padding-left: 0;
@@ -247,6 +270,11 @@ h3 {
   overflow-x: scroll;
 	border: 1px solid rgba(0,0,0,0.4);
 }
+@media (prefers-color-scheme: dark) {
+	.canvas-dummy {
+		border-color: #333;
+	}
+}
 canvas {
   width: 100%;
 	min-width: 1800px;
@@ -294,20 +322,22 @@ canvas {
     padding: 0.2em 0;
     background-color: transparent;
     border: 0;
-		border-bottom: 2px solid transparent;
+	border-bottom: 2px solid transparent;
     cursor: pointer;
     text-decoration: none;
     text-decoration: capitalize;
 }
 .internationalButton:hover {
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 }
 .internationalButton:focus {
     outline: none;
 }
 .internationalButton.active {
-  cursor: default;
+	cursor: default;
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 }
 
 .chartButton {
@@ -324,6 +354,7 @@ canvas {
 }
 .chartButton:hover {
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 }
 .chartButton:focus {
     outline: none;
@@ -331,6 +362,7 @@ canvas {
 .chartButton.active {
     cursor: default;
 	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
 }
 
 /* !flags */
@@ -369,6 +401,37 @@ canvas {
 .flag.VS { background-image: url(flags/vs.png); }
 .flag.ZG { background-image: url(flags/zg.png); }
 .flag.ZH { background-image: url(flags/zh.png); }
+@media (prefers-color-scheme: dark) {
+	.flag.AG { background-image: url(flags/ag-dark.png); }
+	.flag.AI { background-image: url(flags/ai-dark.png); }
+	.flag.AR { background-image: url(flags/ar-dark.png); }
+	.flag.BE { background-image: url(flags/be-dark.png); }
+	.flag.BL { background-image: url(flags/bl-dark.png); }
+	.flag.BS { background-image: url(flags/bs-dark.png); }
+	.flag.CH { background-image: url(flags/ch-dark.png); }
+	.flag.FL { background-image: url(flags/fl-dark.png); }
+	.flag.FR { background-image: url(flags/fr-dark.png); }
+	.flag.GE { background-image: url(flags/ge-dark.png); }
+	.flag.GL { background-image: url(flags/gl-dark.png); }
+	.flag.GR { background-image: url(flags/gr-dark.png); }
+	.flag.JU { background-image: url(flags/ju-dark.png); }
+	.flag.LI { background-image: url(flags/li-dark.png); }
+	.flag.LU { background-image: url(flags/lu-dark.png); }
+	.flag.NE { background-image: url(flags/ne-dark.png); }
+	.flag.NW { background-image: url(flags/nw-dark.png); }
+	.flag.OW { background-image: url(flags/ow-dark.png); }
+	.flag.SG { background-image: url(flags/sg-dark.png); }
+	.flag.SH { background-image: url(flags/sh-dark.png); }
+	.flag.SO { background-image: url(flags/so-dark.png); }
+	.flag.SZ { background-image: url(flags/sz-dark.png); }
+	.flag.TG { background-image: url(flags/tg-dark.png); }
+	.flag.TI { background-image: url(flags/ti-dark.png); }
+	.flag.UR { background-image: url(flags/ur-dark.png); }
+	.flag.VD { background-image: url(flags/vd-dark.png); }
+	.flag.VS { background-image: url(flags/vs-dark.png); }
+	.flag.ZG { background-image: url(flags/zg-dark.png); }
+	.flag.ZH { background-image: url(flags/zh-dark.png); }
+}
 
 /* !page-footer */
 #page-footer {
@@ -412,6 +475,7 @@ canvas {
   border-radius: 50%;
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #000 transparent transparent transparent;
+  border-color: var(--color-main) transparent transparent transparent;
 }
 .lds-ring div:nth-child(1) {
   animation-delay: -0.45s;
