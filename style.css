@@ -322,10 +322,11 @@ canvas {
     padding: 0.2em 0;
     background-color: transparent;
     border: 0;
-	border-bottom: 2px solid transparent;
+	  border-bottom: 2px solid transparent;
     cursor: pointer;
     text-decoration: none;
     text-decoration: capitalize;
+    color: var(--color-main);
 }
 .internationalButton:hover {
 	border-bottom: 2px solid #000;
@@ -347,10 +348,11 @@ canvas {
     padding: 0.2em 0;
     background-color: transparent;
     border: 0;
-	border-bottom: 2px solid transparent;
+	  border-bottom: 2px solid transparent;
     cursor: pointer;
     text-decoration: none;
     text-decoration: capitalize;
+    color: var(--color-main);
 }
 .chartButton:hover {
 	border-bottom: 2px solid #000;
