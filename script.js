@@ -805,8 +805,8 @@ function barChartAllCHDeaths() {
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
-        borderColor: '#010101',
-        backgroundColor: '#010101',
+        borderColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
+        backgroundColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         datalabels: {
           align: 'end',
           anchor: 'end'
@@ -1229,6 +1229,9 @@ function getScales() {
       ticks: {
         min: new Date("2020-02-24T23:00:00"),
         max: new Date(),
+      },
+      gridLines: {
+          color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
       }
     }],
     yAxes: [{
@@ -1238,6 +1241,9 @@ function getScales() {
         beginAtZero: true,
         suggestedMax: 10,
       },
+      gridLines: {
+          color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+      }
     }]
   };
 }
@@ -1245,7 +1251,7 @@ function getScales() {
 function getDataLabels() {
   if(getDeviceState()==2) return false;
   return {
-      color: 'black',
+      color: inDarkMode() ? '#ccc' : 'black',
       font: {
         weight: 'bold'
       },
@@ -1359,4 +1365,11 @@ function getSiblings(element, selector) {
 	}
 
 	return siblings;
+}
+
+function inDarkMode() {
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return true;
+  }
+  return false;
 }
