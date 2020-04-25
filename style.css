@@ -279,10 +279,13 @@ canvas {
   width: 100%;
 	min-width: 1800px;
 }
+button {
+	font-family: "IBM Plex Sans", sans-serif;
+}
 .chartButtons {
-		overflow-x: scroll;
-		min-width: 1800px;
-		width: 100%
+	overflow-x: scroll;
+	min-width: 1800px;
+	width: 100%
     clear: both;
 }
 @media (max-width: 660px) {
@@ -291,9 +294,9 @@ canvas {
 		min-width: 600px;
 	}
 	.chartButtons {
-			overflow-x: scroll;
-			min-width: 600px;
-			width: 100%
+		overflow-x: scroll;
+		min-width: 600px;
+		width: 100%;
 	    clear: both;
 	}
 }
@@ -320,6 +323,7 @@ canvas {
 .internationalButton {
     margin: 1em 1em 1em 0;
     padding: 0.2em 0;
+	color: var(--color-main);
     background-color: transparent;
     border: 0;
 	  border-bottom: 2px solid transparent;
@@ -346,6 +350,7 @@ canvas {
     display: block;
     margin: 1em 1em 0 0;
     padding: 0.2em 0;
+	color: var(--color-main);
     background-color: transparent;
     border: 0;
 	  border-bottom: 2px solid transparent;

@@ -1291,6 +1291,7 @@ function setLanguageNav() {
   switch(lang) {
     case 'de':
     case 'fr':
+    case 'it':
       break;
     default:
       lang = 'en';
@@ -1317,6 +1318,16 @@ function setLanguageNav() {
     href = "index.html?lang=fr";
   }
   li.innerHTML = '<a href="'+href+'">FR</a>';
+  ul.appendChild(li);
+  li = document.createElement("li");
+  if(lang=="it") {
+    li.className = "here";
+    href = "#"
+  }
+  else {
+    href = "index.html?lang=it";
+  }
+  li.innerHTML = '<a href="'+href+'">IT</a>';
   ul.appendChild(li);
   li = document.createElement("li");
   if(lang=="en") {
