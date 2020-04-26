@@ -212,9 +212,9 @@ function getWorldDeaths(chTotal) {
 }
 
 function getCanton(i) {
-  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv'
+  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
   if(cantons[i] == "FL") {
-    url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv'
+    var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
   }
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
@@ -237,6 +237,7 @@ function getCanton(i) {
       }
       else {
         for(var x=0; x<csvdata.length; x++) {
+          if(!csvdata[x].abbreviation_canton_and_fl) continue;
           if(csvdata[x].date.split(".").length>1) {
             var splitDate = csvdata[x].date.split(".");
             var day = splitDate[0];
@@ -247,21 +248,21 @@ function getCanton(i) {
           data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
-        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased!="") return d});
+        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceases && d.ncumul_deceased!="") return d});
         if(filteredDataForDeaths.length==0) {
           actualDeaths.push(latestData);
         }
         else {
           actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
         }
-        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.current_hosp!="") return d});
+        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.current_hosp && d.current_hosp!="") return d});
         if(filteredDataForHospitalisation.length==0) {
           //actualHospitalisation.push(latestData);
         }
         else {
           actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
         }
-        var filteredDataForCases = csvdata.filter(function(d) { if(d.ncumul_conf!="") return d});
+        var filteredDataForCases = csvdata.filter(function(d) { if(d.ncumul_conf && d.ncumul_conf!="") return d});
         if(filteredDataForCases.length==0) {
           actualData.push(latestData);
         }
@@ -326,7 +327,7 @@ function processActualData() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    if(actual.source.substring(0,2)=="ht") {
+    if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
       a.href = actual.source;
@@ -381,7 +382,7 @@ function processActualDeaths() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    if(actual.source.substring(0,2)=="ht") {
+    if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
       a.href = actual.source;
@@ -444,7 +445,7 @@ function processActualHospitalisation() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    if(actual.source.substring(0,2)=="ht") {
+    if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
       a.href = actual.source;
