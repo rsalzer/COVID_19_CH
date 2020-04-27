@@ -248,7 +248,7 @@ function getCanton(i) {
           data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
-        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceases && d.ncumul_deceased!="") return d});
+        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased && d.ncumul_deceased!="") return d});
         if(filteredDataForDeaths.length==0) {
           actualDeaths.push(latestData);
         }
