@@ -316,8 +316,9 @@ button {
 .toplink:hover {
 	text-decoration: underline;
 }
-.buttonDiv {
-  
+.rightButtonDiv {
+   max-width: 640px;
+   text-align: right;
 }
 .internationalButton {
     clear: both;
@@ -325,7 +326,7 @@ button {
 .internationalButton {
     margin: 1em 1em 1em 0;
     padding: 0.2em 0;
-	color: var(--color-main);
+	  color: var(--color-main);
     background-color: transparent;
     border: 0;
 	  border-bottom: 2px solid transparent;
@@ -333,6 +334,9 @@ button {
     text-decoration: none;
     text-decoration: capitalize;
     color: var(--color-main);
+}
+.rightButtonDiv button:last-child {
+  margin: 1em 0em 1em 0;
 }
 .internationalButton:hover {
 	border-bottom: 2px solid #000;
