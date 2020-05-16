@@ -5,8 +5,8 @@ const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU
 const names = {
   "CH": "Ganze Schweiz",
   "AG": "Kanton Aargau",
-  "AI": "Kanton Appenzell Innerhoden",
-  "AR": "Kanton Appenzell Ausserhoden",
+  "AI": "Kanton Appenzell Innerrhoden",
+  "AR": "Kanton Appenzell Ausserrhoden",
   "BE": "Kanton Bern",
   "BL": "Kanton Basel Land",
   "BS": "Kanton Basel Stadt",
