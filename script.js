@@ -58,7 +58,7 @@ function getWorldData(chTotal) {
 
       worldData = csvdata.filter(function(d) { if(d.Key==d.CountryCode) return d; }); //only use countries;
       var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
-      ch[0].Confirmed = ""+chTotal;
+      if(ch && ch[0]) ch[0].Confirmed = ""+chTotal;
       parseWorldData();
       getWorldDataRelative(false);
   });
@@ -75,6 +75,19 @@ function worldDataBackward() {
   if(countryPage==0) return;
   countryPage--;
   parseWorldData();
+}
+
+var countryPageRelative = 0;
+function worldDataRelativeForward() {
+  if(countryPageRelative==10) return;
+  countryPageRelative++;
+  getWorldDataRelative(withoutSmallCountries);
+}
+
+function worldDataRelativeBackward() {
+  if(countryPageRelative==0) return;
+  countryPageRelative--;
+  getWorldDataRelative(withoutSmallCountries);
 }
 
 function formatCountryName(name) {
@@ -119,7 +132,11 @@ function parseWorldData() {
       getWorldDeaths(totalDeaths);
 }
 
+var withoutSmallCountries = false;
 function getWorldDataRelative(withoutSmall) {
+      withoutSmallCountries = withoutSmall;
+      var start = countryPageRelative*20;
+      var end = start+20;
       var all = Array.from(worldData);
       all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
       if(withoutSmall) {
@@ -131,7 +148,7 @@ function getWorldDataRelative(withoutSmall) {
         document.getElementById("withSmallButton").classList.add('active');
         document.getElementById("withoutSmallButton").classList.remove('active');
       }
-      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(start,end);
       var firstTable = document.getElementById("relative1");
       firstTable.innerHTML = "";
       for(var i=0; i<20; i++) {
@@ -142,7 +159,7 @@ function getWorldDataRelative(withoutSmall) {
         var month = parseInt(splitDate[1]);
         var day = parseInt(splitDate[2]);
         var dateString = day+"."+month+"."+year;
-        var country = single.CountryName.replace(" of America","");
+        var country = formatCountryName(single.CountryName);
         var confirmed = parseFloat(single.Confirmed);
         var population = parseFloat(single.Population);
         var exact = confirmed/population*1000000;
@@ -153,11 +170,11 @@ function getWorldDataRelative(withoutSmall) {
         var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
         var tr = document.createElement("tr");
         if(short=="ch") {
-          tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
           tr.className = "ch";
         }
         else {
-          tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
         }
         firstTable.appendChild(tr);
       }
@@ -165,12 +182,14 @@ function getWorldDataRelative(withoutSmall) {
 }
 
 function getWorldDeathRelative(withoutSmall) {
+      var start = countryPageRelative*20;
+      var end = start+20;
       var all = Array.from(worldData);
       all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
       if(withoutSmall) {
         all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
       }
-      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(0,25);
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(start,end);
       var firstTable = document.getElementById("relative2");
       firstTable.innerHTML = "";
       for(var i=0; i<20; i++) {
@@ -181,7 +200,7 @@ function getWorldDeathRelative(withoutSmall) {
         var month = parseInt(splitDate[1]);
         var day = parseInt(splitDate[2]);
         var dateString = day+"."+month+"."+year;
-        var country = single.CountryName.replace(" of America","").replace("Islands","");
+        var country = formatCountryName(single.CountryName);
         var confirmed = parseFloat(single.Deaths);
         var population = parseFloat(single.Population);
         var exact = confirmed/population*1000000;
@@ -192,11 +211,11 @@ function getWorldDeathRelative(withoutSmall) {
         var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
         var tr = document.createElement("tr");
         if(short=="ch") {
-          tr.innerHTML = "<td><b>"+(i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
           tr.className = "ch";
         }
         else {
-          tr.innerHTML = "<td>"+(i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
         }
         firstTable.appendChild(tr);
       }
@@ -205,7 +224,7 @@ function getWorldDeathRelative(withoutSmall) {
 function getWorldDeaths(chTotal) {
   if(worldData==null) return;
   var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
-  ch[0].Deaths = ""+chTotal;
+  if(ch && ch[0]) ch[0].Deaths = ""+chTotal;
 
   var start = countryPage*20;
   var end = start+20;
@@ -437,6 +456,8 @@ function processActualHospitalisation() {
   var total = 0;
   var totalicu = 0;
   var totalvent = 0;
+  var totalisolated = 0;
+  var totalquarantined = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
     //if(i<sortedActual.length/2)
@@ -447,6 +468,8 @@ function processActualHospitalisation() {
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_icu!="") totalicu+=parseInt(actual.current_icu);
     if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_vent!="") totalvent+=parseInt(actual.current_vent);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_isolated!=undefined && actual.current_isolated!="") totalisolated+=parseInt(actual.current_isolated);
+    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_quarantined!=undefined && actual.current_quarantined!="") totalquarantined+=parseInt(actual.current_quarantined);
 
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -472,6 +495,18 @@ function processActualHospitalisation() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
+    text = document.createTextNode("");
+    if(actual.current_isolated!=undefined)
+      text = document.createTextNode(actual.current_isolated);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode("");
+    if(actual.current_quarantined!=undefined)
+      text = document.createTextNode(actual.current_quarantined);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
     if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
@@ -488,7 +523,7 @@ function processActualHospitalisation() {
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td><b>"+totalisolated+"</b></td><td><b>"+totalquarantined+"</b></td><td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
