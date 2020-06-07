@@ -745,7 +745,14 @@ function barChartAllCH() {
         borderColor: '#F15F36',
         backgroundColor: '#F15F36',
         datalabels: {
-          align: 'end',
+          align: /*'end',*/ function (context) {
+                var index = context.dataIndex;
+                return index % 2 == 0 ? 'top' : 'bottom';
+          },
+          offset: function (context) {
+                var index = context.dataIndex;
+                return index % 2 == 0 ? 5 : 10;
+          },
           anchor: 'end'
         }
       }
@@ -871,7 +878,10 @@ function barChartAllCHDeaths() {
         borderColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         backgroundColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         datalabels: {
-          align: 'end',
+          align: 'end', /*function (context) {
+                var index = context.dataIndex;
+                return index % 2 == 0 ? 'top' : 'bottom';
+          },*/
           anchor: 'end'
         }
       }
@@ -1316,7 +1326,7 @@ function getDataLabels() {
   return {
       color: inDarkMode() ? '#ccc' : 'black',
       font: {
-        weight: 'bold'
+        weight: 'bold',
       },
       formatter: function(value, context) {
         var index = context.dataIndex;
