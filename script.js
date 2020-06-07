@@ -42,6 +42,7 @@ var verbose = false;
 var actualData = [];
 var actualDeaths = [];
 var actualHospitalisation = [];
+var actualIsolation = [];
 var data = [];
 Chart.defaults.global.defaultFontFamily = "IBM Plex Sans";
 document.getElementById("loaded").style.display = 'none';
@@ -308,6 +309,13 @@ function getCanton(i) {
         else {
           actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
         }
+        var filteredDataForIsolation = csvdata.filter(function(d) { if((d.current_isolated!=null && d.current_isolated!="") || (d.current_quarantined!=null && d.current_quarantined!="")) return d});
+        if(filteredDataForIsolation.length==0) {
+          //actualHospitalisation.push(latestData);
+        }
+        else {
+          actualIsolation.push(filteredDataForIsolation[filteredDataForIsolation.length-1]);
+        }
         var filteredDataForCases = csvdata.filter(function(d) { if(d.ncumul_conf && d.ncumul_conf!="") return d});
         if(filteredDataForCases.length==0) {
           actualData.push(latestData);
@@ -332,6 +340,7 @@ function processData() {
   processActualData();
   processActualDeaths();
   processActualHospitalisation();
+  processActualIsolation();
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
   barChartAllCH();
@@ -450,14 +459,62 @@ function processActualDeaths() {
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
+function processActualIsolation() {
+  var sortedActual = Array.from(actualIsolation).sort(function(a, b){return b.current_quarantined-a.current_quarantined});
+  var table = document.getElementById("quarantined");
+  var totalIsolated = 0;
+  var totalQuarantined = 0;
+  for(var i=0; i<sortedActual.length; i++) {
+    var actual = sortedActual[i];
+    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_isolated!=null && actual.current_isolated!="") totalIsolated+=parseInt(actual.current_isolated);
+    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_quarantined!=null && actual.current_quarantined!="") totalQuarantined+=parseInt(actual.current_quarantined);
+
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var a = document.createElement("a");
+    a.className = "flag "+actual.abbreviation_canton_and_fl;
+    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.appendChild(document.createTextNode(actual.date));
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(actual.current_isolated);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    text = document.createTextNode(actual.current_quarantined);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    if(actual.source && actual.source.substring(0,2)=="ht") {
+      a = document.createElement("a");
+      a.innerHTML = "&#x2197;&#xFE0E;";
+      a.href = actual.source;
+      td.appendChild(a);
+    }
+    else {
+      a = document.createElement("a");
+      a.innerHTML = "&#x2197;&#xFE0E;";
+      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
+      td.appendChild(a);
+    }
+    tr.appendChild(td);
+    table.appendChild(tr);
+  }
+  var tr = document.createElement("tr");
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+totalIsolated+"</b></td><td><b>"+totalQuarantined+"</b></td><td></td>";
+  table.append(tr);
+}
+
 function processActualHospitalisation() {
   var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.current_hosp-a.current_hosp});
   var secondTable = document.getElementById("hospitalised_2");
   var total = 0;
   var totalicu = 0;
   var totalvent = 0;
-  var totalisolated = 0;
-  var totalquarantined = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
     //if(i<sortedActual.length/2)
@@ -465,11 +522,9 @@ function processActualHospitalisation() {
     //else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.current_hosp;
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_icu!="") totalicu+=parseInt(actual.current_icu);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_vent!="") totalvent+=parseInt(actual.current_vent);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_isolated!=undefined && actual.current_isolated!="") totalisolated+=parseInt(actual.current_isolated);
-    if(actualHospitalisation.abbreviation_canton_and_fl!="FL" && actual.current_quarantined!=undefined && actual.current_quarantined!="") totalquarantined+=parseInt(actual.current_quarantined);
+    if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
+    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_icu!="") totalicu+=parseInt(actual.current_icu);
+    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_vent!="") totalvent+=parseInt(actual.current_vent);
 
     var tr = document.createElement("tr");
     var td = document.createElement("td");
@@ -495,18 +550,6 @@ function processActualHospitalisation() {
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    text = document.createTextNode("");
-    if(actual.current_isolated!=undefined)
-      text = document.createTextNode(actual.current_isolated);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
-    text = document.createTextNode("");
-    if(actual.current_quarantined!=undefined)
-      text = document.createTextNode(actual.current_quarantined);
-    td.appendChild(text);
-    tr.appendChild(td);
-    td = document.createElement("td");
     if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
@@ -523,7 +566,7 @@ function processActualHospitalisation() {
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td><b>"+totalisolated+"</b></td><td><b>"+totalquarantined+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
@@ -1235,6 +1278,40 @@ function barChartHospitalisations(place) {
       }
     });
   }
+  var filteredForIsolated = moreFilteredData.filter(function(d) { if(d.current_isolated!="") return d});
+  if(filteredForIsolated.length>0) {
+    var casesIsolated = moreFilteredData.map(function(d) {if(d.current_isolated=="") return null; return d.current_isolated});
+    datasets.push({
+      label: _('In Isolation'),
+      data: casesIsolated,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#AF5500',
+      backgroundColor: '#AF5500',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
+  var filteredForQuarantined = moreFilteredData.filter(function(d) { if(d.current_quarantined!="") return d});
+  if(filteredForQuarantined.length>0) {
+    var casesQuarantined = moreFilteredData.map(function(d) {if(d.current_quarantined=="") return null; return d.current_quarantined});
+    datasets.push({
+      label: _('In Quarantäne'),
+      data: casesQuarantined,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#3333AA',
+      backgroundColor: '#3333AA',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
   var chart = new Chart(canvas.id, {
     type: 'line',
     options: {
@@ -1262,6 +1339,13 @@ function barChartHospitalisations(place) {
             var index = tooltipItems.index;
             var datasetIndex = tooltipItems.datasetIndex;
             var changeStr = "";
+            var maxLength = 0;
+            for(var i=0; i<data.datasets.length; i++) {
+              var titleToTest = data.datasets[i].label;
+              if(titleToTest.length>maxLength) maxLength = titleToTest.length;
+            }
+            var title = data.datasets[datasetIndex].label+": ";
+            var titlepadding = " ".repeat(maxLength+2-title.length);
             if(index>0) {
                 var change = parseInt(value)-parseInt(data.datasets[datasetIndex].data[index-1]);
                 var label = change>0 ? "+"+change : change;
@@ -1270,7 +1354,7 @@ function barChartHospitalisations(place) {
             }
             var tabbing = 3-value.length;
             var padding = " ".repeat(tabbing);
-            return value+padding+changeStr;
+            return title+titlepadding+value+padding+changeStr;
           }
         }
       },
