@@ -165,7 +165,8 @@ table tr td:nth-child(3) {
 	margin-right: 0;
 }
 .table-group table:nth-child(2) tr:last-child td,
-#hospitalised_2 tr:last-child td {
+#hospitalised_2 tr:last-child td,
+#quarantined tr:last-child td {
 	opacity: 1;
 }
 .international .ch td{
@@ -217,6 +218,9 @@ table img {
 		padding-top: 0.2em;
 		padding-bottom: 0.2em;
 	}
+}
+.BAG {
+  opacity: 0.5;
 }
 /* !wide-table */
 table.wide {

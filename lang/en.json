@@ -74,5 +74,7 @@
     "Fälle in Isolation / Quarantäne": "Cases in isolation / quarantine",
     "In Isolation": "In isolation",
     "In Quarantäne": "In quarantine",
+    "Da nicht alle Kantone Daten zu Isolation/Quarantäne direkt bereitstellen, wird die Tabelle durch Daten des BAGs ergänzt.": "Since not all cantons provide isolation / quarantine data directly, the table is supplemented by data from the FOPH.",
+    "BAG": "FOPH",
     "": ""
 }

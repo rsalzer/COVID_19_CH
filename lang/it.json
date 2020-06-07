@@ -72,6 +72,8 @@
     "Mit Kleinstaaten (<100k Einwohner)": "Con stati piccoli (<100.000 abitanti)",
     "Ohne Kleinstaaten": "Senza piccoli stati",
     "Fälle in Isolation / Quarantäne": "Casi in isolamento / quarantena",
+    "Da nicht alle Kantone Daten zu Isolation/Quarantäne direkt bereitstellen, wird die Tabelle durch Daten des BAGs ergänzt.": "Poiché non tutti i Cantoni forniscono direttamente i dati di isolamento / quarantena, la tabella è integrata dai dati dell'UFSP.",
+    "BAG": "UFSP",
     "In Isolation": "In isolamento",
     "In Quarantäne": "In quarantena",
     "": ""

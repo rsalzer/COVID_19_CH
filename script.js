@@ -340,9 +340,9 @@ function processData() {
   processActualData();
   processActualDeaths();
   processActualHospitalisation();
-  processActualIsolation();
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
+  getBAGIsolation();
   barChartAllCH();
   barChartAllCHDeaths();
   barChartAllCHHospitalisations();
@@ -459,6 +459,22 @@ function processActualDeaths() {
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
+function getBAGIsolation() {
+  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_AGE/master/data/current_isolated.csv", function(error, csvdata) {
+      if(csvdata!=null) {
+        for(var i=0; i<csvdata.length; i++) {
+          var row = csvdata[i];
+          var canton = row.abbreviation_canton_and_fl;
+          if(actualIsolation.filter(function(d) { if(d.abbreviation_canton_and_fl==canton) return d}).length==0) {
+            row.source = "BAG";
+            actualIsolation.push(row);
+          }
+        }
+        processActualIsolation();
+      }
+  });
+}
+
 function processActualIsolation() {
   var sortedActual = Array.from(actualIsolation).sort(function(a, b){return b.current_quarantined-a.current_quarantined});
   var table = document.getElementById("quarantined");
@@ -483,10 +499,12 @@ function processActualIsolation() {
     td = document.createElement("td");
     text = document.createTextNode(actual.current_isolated);
     td.appendChild(text);
+    if(actual.source=="BAG") td.className = "BAG";
     tr.appendChild(td);
     td = document.createElement("td");
     text = document.createTextNode(actual.current_quarantined);
     td.appendChild(text);
+    if(actual.source=="BAG") td.className = "BAG";
     tr.appendChild(td);
     td = document.createElement("td");
     if(actual.source && actual.source.substring(0,2)=="ht") {
@@ -499,7 +517,9 @@ function processActualIsolation() {
       a = document.createElement("a");
       a.innerHTML = "&#x2197;&#xFE0E;";
       a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      td.appendChild(a);
+      text = document.createTextNode(_("BAG"));
+      td.className = "BAG";
+      td.appendChild(text);
     }
     tr.appendChild(td);
     table.appendChild(tr);

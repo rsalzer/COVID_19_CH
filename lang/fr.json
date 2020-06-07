@@ -72,6 +72,8 @@
     "Mit Kleinstaaten (<100k Einwohner)": "Avec de petits États (<100k habitants)",
     "Ohne Kleinstaaten": "Sans petits états",
     "Fälle in Isolation / Quarantäne": "Cas en isolement / quarantaine",
+    "Da nicht alle Kantone Daten zu Isolation/Quarantäne direkt bereitstellen, wird die Tabelle durch Daten des BAGs ergänzt.": "Étant donné que tous les cantons ne fournissent pas directement des données d'isolement / de quarantaine, le tableau est complété par des données de l'OFSP.",
+    "BAG": "OFSP",
     "In Isolation": "En isolement",
     "In Quarantäne": "En quarantaine",
     "": ""
