@@ -43,7 +43,7 @@ body {
 	border-color: var(--color-main);
 	cursor: default;
 }
-#page-nav li:nth-child(3) {
+#page-nav li:nth-child(4) {
   margin-left: auto;
 }
 #page-nav li:last-child {
