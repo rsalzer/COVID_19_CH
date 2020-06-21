@@ -222,6 +222,10 @@ table img {
 .BAG {
   opacity: 0.5;
 }
+.left {
+  text-align: left !important;
+  white-space: nowrap;
+}
 /* !wide-table */
 table.wide {
 	width: 100%;

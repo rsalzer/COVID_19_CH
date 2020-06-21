@@ -189,6 +189,7 @@ function processActualData() {
     tr.appendChild(td);
     td = document.createElement("td");
     text = document.createTextNode(bagData[bagData.length-1].date);
+    td.className = "BAG left";
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
