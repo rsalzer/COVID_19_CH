@@ -61,7 +61,7 @@ function getWorldData(chTotal) {
       var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
       if(ch && ch[0]) ch[0].Confirmed = ""+chTotal;
       parseWorldData();
-      getWorldDataRelative(false);
+      //getWorldDataRelative(false);
   });
 }
 
@@ -338,13 +338,13 @@ function getCanton(i) {
 }
 
 function processData() {
-  processActualData();
-  processActualDeaths();
-  processActualHospitalisation();
+  //processActualData();
+  //processActualDeaths();
+  //processActualHospitalisation();
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
-  getBAGIsolation();
-  barChartAllCH();
+  //getBAGIsolation();
+  //barChartAllCH();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
   }
@@ -400,7 +400,7 @@ function processActualData() {
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
   secondTable.append(tr);
-  getWorldData(total);
+  //getWorldData(total);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
