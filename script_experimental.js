@@ -49,7 +49,6 @@ document.getElementById("loaded").style.display = 'none';
 
 setLanguageNav();
 getBAGCantons();
-getCanton(0);
 
 var worldData;
 function getWorldData(chTotal) {
@@ -260,6 +259,7 @@ function getWorldDeaths(chTotal) {
 }
 
 function getCanton(i) {
+  //console.log("Get Canton "+i+" : "+new Date());
   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
   if(cantons[i] == "FL") {
     var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
@@ -345,12 +345,10 @@ function processData() {
   document.getElementById("loaded").style.display = 'block';
   getBAGIsolation();
   barChartAllCH();
-  barChartAllCHDeaths();
-  barChartAllCHHospitalisations();
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
-    barChartHospitalisations(cantons[i]);
   }
+  //console.log("End process: "+new Date());
 }
 
 function processActualData() {
@@ -482,6 +480,7 @@ function getBAGCantons() {
       if(csvdata!=null) {
           bagData = csvdata;
       }
+      getCanton(0);
   });
 }
 
@@ -1512,8 +1511,14 @@ function getDataLabels() {
       formatter: function(value, context) {
         var index = context.dataIndex;
         if(index==0) return "";
-        var lastValue = context.dataset.data[index-1].y;
-        var change = value.y-lastValue;
+        var lastValue = context.dataset.data[index-1];
+        var percentageChange = value/lastValue - 1;
+        var rounded = Math.round(percentageChange * 100);
+        var label = ""+rounded;
+        if(rounded >= 0) label = "+"+label+"%";
+        else label = "-"+label+"%";
+
+        var change = value-lastValue;
         var label = change>0 ? "+"+change : change;
         return label;
       }
