@@ -459,7 +459,7 @@ function processActualDeaths() {
 }
 
 function getBAGIsolation() {
-  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_AGE/master/data/current_isolated.csv", function(error, csvdata) {
+  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/current_isolated.csv", function(error, csvdata) {
       if(csvdata!=null) {
         for(var i=0; i<csvdata.length; i++) {
           var row = csvdata[i];
@@ -476,7 +476,7 @@ function getBAGIsolation() {
 
 var bagData;
 function getBAGCantons() {
-  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_AGE/master/data/casesPerCanton.csv", function(error, csvdata) {
+  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/casesPerCanton.csv", function(error, csvdata) {
       if(csvdata!=null) {
           bagData = csvdata;
       }

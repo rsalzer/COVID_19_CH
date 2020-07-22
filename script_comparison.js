@@ -156,7 +156,7 @@ function processData() {
 
 var bagData;
 function getBAGCantons() {
-  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_AGE/master/data/casesPerCanton.csv", function(error, csvdata) {
+  d3.csv("https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/casesPerCanton.csv", function(error, csvdata) {
       if(csvdata!=null) {
           bagData = csvdata;
       }
