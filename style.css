@@ -288,6 +288,9 @@ canvas {
   width: 100%;
 	min-width: var(--canvas-minwidth);
 }
+.bagcanvas {
+  min-width: 800px;
+}
 button {
 	font-family: "IBM Plex Sans", sans-serif;
 }
