@@ -3,7 +3,7 @@ var data;
 const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
 
 const names = {
-  "CH": "Ganze Schweiz",
+  "CH": "Ganze Schweiz + FL",
   "AG": "Kanton Aargau",
   "AI": "Kanton Appenzell Innerrhoden",
   "AR": "Kanton Appenzell Ausserrhoden",
@@ -53,7 +53,7 @@ getBAGTotals();
 
 
 function processData() {
-  //processActualData();
+  processActualData();
   //processActualDeaths();
   //processActualHospitalisation();
   document.getElementById("loadingspinner").style.display = 'none';
@@ -82,6 +82,67 @@ function getBAGTotals() {
           barChartAllCH(csvdata, true);
       }
   });
+}
+
+function processActualData() {
+  var latestLine = bagData[bagData.length-1]; //Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+  var yesterday = bagData[bagData.length-2];
+  var dateSplit = latestLine.date.split("-");
+  var day = parseInt(dateSplit[2]);
+  var month = parseInt(dateSplit[1]);
+  var year = parseInt(dateSplit[0]);
+  var dateString = " per "+day+"."+month+"."+year;
+  var h3 = document.getElementById("latest_title");
+  h3.innerHTML += dateString;
+  var latestArray = [];
+  for (var key in latestLine) {
+			 // check if the property/key is defined in the object itself, not in parent
+			 if (latestLine.hasOwnProperty(key) && key!="date" && key!="FL") {
+         var diff = parseInt(latestLine[key]) - parseInt(yesterday[key]);
+         latestArray.push( { abbreviation_canton_and_fl: key, ncumul_conf: latestLine[key], diff: diff } )
+       }
+   }
+  var sortedActual = Array.from(latestArray).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+  var firstTable = document.getElementById("confirmed_bag_1");
+  var secondTable = document.getElementById("confirmed_bag_2");
+  var total = 0;
+  var totalDiff = 0;
+  for(var i=0; i<sortedActual.length; i++) {
+    var table;
+    if(i<sortedActual.length/2) table = firstTable;
+    else table = secondTable;
+    var actual = sortedActual[i];
+    var now = actual.ncumul_conf;
+    if(actual.abbreviation_canton_and_fl!="FL" && now!="") {
+      total+=parseInt(now);
+      totalDiff += actual.diff;
+    }
+    var tr = document.createElement("tr");
+    var td = document.createElement("td");
+    var a = document.createElement("a");
+    a.className = "flag "+actual.abbreviation_canton_and_fl;
+    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
+    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
+    td.appendChild(a);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    var text = document.createTextNode(now);
+    td.appendChild(text);
+    tr.appendChild(td);
+    td = document.createElement("td");
+    var text = document.createTextNode(actual.diff);
+    td.appendChild(text);
+    tr.appendChild(td);
+    table.appendChild(tr);
+  }
+  var tr = document.createElement("tr");
+  var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>"+formattedTotal+"</b></td><td><b>"+totalDiff+"</b></td>";
+  secondTable.append(tr);
+  // getWorldData(total);
+  //document.getElementById("last").append(firstTable);
+  //document.getElementById("last").append(secondTable);
+  //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
 function processActualIsolation() {
@@ -295,7 +356,7 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
     };
 }
 
-function barChartAllCH(alldata, all) {
+function barChartAllCH(alldata) {
   place = "CH";
   var article = document.getElementById("detail_"+place);
   var h3 = document.createElement("h3");
@@ -327,7 +388,19 @@ function barChartAllCH(alldata, all) {
     var date = new Date(year,month,day);
     var obj = {};
     obj.x = date;
-    obj.y = d.new_cases;
+    obj.y = parseInt(d.new_cases); // - parseInt(d.diff);
+    obj.total = d.total_cases;
+    return obj;
+  });
+  var diffData = filterBAG.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    var obj = {};
+    obj.x = date;
+    obj.y = d.diff;
     obj.total = d.total_cases;
     return obj;
   });
@@ -357,7 +430,7 @@ function barChartAllCH(alldata, all) {
          afterLabel: function(t, d) {
             var datasetLabel = d.datasets[t.datasetIndex].label;
             var yLabel = Math.abs(t.yLabel);
-            return "Gesamtfälle" + ': ' + bagCantonData[t.index].total;
+            return "Gesamt" + ': ' + bagCantonData[t.index].total;
          }
        }
       },
@@ -403,13 +476,306 @@ function barChartAllCH(alldata, all) {
   data: {
     datasets: [
       {
-        label: _('Neue Fälle'),
+        label: _('Neu   '),
         data: bagCantonData,
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
         borderColor: '#FF0000',
         backgroundColor: '#FF0000',
+        datalabels: {
+          align: 'top',
+          anchor: 'end'
+        }
+      }
+      // ,{
+      //   label: _('Heute neu gemeldet'),
+      //   data: diffData,
+      //   fill: false,
+      //   cubicInterpolationMode: 'monotone',
+      //   spanGaps: true,
+      //   borderColor: '#FFFF00',
+      //   backgroundColor: '#FFFF00',
+      //   datalabels: {
+      //     align: 'top',
+      //     anchor: 'end'
+      //   }
+      // }
+    ]
+  }
+  });
+  addAxisButtons(canvas, chart);
+  barChartAllCHDeaths(alldata)
+}
+
+function barChartAllCHDeaths(alldata) {
+  place = "CH";
+  var article = document.getElementById("detail_"+place);
+  // var h3 = document.createElement("h3");
+  // h3.className = "flag "+place;
+  // var text = document.createTextNode(_(names[place]));
+  // h3.appendChild(text);
+  // var a = document.createElement("a");
+  // a.href = "#top";
+  // a.innerHTML = "&#x2191;&#xFE0E;";
+  // a.className = "toplink";
+  // h3.appendChild(a);
+  // article.appendChild(h3);
+  var div = document.createElement("div");
+  div.className = "canvas-dummy";
+  div.id = "container_"+place+"_death";
+  var canvas = document.createElement("canvas");
+  canvas.id = place+"_death";
+  // canvas.className = "bagcanvas"
+  canvas.height=250;
+  div.appendChild(canvas);
+  article.appendChild(div);
+  div.scrollLeft = 1700;
+  var filterBAG = alldata;
+  var bagCantonData = filterBAG.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    var obj = {};
+    obj.x = date;
+    obj.y = d.new_deaths;
+    obj.total = d.total_deaths;
+    return obj;
+  });
+  var chart = new Chart(canvas.id, {
+    type: 'bar',
+    options: {
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
+      responsive: false,
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: _('Todesfälle')
+      },
+      tooltips: {
+        enabled: true,
+        intersect: false,
+        mode: 'x',
+        position: 'nearest',
+        bodyFontFamily: 'IBM Plex Mono',
+        callbacks: {
+         afterLabel: function(t, d) {
+            var datasetLabel = d.datasets[t.datasetIndex].label;
+            var yLabel = Math.abs(t.yLabel);
+            return "Gesamt" + ': ' + bagCantonData[t.index].total;
+         }
+       }
+      },
+      scales: {
+        xAxes: [{
+          stacked: true,
+          type: 'time',
+          time: {
+            tooltipFormat: 'DD.MM.YYYY',
+            unit: 'day',
+            displayFormats: {
+              day: 'DD.MM'
+            }
+          },
+          ticks: {
+            min: new Date("2020-02-23T22:00:00"),
+            max: new Date(),
+          },
+          gridLines: {
+              color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        }],
+        yAxes: [{
+          type: cartesianAxesTypes.LINEAR,
+          stacked: true,
+          position: 'right',
+          ticks: {
+            beginAtZero: true,
+            suggestedMax: 10,
+            callback: function(t, i) {
+                   return t < 0 ? Math.abs(t) : t;
+            }
+          },
+          gridLines: {
+              color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        }]
+      },
+      plugins: {
+        datalabels: {
+            color: inDarkMode() ? '#ccc' : 'black',
+            font: {
+              weight: 'bold',
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1].y;
+              var change = value.y-lastValue;
+              var label = change>0 ? "+"+change : change;
+              return Math.abs(value.y);
+            }
+        }
+      }
+  },
+  data: {
+    datasets: [
+      {
+        label: _('Neu   '),
+        data: bagCantonData,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
+        backgroundColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
+        datalabels: {
+          align: 'top',
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+  });
+  addAxisButtons(canvas, chart);
+  barChartAllCHHosp(alldata)
+}
+
+function barChartAllCHHosp(alldata) {
+  place = "CH";
+  var article = document.getElementById("detail_"+place);
+  // var h3 = document.createElement("h3");
+  // h3.className = "flag "+place;
+  // var text = document.createTextNode(_(names[place]));
+  // h3.appendChild(text);
+  // var a = document.createElement("a");
+  // a.href = "#top";
+  // a.innerHTML = "&#x2191;&#xFE0E;";
+  // a.className = "toplink";
+  // h3.appendChild(a);
+  // article.appendChild(h3);
+  var div = document.createElement("div");
+  div.className = "canvas-dummy";
+  div.id = "container_"+place+"_hosp";
+  var canvas = document.createElement("canvas");
+  canvas.id = place+"_hosp";
+  // canvas.className = "bagcanvas"
+  canvas.height=250;
+  div.appendChild(canvas);
+  article.appendChild(div);
+  div.scrollLeft = 1700;
+  var filterBAG = alldata;
+  var bagCantonData = filterBAG.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    var obj = {};
+    obj.x = date;
+    obj.y = d.new_hosp;
+    obj.total = d.total_hosp;
+    return obj;
+  });
+  var chart = new Chart(canvas.id, {
+    type: 'bar',
+    options: {
+      layout: {
+          padding: {
+              right: 20
+          }
+      },
+      responsive: false,
+      legend: {
+        display: false
+      },
+      title: {
+        display: true,
+        text: _('Hospitalisiert')
+      },
+      tooltips: {
+        enabled: true,
+        intersect: false,
+        mode: 'x',
+        position: 'nearest',
+        bodyFontFamily: 'IBM Plex Mono',
+        callbacks: {
+         afterLabel: function(t, d) {
+            var datasetLabel = d.datasets[t.datasetIndex].label;
+            var yLabel = Math.abs(t.yLabel);
+            return "Gesamt" + ': ' + bagCantonData[t.index].total;
+         }
+       }
+      },
+      scales: {
+        xAxes: [{
+          stacked: true,
+          type: 'time',
+          time: {
+            tooltipFormat: 'DD.MM.YYYY',
+            unit: 'day',
+            displayFormats: {
+              day: 'DD.MM'
+            }
+          },
+          ticks: {
+            min: new Date("2020-02-23T22:00:00"),
+            max: new Date(),
+          },
+          gridLines: {
+              color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        }],
+        yAxes: [{
+          type: cartesianAxesTypes.LINEAR,
+          stacked: true,
+          position: 'right',
+          ticks: {
+            beginAtZero: true,
+            suggestedMax: 10,
+            callback: function(t, i) {
+                   return t < 0 ? Math.abs(t) : t;
+            }
+          },
+          gridLines: {
+              color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
+          }
+        }]
+      },
+      plugins: {
+        datalabels: {
+            color: inDarkMode() ? '#ccc' : 'black',
+            font: {
+              weight: 'bold',
+            },
+            formatter: function(value, context) {
+              var index = context.dataIndex;
+              if(index==0) return "";
+              var lastValue = context.dataset.data[index-1].y;
+              var change = value.y-lastValue;
+              var label = change>0 ? "+"+change : change;
+              return Math.abs(value.y);
+            }
+        }
+      }
+  },
+  data: {
+    datasets: [
+      {
+        label: _('Neu   '),
+        data: bagCantonData,
+        fill: false,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        borderColor: '#CCCC00',
+        backgroundColor: '#CCCC00',
         datalabels: {
           align: 'top',
           anchor: 'end'
@@ -490,7 +856,7 @@ function barChartCases(place) {
          afterLabel: function(t, d) {
             var datasetLabel = d.datasets[t.datasetIndex].label;
             var yLabel = Math.abs(t.yLabel);
-            return "Gesamtfälle" + ': ' + bagCantonData[t.index].total;
+            return "Gesamt" + ': ' + bagCantonData[t.index].total;
          },
          beforeLabel: function(t, d) {
             return false;
@@ -542,7 +908,7 @@ function barChartCases(place) {
   data: {
     datasets: [
       {
-        label: _('Neue Fälle'),
+        label: _('Neu   '),
         data: bagCantonData,
         fill: false,
         cubicInterpolationMode: 'monotone',

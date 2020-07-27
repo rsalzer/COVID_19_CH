@@ -166,8 +166,18 @@ table tr td:nth-child(3) {
 }
 .table-group table:nth-child(2) tr:last-child td,
 #hospitalised_2 tr:last-child td,
-#quarantined tr:last-child td {
+#quarantined tr:last-child td,
+#confirmed_bag_1 tr td:nth-child(2),
+#confirmed_bag_1 tr th:nth-child(2),
+#confirmed_bag_2 tr td:nth-child(2),
+#confirmed_bag_2 tr th:nth-child(2) {
 	opacity: 1;
+}
+#confirmed_bag_1 tr td:nth-child(2),
+#confirmed_bag_1 tr th:nth-child(2),
+#confirmed_bag_2 tr td:nth-child(2),
+#confirmed_bag_2 tr th:nth-child(2) {
+	text-align: right;
 }
 .international .ch td{
 	opacity: 1 !important;
