@@ -404,6 +404,28 @@ function barChartAllCH(alldata) {
     obj.total = d.total_cases;
     return obj;
   });
+  var averageData = [];
+  for(var i=0; i<filterBAG.length; i++) {
+    var d = filterBAG[i];
+    var sum = parseInt(d.new_cases);
+    var num = 1;
+    for(var j=1; j<7; j++) {
+      var x = i-j;
+      if(x<0) break;
+      num++;
+      sum += parseInt(filterBAG[x].new_cases);
+    }
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    var obj = {};
+    var avg = Math.round(sum/num);
+    obj.x = date;
+    obj.y = avg;
+    averageData.push(obj);
+  }
   var chart = new Chart(canvas.id, {
     type: 'bar',
     options: {
@@ -422,12 +444,13 @@ function barChartAllCH(alldata) {
       },
       tooltips: {
         enabled: true,
-        intersect: false,
-        mode: 'x',
+        intersect: true,
+        mode: 'index',
         position: 'nearest',
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
          afterLabel: function(t, d) {
+            if(t.datasetIndex==0) return "";
             var datasetLabel = d.datasets[t.datasetIndex].label;
             var yLabel = Math.abs(t.yLabel);
             return "Gesamt" + ': ' + bagCantonData[t.index].total;
@@ -436,7 +459,7 @@ function barChartAllCH(alldata) {
       },
       scales: {
         xAxes: [{
-          stacked: true,
+          stacked: false,
           type: 'time',
           time: {
             tooltipFormat: 'DD.MM.YYYY',
@@ -455,7 +478,7 @@ function barChartAllCH(alldata) {
         }],
         yAxes: [{
           type: cartesianAxesTypes.LINEAR,
-          stacked: true,
+          stacked: false,
           position: 'right',
           ticks: {
             beginAtZero: true,
@@ -470,11 +493,17 @@ function barChartAllCH(alldata) {
         }]
       },
       plugins: {
-        datalabels: getDataLabels()
+        datalabels: false
       }
   },
   data: {
     datasets: [
+      {
+        label: _('7d-Avg'),
+        data: averageData,
+        borderColor: 'white',
+        type: 'line',
+      },
       {
         label: _('Neu   '),
         data: bagCantonData,
@@ -488,6 +517,7 @@ function barChartAllCH(alldata) {
           anchor: 'end'
         }
       }
+
       // ,{
       //   label: _('Heute neu gemeldet'),
       //   data: diffData,
@@ -1262,7 +1292,7 @@ function addAxisButton(container, chart, name, all, isActive) {
     this.classList.add('active');
     getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
     chart.options.scales.xAxes[0].ticks.min = all ? new Date("2020-02-23T22:00:00") : new Date("2020-05-31T22:00:00");
-    chart.options.scales.yAxes[0].ticks.max = all ? 1600 : 200;
+    chart.options.scales.yAxes[0].ticks.max = all ? 1600 : 400;
     chart.update();
   });
   container.append(button);
