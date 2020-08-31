@@ -734,6 +734,17 @@ function barChartAllCH() {
     for(var i=0; i<cantons.length-1; i++) { //without FL
       var canton = cantons[i];
       var cantonTotal = getNumConf(canton, date, "ncumul_conf");
+      if(cantonTotal==null) {
+        if(dataPerDay.length>0)
+          cantonTotal = dataPerDay[dataPerDay.length-1].data[i];
+        else {
+          cantonTotal = {
+            canton: canton,
+            date: _("Keine Daten"),
+            ncumul_conf: 0
+          };
+        }
+      }
       singleDayObject.data.push(cantonTotal);
     }
     var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
@@ -741,6 +752,7 @@ function barChartAllCH() {
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
   }
+  // console.log("End preping CH cases");
   //console.log(dataPerDay);
   var place = "CH";
   var section = document.getElementById("detail");
@@ -874,6 +886,17 @@ function barChartAllCHDeaths() {
     for(var i=0; i<cantons.length-1; i++) { //without FL
       var canton = cantons[i];
       var cantonTotal = getNumConf(canton, date, "ncumul_deceased");
+      if(cantonTotal==null) {
+        if(dataPerDay.length>0)
+          cantonTotal = dataPerDay[dataPerDay.length-1].data[i];
+        else {
+          cantonTotal = {
+            canton: canton,
+            date: _("Keine Daten"),
+            ncumul_deceased: 0
+          };
+        }
+      }
       singleDayObject.data.push(cantonTotal);
     }
     var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_deceased; }, 0);
@@ -1003,6 +1026,17 @@ function barChartAllCHHospitalisations() {
     for(var i=0; i<cantons.length-1; i++) { //without FL
       var canton = cantons[i];
       var cantonTotal = getNumConf(canton, date, "current_hosp");
+      if(cantonTotal==null) {
+        if(dataPerDay.length>0)
+          cantonTotal = dataPerDay[dataPerDay.length-1].data[i];
+        else {
+          cantonTotal = {
+            canton: canton,
+            date: _("Keine Daten"),
+            current_hosp: 0
+          };
+        }
+      }
       singleDayObject.data.push(cantonTotal);
     }
     var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.current_hosp; }, 0);
@@ -1121,26 +1155,27 @@ function getNumConf(canton, date, variable) {
     obj[variable] = parseInt(filteredData[filteredData.length-1][variable]);
     return obj;
   }
-  for(var i=1; i<=50; i++) {
-    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()-1));
-    dateString = date.toISOString().substring(0,10);
-    filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d[variable]!="") return d});
-    if(filteredData.length>0) {
-      if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
-      var obj = {
-        canton: canton,
-        date: dateString,
-      };
-      obj[variable] = parseInt(filteredData[filteredData.length-1][variable])
-      return obj;
-    }
-  }
-  var obj = {
-    canton: canton,
-    date: _("Keine Daten"),
-  };
-  obj[variable] = 0;
-  return obj;
+  return null;
+  // for(var i=1; i<=50; i++) {
+  //   date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()-1));
+  //   dateString = date.toISOString().substring(0,10);
+  //   filteredData = prefilter.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d[variable]!="") return d});
+  //   if(filteredData.length>0) {
+  //     if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
+  //     var obj = {
+  //       canton: canton,
+  //       date: dateString,
+  //     };
+  //     obj[variable] = parseInt(filteredData[filteredData.length-1][variable])
+  //     return obj;
+  //   }
+  // }
+  // var obj = {
+  //   canton: canton,
+  //   date: _("Keine Daten"),
+  // };
+  // obj[variable] = 0;
+  // return obj;
 }
 
 function barChartCases(place) {
