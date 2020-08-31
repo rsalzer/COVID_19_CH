@@ -1,5 +1,25 @@
 var data;
 
+var oldDate = null;
+console.logCopy = console.log.bind(console);
+console.log = function(arguments)
+{
+    if (arguments.length)
+    {
+        var d = new Date();
+        if(oldDate==null) timestamp = '';
+        else {
+          var diff = d-oldDate;
+          var msec = diff;
+          var ss = Math.floor(msec / 1000);
+          msec -= ss * 1000;
+          var timestamp = '[' + ss + ':' + msec + '] ';
+        }
+        oldDate = d;
+        this.logCopy(timestamp, arguments);
+    }
+};
+
 const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
 
 const names = {
@@ -49,6 +69,7 @@ document.getElementById("loaded").style.display = 'none';
 
 setLanguageNav();
 
+console.log("START");
 getCanton(0);
 var worldData;
 function getWorldData(chTotal) {
@@ -259,6 +280,7 @@ function getWorldDeaths(chTotal) {
 }
 
 function getCanton(i) {
+  // var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
   if(cantons[i] == "FL") {
     var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
@@ -337,19 +359,27 @@ function getCanton(i) {
 }
 
 function processData() {
+  document.getElementById("loadingspinner").style.display = 'none';
+  document.getElementById("loaded").style.display = 'block';
+  var start = new Date();
+  // console.log("Process actual");
   processActualData();
   processActualDeaths();
   processActualHospitalisation();
-  document.getElementById("loadingspinner").style.display = 'none';
-  document.getElementById("loaded").style.display = 'block';
+  // console.log("End actual");
   getBAGIsolation();
+  // console.log("Start All CH");
   barChartAllCH();
+  // console.log("End All CH / Start Deaths");
   barChartAllCHDeaths();
+  // console.log("End Deaths CH / Start Hosp");
   barChartAllCHHospitalisations();
+  // console.log("End Hosp CH");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
   }
+  console.log("End Single Cantons");
 }
 
 function processActualData() {
@@ -691,6 +721,7 @@ function barChartAllCH() {
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
+  // console.log("Start preping CH cases");
   while(date<now) {
     var dateString = date.toISOString();
     dateString = dateString.substring(0,10);
