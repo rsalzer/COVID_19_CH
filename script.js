@@ -69,7 +69,7 @@ document.getElementById("loaded").style.display = 'none';
 
 setLanguageNav();
 
-console.log("START");
+//console.log("START");
 getCanton(0);
 var worldData;
 function getWorldData(chTotal) {
@@ -379,7 +379,7 @@ function processData() {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
   }
-  console.log("End Single Cantons");
+  //console.log("End Single Cantons");
 }
 
 function processActualData() {
