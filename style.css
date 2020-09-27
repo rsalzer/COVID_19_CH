@@ -207,6 +207,10 @@ table img {
 		width: 100%;
 		margin-right: 0px;
 	}
+  .table-group table td,
+  .table-group table th {
+  	width: 50px;
+  }
 	.table-group table:nth-child(1) tbody > tr:last-child td {
 		border-bottom: 0;
 	}
