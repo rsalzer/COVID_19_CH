@@ -481,6 +481,8 @@ function processActualData() {
       var risk = "low";
       if(incidence>=60) risk = "medium";
       if(incidence>=120) risk = "high";
+      if(incidence<100 && getDeviceState()==2) incidence = "&nbsp;"+incidence;
+      if(cases14DaysDiff<1000 && getDeviceState()==2) cases14DaysDiff = "&nbsp;" + cases14DaysDiff;
     }
     else { // another day back if does not exist...
       d.setDate(d.getDate() - 1);
