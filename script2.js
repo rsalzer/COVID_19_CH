@@ -21,7 +21,36 @@ console.log = function(arguments)
 };
 
 const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
-
+const population = {
+  "CH": 8619259,
+  "AG": 687491,
+  "AI": 16136,
+  "AR": 55388,
+  "BE": 1040412,
+  "BL": 289534,
+  "BS": 196386,
+  "FR": 322658,
+  "GE": 504205,
+  "GL": 40713,
+  "GR": 198787,
+  "JU": 73490,
+  "LU": 414364,
+  "NE": 176340,
+  "NW": 43039,
+  "OW": 37906,
+  "SG": 511811,
+  "SH": 82454,
+  "SO": 275661,
+  "SZ": 160289,
+  "TG": 280068,
+  "TI": 350887,
+  "UR": 36732,
+  "VD": 808652,
+  "VS": 345875,
+  "ZG": 127387,
+  "ZH": 1542594,
+  "FL": 38749
+};
 const names = {
   "CH": "Ganze Schweiz",
   "AG": "Kanton Aargau",
@@ -60,6 +89,7 @@ const cartesianAxesTypes = {
 
 var verbose = false;
 var actualData = [];
+var lastData = [];
 var actualDeaths = [];
 var actualHospitalisation = [];
 var actualIsolation = [];
@@ -69,7 +99,7 @@ document.getElementById("loaded").style.display = 'none';
 
 setLanguageNav();
 
-//console.log("START");
+console.log("START");
 getCanton(0);
 var worldData;
 function getWorldData(chTotal) {
@@ -314,7 +344,12 @@ function getCanton(i) {
             var year = splitDate[2];
             csvdata[x].date = year+"-"+month+"-"+day;
           }
-          data.push(csvdata[x]);
+          var dateSplit = csvdata[x].date.split("-");
+          var month = parseInt(dateSplit[1])-1;
+          var year = parseInt(dateSplit[0]);
+          var day = parseInt(dateSplit[2]);
+          if(month>=6 || (month==5 && day >=3) || year >=2021)
+            data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
         var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased && d.ncumul_deceased!="") return d});
@@ -344,6 +379,7 @@ function getCanton(i) {
         }
         else {
           actualData.push(filteredDataForCases[filteredDataForCases.length-1]);
+          lastData.push(filteredDataForCases[filteredDataForCases.length-2]);
         }
         if (verbose) {
           console.log("added "+csvdata.length+" rows for "+cantons[i]);
@@ -359,6 +395,7 @@ function getCanton(i) {
 }
 
 function processData() {
+  console.log("Start Processing");
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
   var start = new Date();
@@ -379,7 +416,7 @@ function processData() {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
   }
-  //console.log("End Single Cantons");
+  console.log("End Processing");
 }
 
 function processActualData() {
@@ -387,6 +424,7 @@ function processActualData() {
   var firstTable = document.getElementById("confirmed_1");
   var secondTable = document.getElementById("confirmed_2");
   var total = 0;
+  var diffTotal = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
     if(i<sortedActual.length/2) table = firstTable;
@@ -405,12 +443,67 @@ function processActualData() {
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date));
+    td.appendChild(document.createTextNode(actual.date.replace("2020-", "")));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
+    td = document.createElement("td");
+    var yesterday = lastData.filter(d => d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl)[0];
+    var casesYesterday = parseInt(yesterday.ncumul_conf);
+    var diff = "";
+    if(actual.date == "2020-09-25") {
+      var diff = parseInt(now) - casesYesterday;
+      diffTotal += diff;
+    }
+    td.appendChild(document.createTextNode(diff));
+    tr.appendChild(td);
+
+    var dateSplit = actual.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var d = new Date(Date.UTC(year,month,day))
+    d.setDate(d.getDate() - 14);
+    dateString = d.toISOString();
+    dateString = dateString.substring(0,10);
+    //console.log("today: "+day+" -14: "+dateString);
+
+    var filtered14DaysAgo = data.filter(d => (d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl && d.date == dateString));
+    var cases14DaysDiff = "";
+    var incidence = "";
+    var risk;
+    if(filtered14DaysAgo.length>0) {
+      var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
+      var cases14DaysDiff = parseInt(now) - cases14DaysAgo;
+      var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
+      var risk = "low";
+      if(incidence>=60) risk = "medium";
+      if(incidence>=120) risk = "high";
+    }
+    else { // another day back if does not exist...
+      d.setDate(d.getDate() - 1);
+      dateString = d.toISOString();
+      dateString = dateString.substring(0,10);
+      filtered14DaysAgo = data.filter(d => (d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl && d.date == dateString));
+      if(filtered14DaysAgo.length>0) {
+        var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
+        var cases14DaysDiff = parseInt(now) - cases14DaysAgo;
+        var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
+        var risk = "low";
+        if(incidence>=60) risk = "medium";
+        if(incidence>=120) risk = "high";
+      }
+    }
+    td = document.createElement("td");
+    td.innerHTML = cases14DaysDiff;
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.innerHTML = "<span class=\"risk "+risk+"\">"+incidence+"</span>";
+    tr.appendChild(td);
+
+    /*
     td = document.createElement("td");
     if(actual.source && actual.source.substring(0,2)=="ht") {
       a = document.createElement("a");
@@ -425,11 +518,12 @@ function processActualData() {
       td.appendChild(a);
     }
     tr.appendChild(td);
+    */
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+diffTotal+"</b></td><td></td><td></td>";
   secondTable.append(tr);
   getWorldData(total);
   //document.getElementById("last").append(firstTable);
@@ -717,7 +811,7 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
 }
 
 function barChartAllCH() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  date = new Date(Date.UTC(2020, 5, 3));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -870,7 +964,8 @@ function barChartAllCH() {
 }
 
 function barChartAllCHDeaths() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  //date = new Date(Date.UTC(2020, 1, 25));
+  date = new Date(Date.UTC(2020, 5, 3));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1010,7 +1105,8 @@ function barChartAllCHDeaths() {
 }
 
 function barChartAllCHHospitalisations() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  date = new Date(Date.UTC(2020, 5, 3));
+  //date = new Date(Date.UTC(2020, 1, 25));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1470,7 +1566,7 @@ function getScales() {
         }
       },
       ticks: {
-        min: new Date("2020-02-24T23:00:00"),
+        min: new Date("2020-06-02T23:00:00"),
         max: new Date(),
       },
       gridLines: {

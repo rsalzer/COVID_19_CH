@@ -120,7 +120,7 @@ table {
 table td,
 table th {
 	text-align: right;
-	padding: 0.2em 0.5em;
+	padding: 0.2em 0.4em;
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 }
@@ -398,6 +398,26 @@ button {
     cursor: default;
 	border-bottom: 2px solid #000;
 	border-color: var(--color-main);
+}
+
+/* !risks */
+.risk:after {
+	content: '';
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	border-radius: 0.5rem;
+	background-color: #ccc;
+	margin-left: 0.5rem;
+	margin-top: 1px;
+	vertical-align: top;
+}
+.risk.high:after { background-color: red; }
+.risk.medium:after { background-color: orange; }
+.risk.low:after { background-color: green; }
+
+.legend {
+	list-style: none;
 }
 
 /* !flags */
