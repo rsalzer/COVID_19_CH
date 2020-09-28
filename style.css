@@ -120,7 +120,7 @@ table {
 table td,
 table th {
 	text-align: right;
-	padding: 0.2em 0.4em;
+	padding: 0.2em 0.3em;
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 }
