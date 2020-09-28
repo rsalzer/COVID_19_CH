@@ -425,6 +425,7 @@ function processActualData() {
   var secondTable = document.getElementById("confirmed_2");
   var total = 0;
   var diffTotal = 0;
+  var cases14DaysTotal = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
     if(i<sortedActual.length/2) table = firstTable;
@@ -453,7 +454,7 @@ function processActualData() {
     var yesterday = lastData.filter(d => d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl)[0];
     var casesYesterday = parseInt(yesterday.ncumul_conf);
     var diff = "";
-    if(actual.date == "2020-09-25") {
+    if(actual.date == "2020-09-28") {
       var diff = parseInt(now) - casesYesterday;
       diffTotal += diff;
     }
@@ -476,7 +477,7 @@ function processActualData() {
     var risk;
     if(filtered14DaysAgo.length>0) {
       var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
-      var cases14DaysDiff = parseInt(now) - cases14DaysAgo;
+      cases14DaysDiff = parseInt(now) - cases14DaysAgo;
       var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
       var risk = "low";
       if(incidence>=60) risk = "medium";
@@ -489,13 +490,15 @@ function processActualData() {
       filtered14DaysAgo = data.filter(d => (d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl && d.date == dateString));
       if(filtered14DaysAgo.length>0) {
         var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
-        var cases14DaysDiff = parseInt(now) - cases14DaysAgo;
+        cases14DaysDiff = parseInt(now) - cases14DaysAgo;
         var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
         var risk = "low";
         if(incidence>=60) risk = "medium";
         if(incidence>=120) risk = "high";
       }
     }
+    if(cases14DaysDiff!="")
+      cases14DaysTotal += cases14DaysDiff
     td = document.createElement("td");
     td.innerHTML = cases14DaysDiff;
     tr.appendChild(td);
@@ -523,7 +526,12 @@ function processActualData() {
   }
   var tr = document.createElement("tr");
   var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+diffTotal+"</b></td><td></td><td></td>";
+  var formatted14DayCases = cases14DaysTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var incidenceCH = Math.round(cases14DaysTotal / population["CH"] * 100000);
+  var riskCH = "low";
+  if(incidenceCH>=60) riskCH = "medium";
+  if(incidenceCH>=120) riskCH = "high";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+diffTotal+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"risk "+riskCH+"\">"+incidenceCH+"</span></td>";
   secondTable.append(tr);
   getWorldData(total);
   //document.getElementById("last").append(firstTable);
