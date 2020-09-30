@@ -408,7 +408,8 @@ function processData() {
   // console.log("End Hosp CH");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
-    if(getDeviceState()!=2) barChartHospitalisations(cantons[i]); //dont do it on mobiles
+    //if(getDeviceState()!=2)
+    barChartHospitalisations(cantons[i]); //dont do it on mobiles
   }
   //console.log("End Single Cantons");
 }
@@ -1278,7 +1279,7 @@ function getNumConf(canton, date, variable) {
 }
 
 var dateNOW = new Date();
-dateNOW.setDate(dateNOW.getDate()-60);
+dateNOW.setDate(dateNOW.getDate()-30);
 function getDateForMode(mode) {
   switch(mode) {
     case 0:
@@ -1298,7 +1299,7 @@ function filterCases(place, mode) {
     var referenceDate = getDateForMode(mode);
     moreFilteredData = moreFilteredData.filter(function(d) {
       var dateSplit = d.date.split("-");
-      var day = parseInt(dateSplit[2]);
+      var day = parseInt(dateSplit[2])+1; //So we dont get 0 for first diff
       var month = parseInt(dateSplit[1])-1;
       var year = parseInt(dateSplit[0]);
       var date = new Date(year,month,day);
@@ -1316,6 +1317,9 @@ function filterCases(place, mode) {
   var cases = moreFilteredData.map(function(d) {return d.ncumul_conf});
   var diff = [0];
   for (var i = 1; i < cases.length; i++) diff.push(cases[i] - cases[i - 1]);
+  dateLabels.splice(0,1);
+  cases.splice(0,1);
+  diff.splice(0,1);
   return {
     "cases": cases,
     "dateLabels": dateLabels,
@@ -1377,19 +1381,22 @@ function barChartCases(place) {
           label: function(tooltipItems, data) {
             var index = tooltipItems.index;
             var value = filter.cases[index];
-            var changeStr = "";
+            var change;
             if(index>0) {
-                var change = parseInt(value)-parseInt(filter.cases[index-1]);
-                var label = change>0 ? "+"+change : change;
-                changeStr = " ("+label+")";
+                change = parseInt(value)-parseInt(filter.cases[index-1]);
             }
+            else {
+                change = parseInt(tooltipItems.value);
+            }
+            var label = change>0 ? "+"+change : change;
+            var changeStr = " ("+label+")";
             return value+changeStr;
           }
         }
       },
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
-        datalabels: (getDeviceState()==2) ? false :
+        datalabels:
         {
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
@@ -1723,7 +1730,7 @@ function setLanguageNav() {
 function addFilterLengthButtons(elementAfter, chart, place) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addFilterLengthButton(div, chart, _('Letzte 60 Tage'), 2, getDeviceState()==2, place);
+  if(getDeviceState()==2) addFilterLengthButton(div, chart, _('Letzte 30 Tage'), 2, getDeviceState()==2, place);
   addFilterLengthButton(div, chart, _('Ab Juni'), 1, getDeviceState()!=2, place);
   addFilterLengthButton(div, chart, _('Ab März'), 0, false, place);
   elementAfter.before(div);
@@ -1745,12 +1752,15 @@ function addFilterLengthButton(container, chart, name, mode, isActive, place) {
       label: function(tooltipItems, data) {
         var index = tooltipItems.index;
         var value = filter.cases[index];
-        var changeStr = "";
+        var change;
         if(index>0) {
-            var change = parseInt(value)-parseInt(filter.cases[index-1]);
-            var label = change>0 ? "+"+change : change;
-            changeStr = " ("+label+")";
+            change = parseInt(value)-parseInt(filter.cases[index-1]);
         }
+        else {
+            change = parseInt(tooltipItems.value);
+        }
+        var label = change>0 ? "+"+change : change;
+        var changeStr = " ("+label+")";
         return value+changeStr;
       }
     };
