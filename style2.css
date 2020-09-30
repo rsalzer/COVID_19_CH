@@ -317,11 +317,11 @@ button {
 @media (max-width: 660px) {
 	canvas {
 	  width: 100%;
-		min-width: 900px;
+		min-width: 1500px;
 	}
 	.chartButtons {
 		overflow-x: scroll;
-		min-width: 900px;
+		min-width: 1500px;
 		width: 100%;
 	    clear: both;
 	}
