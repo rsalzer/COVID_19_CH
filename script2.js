@@ -1605,7 +1605,7 @@ function getScales(short) {
       position: 'right',
       ticks: {
         beginAtZero: true,
-        suggestedMax: 5,
+        suggestedMax: 7,
       },
       gridLines: {
           color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
