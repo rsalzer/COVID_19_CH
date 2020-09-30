@@ -454,7 +454,10 @@ function processActualData() {
     var yesterday = lastData.filter(d => d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl)[0];
     var casesYesterday = parseInt(yesterday.ncumul_conf);
     var diff = "";
-    if(actual.date == "2020-09-28") {
+    var timeNow = new Date();
+    timeNow.setMinutes(timeNow.getMinutes()-timeNow.getTimezoneOffset()); //correct offset to UTC
+    timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
+    if(actual.date == timeNow.toISOString().substring(0,10)) {
       var diff = parseInt(now) - casesYesterday;
       diffTotal += diff;
     }
