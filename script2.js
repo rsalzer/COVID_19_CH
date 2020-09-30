@@ -934,7 +934,7 @@ function barChartAllCH() {
           }
         }
       },
-      scales: getScales(false),
+      scales: getScales(0),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -1078,7 +1078,7 @@ function barChartAllCHDeaths() {
           }
         }
       },
-      scales: getScales(false),
+      scales: getScales(0),
       plugins: {
         datalabels: getDataLabels()
         }
@@ -1214,7 +1214,7 @@ function barChartAllCHHospitalisations() {
           }
         }
       },
-      scales: getScales(false),
+      scales: getScales(0),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -1277,12 +1277,25 @@ function getNumConf(canton, date, variable) {
   // return obj;
 }
 
-function filterCases(place, short) {
+var dateNOW = new Date();
+dateNOW.setDate(dateNOW.getDate()-60);
+function getDateForMode(mode) {
+  switch(mode) {
+    case 0:
+      return new Date("2020-02-24T23:00:00");
+    case 1:
+      return new Date("2020-05-31T23:00:00");
+    case 2:
+      return dateNOW;
+  }
+}
+
+function filterCases(place, mode) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
   if(!filteredData || filteredData.length<2) return;
   var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
-  if(short) {
-    var referenceDate = new Date("2020-05-31T23:00:00");
+  if(mode!=0) {
+    var referenceDate = getDateForMode(mode);
     moreFilteredData = moreFilteredData.filter(function(d) {
       var dateSplit = d.date.split("-");
       var day = parseInt(dateSplit[2]);
@@ -1339,7 +1352,7 @@ function barChartCases(place) {
   article.appendChild(div);
   section.appendChild(article);
   div.scrollLeft = 1700;
-  var filter = filterCases(place, true);
+  var filter = filterCases(place, (getDeviceState()==2) ? 2 : 1);
   var chart = new Chart(canvas.id, {
     type: 'bar',
     options: {
@@ -1374,7 +1387,7 @@ function barChartCases(place) {
           }
         }
       },
-      scales: getScales(true),
+      scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
         datalabels: (getDeviceState()==2) ? false :
         {
@@ -1568,7 +1581,7 @@ function barChartHospitalisations(place) {
           }
         }
       },
-      scales: getScales(true),
+      scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
         datalabels: false
       }
@@ -1581,7 +1594,7 @@ function barChartHospitalisations(place) {
 
 }
 
-function getScales(short) {
+function getScales(mode) {
   return {
     xAxes: [{
       type: 'time',
@@ -1593,7 +1606,7 @@ function getScales(short) {
         }
       },
       ticks: {
-        min: short ? new Date("2020-05-31T23:00:00") : new Date("2020-02-24T23:00:00"),
+        min: getDateForMode(mode),
         max: new Date(),
       },
       gridLines: {
@@ -1710,12 +1723,13 @@ function setLanguageNav() {
 function addFilterLengthButtons(elementAfter, chart, place) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addFilterLengthButton(div, chart, _('Ab Juni'), true, true, place);
-  addFilterLengthButton(div, chart, _('Ab März'), false, false, place);
+  addFilterLengthButton(div, chart, _('Letzte 60 Tage'), 2, getDeviceState()==2, place);
+  addFilterLengthButton(div, chart, _('Ab Juni'), 1, getDeviceState()!=2, place);
+  addFilterLengthButton(div, chart, _('Ab März'), 0, false, place);
   elementAfter.before(div);
 }
 
-function addFilterLengthButton(container, chart, name, short, isActive, place) {
+function addFilterLengthButton(container, chart, name, mode, isActive, place) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
@@ -1723,10 +1737,10 @@ function addFilterLengthButton(container, chart, name, short, isActive, place) {
   button.addEventListener('click', function() {
     this.classList.add('active');
     getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
-    var filter = filterCases(place, short);
+    var filter = filterCases(place, mode);
     chart.data.labels = filter.dateLabels;
     chart.data.datasets[0].data = filter.diff;
-    chart.options.scales.xAxes[0].ticks.min = short ? new Date("2020-05-31T23:00:00") : new Date("2020-02-24T23:00:00");
+    chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = {
       label: function(tooltipItems, data) {
         var index = tooltipItems.index;
@@ -1740,7 +1754,7 @@ function addFilterLengthButton(container, chart, name, short, isActive, place) {
         return value+changeStr;
       }
     };
-    chart.options.plugins.datalabels = (!short || getDeviceState()==2) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
   });
   container.append(button);
