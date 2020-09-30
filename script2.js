@@ -1371,7 +1371,7 @@ function barChartCases(place) {
       },
       scales: getScales(true),
       plugins: {
-        datalabels:
+        datalabels: (getDeviceState()==2) ? false :
         {
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
@@ -1735,7 +1735,7 @@ function addFilterLengthButton(container, chart, name, short, isActive, place) {
         return value+changeStr;
       }
     };
-    chart.options.plugins.datalabels = !short ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.options.plugins.datalabels = (!short || getDeviceState()==2) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
   });
   container.append(button);
