@@ -99,7 +99,7 @@ document.getElementById("loaded").style.display = 'none';
 
 setLanguageNav();
 
-console.log("START");
+//console.log("START");
 getCanton(0);
 var worldData;
 function getWorldData(chTotal) {
@@ -344,12 +344,7 @@ function getCanton(i) {
             var year = splitDate[2];
             csvdata[x].date = year+"-"+month+"-"+day;
           }
-          var dateSplit = csvdata[x].date.split("-");
-          var month = parseInt(dateSplit[1])-1;
-          var year = parseInt(dateSplit[0]);
-          var day = parseInt(dateSplit[2]);
-          if(month>=6 || (month==5 && day >=3) || year >=2021)
-            data.push(csvdata[x]);
+          data.push(csvdata[x]);
         }
         var latestData = csvdata[csvdata.length-1];
         var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased && d.ncumul_deceased!="") return d});
@@ -395,7 +390,6 @@ function getCanton(i) {
 }
 
 function processData() {
-  console.log("Start Processing");
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
   var start = new Date();
@@ -416,7 +410,7 @@ function processData() {
     barChartCases(cantons[i]);
     barChartHospitalisations(cantons[i]);
   }
-  console.log("End Processing");
+  //console.log("End Single Cantons");
 }
 
 function processActualData() {
@@ -822,7 +816,7 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
 }
 
 function barChartAllCH() {
-  date = new Date(Date.UTC(2020, 5, 3));
+  date = new Date(Date.UTC(2020, 1, 25));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -940,7 +934,7 @@ function barChartAllCH() {
           }
         }
       },
-      scales: getScales(),
+      scales: getScales(false),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -975,8 +969,7 @@ function barChartAllCH() {
 }
 
 function barChartAllCHDeaths() {
-  //date = new Date(Date.UTC(2020, 1, 25));
-  date = new Date(Date.UTC(2020, 5, 3));
+  date = new Date(Date.UTC(2020, 1, 25));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1085,7 +1078,7 @@ function barChartAllCHDeaths() {
           }
         }
       },
-      scales: getScales(),
+      scales: getScales(false),
       plugins: {
         datalabels: getDataLabels()
         }
@@ -1116,8 +1109,7 @@ function barChartAllCHDeaths() {
 }
 
 function barChartAllCHHospitalisations() {
-  date = new Date(Date.UTC(2020, 5, 3));
-  //date = new Date(Date.UTC(2020, 1, 25));
+  date = new Date(Date.UTC(2020, 1, 25));
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1222,7 +1214,7 @@ function barChartAllCHHospitalisations() {
           }
         }
       },
-      scales: getScales(),
+      scales: getScales(false),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -1285,8 +1277,40 @@ function getNumConf(canton, date, variable) {
   // return obj;
 }
 
-function barChartCases(place) {
+function filterCases(place, short) {
   var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
+  if(!filteredData || filteredData.length<2) return;
+  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
+  if(short) {
+    var referenceDate = new Date("2020-05-31T23:00:00");
+    moreFilteredData = moreFilteredData.filter(function(d) {
+      var dateSplit = d.date.split("-");
+      var day = parseInt(dateSplit[2]);
+      var month = parseInt(dateSplit[1])-1;
+      var year = parseInt(dateSplit[0]);
+      var date = new Date(year,month,day);
+      if(date>referenceDate) return true;
+    });
+  }
+  var dateLabels = moreFilteredData.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    return date;
+  });
+  var cases = moreFilteredData.map(function(d) {return d.ncumul_conf});
+  var diff = [0];
+  for (var i = 1; i < cases.length; i++) diff.push(cases[i] - cases[i - 1]);
+  return {
+    "cases": cases,
+    "dateLabels": dateLabels,
+    "diff": diff
+  }
+}
+
+function barChartCases(place) {
   var section = document.getElementById("detail");
   var article = document.createElement("article");
   article.id="detail_"+place;
@@ -1304,35 +1328,15 @@ function barChartCases(place) {
   div.className = "canvas-dummy";
   div.id = "container_"+place;
   var canvas = document.createElement("canvas");
-  //canvas.className  = "myClass";
-  if(filteredData.length==0) {
-    div.appendChild(document.createTextNode(_("Keine Daten")));
-  }
-  else if(filteredData.length==1) {
-    div.appendChild(document.createTextNode(_("Ein Datensatz")+": "+filteredData[0].ncumul_conf+" " + _("Fälle am")+" "+filteredData[0].date));
-  }
-  else {
-    canvas.id = place;
-    canvas.height=250;
-    //canvas.width=350+filteredData.length*40;
-    div.appendChild(canvas);
-  }
+  canvas.id = place;
+  canvas.height=250;
+  div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
   div.scrollLeft = 1700;
-  if(!filteredData || filteredData.length<2) return;
-  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
-  var dateLabels = moreFilteredData.map(function(d) {
-    var dateSplit = d.date.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var date = new Date(year,month,day);
-    return date;
-  });
-  var cases = moreFilteredData.map(function(d) {return d.ncumul_conf});
+  var filter = filterCases(place, true);
   var chart = new Chart(canvas.id, {
-    type: 'line',
+    type: 'bar',
     options: {
       layout: {
           padding: {
@@ -1353,11 +1357,11 @@ function barChartCases(place) {
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
           label: function(tooltipItems, data) {
-            var value = tooltipItems.value;
             var index = tooltipItems.index;
+            var value = filter.cases[index];
             var changeStr = "";
             if(index>0) {
-                var change = parseInt(value)-parseInt(cases[index-1]);
+                var change = parseInt(value)-parseInt(filter.cases[index-1]);
                 var label = change>0 ? "+"+change : change;
                 changeStr = " ("+label+")";
             }
@@ -1365,16 +1369,22 @@ function barChartCases(place) {
           }
         }
       },
-      scales: getScales(),
+      scales: getScales(true),
       plugins: {
-        datalabels: getDataLabels()
+        datalabels:
+        {
+          color: inDarkMode() ? '#ccc' : 'black',
+          font: {
+            weight: 'bold'
+          }
+        }
       }
   },
   data: {
-    labels: dateLabels,
+    labels: filter.dateLabels,
     datasets: [
       {
-        data: cases,
+        data: filter.diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
@@ -1389,7 +1399,7 @@ function barChartCases(place) {
   }
 });
 
-  addAxisButtons(canvas, chart);
+  addFilterLengthButtons(canvas, chart, place);
 }
 
 function barChartHospitalisations(place) {
@@ -1471,6 +1481,7 @@ function barChartHospitalisations(place) {
       }
     });
   }
+  /*
   var filteredForIsolated = moreFilteredData.filter(function(d) { if(d.current_isolated!="") return d});
   if(filteredForIsolated.length>0) {
     var casesIsolated = moreFilteredData.map(function(d) {if(d.current_isolated=="") return null; return d.current_isolated});
@@ -1505,6 +1516,7 @@ function barChartHospitalisations(place) {
       }
     });
   }
+  */
   var chart = new Chart(canvas.id, {
     type: 'line',
     options: {
@@ -1551,7 +1563,7 @@ function barChartHospitalisations(place) {
           }
         }
       },
-      scales: getScales(),
+      scales: getScales(true),
       plugins: {
         datalabels: false
       }
@@ -1562,10 +1574,9 @@ function barChartHospitalisations(place) {
     }
   });
 
-  addAxisButtons(canvas, chart);
 }
 
-function getScales() {
+function getScales(short) {
   return {
     xAxes: [{
       type: 'time',
@@ -1577,7 +1588,7 @@ function getScales() {
         }
       },
       ticks: {
-        min: new Date("2020-06-02T23:00:00"),
+        min: short ? new Date("2020-05-31T23:00:00") : new Date("2020-02-24T23:00:00"),
         max: new Date(),
       },
       gridLines: {
@@ -1689,6 +1700,45 @@ function setLanguageNav() {
   }
   li.innerHTML = '<a href="'+href+'">EN</a>';
   ul.appendChild(li);
+}
+
+function addFilterLengthButtons(elementAfter, chart, place) {
+  var div = document.createElement('div');
+  div.className = "chartButtons";
+  addFilterLengthButton(div, chart, _('Ab Juni'), true, true, place);
+  addFilterLengthButton(div, chart, _('Ab März'), false, false, place);
+  elementAfter.before(div);
+}
+
+function addFilterLengthButton(container, chart, name, short, isActive, place) {
+  var button = document.createElement('button');
+  button.className = "chartButton";
+  if (isActive) button.classList.add('active');
+  button.innerHTML = name;
+  button.addEventListener('click', function() {
+    this.classList.add('active');
+    getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
+    var filter = filterCases(place, short);
+    chart.data.labels = filter.dateLabels;
+    chart.data.datasets[0].data = filter.diff;
+    chart.options.scales.xAxes[0].ticks.min = short ? new Date("2020-05-31T23:00:00") : new Date("2020-02-24T23:00:00");
+    chart.options.tooltips.callbacks = {
+      label: function(tooltipItems, data) {
+        var index = tooltipItems.index;
+        var value = filter.cases[index];
+        var changeStr = "";
+        if(index>0) {
+            var change = parseInt(value)-parseInt(filter.cases[index-1]);
+            var label = change>0 ? "+"+change : change;
+            changeStr = " ("+label+")";
+        }
+        return value+changeStr;
+      }
+    };
+    chart.options.plugins.datalabels = !short ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.update(0);
+  });
+  container.append(button);
 }
 
 function addAxisButtons(elementAfter, chart) {
