@@ -408,7 +408,7 @@ function processData() {
   // console.log("End Hosp CH");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
-    barChartHospitalisations(cantons[i]);
+    if(getDeviceState()!=2) barChartHospitalisations(cantons[i]); //dont do it on mobiles
   }
   //console.log("End Single Cantons");
 }
