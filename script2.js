@@ -1329,7 +1329,12 @@ function barChartCases(place) {
   div.id = "container_"+place;
   var canvas = document.createElement("canvas");
   canvas.id = place;
-  canvas.height=250;
+  if(getDeviceState()==2) {
+    canvas.height=200;
+  }
+  else {
+    canvas.height=250;
+  }
   div.appendChild(canvas);
   article.appendChild(div);
   section.appendChild(article);
@@ -1600,7 +1605,7 @@ function getScales(short) {
       position: 'right',
       ticks: {
         beginAtZero: true,
-        suggestedMax: 10,
+        suggestedMax: 5,
       },
       gridLines: {
           color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
