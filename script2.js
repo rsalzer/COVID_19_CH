@@ -817,7 +817,7 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
 }
 
 function barChartAllCH() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  date = getDateForMode(1);
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -935,7 +935,7 @@ function barChartAllCH() {
           }
         }
       },
-      scales: getScales(0),
+      scales: getScales(1),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -970,7 +970,7 @@ function barChartAllCH() {
 }
 
 function barChartAllCHDeaths() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  date = getDateForMode(1);
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1079,7 +1079,7 @@ function barChartAllCHDeaths() {
           }
         }
       },
-      scales: getScales(0),
+      scales: getScales(1),
       plugins: {
         datalabels: getDataLabels()
         }
@@ -1110,7 +1110,7 @@ function barChartAllCHDeaths() {
 }
 
 function barChartAllCHHospitalisations() {
-  date = new Date(Date.UTC(2020, 1, 25));
+  date = getDateForMode(1);
   var now = new Date();
   //alert(now.toISOString());
   var dataPerDay = [];
@@ -1215,7 +1215,7 @@ function barChartAllCHHospitalisations() {
           }
         }
       },
-      scales: getScales(0),
+      scales: getScales(1),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -1283,9 +1283,11 @@ dateNOW.setDate(dateNOW.getDate()-30);
 function getDateForMode(mode) {
   switch(mode) {
     case 0:
-      return new Date("2020-02-24T23:00:00");
+      //return new Date("2020-02-24T23:00:00");
+      return new Date(Date.UTC(2020,1,25))
     case 1:
-      return new Date("2020-05-31T23:00:00");
+      //return new Date("2020-05-31T23:00:00");
+      return new Date(Date.UTC(2020,5,2))
     case 2:
       return dateNOW;
   }
