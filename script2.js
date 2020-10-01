@@ -408,8 +408,6 @@ function processData() {
   // console.log("End Hosp CH");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
-    //if(getDeviceState()!=2)
-    barChartHospitalisations(cantons[i]); //dont do it on mobiles
   }
   //console.log("End Single Cantons");
 }
@@ -1322,10 +1320,61 @@ function filterCases(place, mode) {
   dateLabels.splice(0,1);
   cases.splice(0,1);
   diff.splice(0,1);
+  //Hospitalisations:
+  var datasets = [];
+  var casesHosp = moreFilteredData.map(function(d) {if(d.current_hosp=="") return null; return d.current_hosp});
+  datasets.push({
+    label: _('Hospitalisiert'),
+    data: casesHosp,
+    fill: false,
+    cubicInterpolationMode: 'monotone',
+    spanGaps: true,
+    borderColor: '#CCCC00',
+    backgroundColor: '#CCCC00',
+    datalabels: {
+      align: 'end',
+      anchor: 'end'
+    }
+  });
+  var filteredForICU = moreFilteredData.filter(function(d) { if(d.current_icu!="") return d});
+  if(filteredForICU.length>0) {
+    var casesICU = moreFilteredData.map(function(d) {if(d.current_icu=="") return null; return d.current_icu});
+    datasets.push({
+      label: _('In Intensivbehandlung'),
+      data: casesICU,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#CF5F5F',
+      backgroundColor: '#CF5F5F',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
+  var filteredForVent = moreFilteredData.filter(function(d) { if(d.current_vent!="") return d});
+  if(filteredForVent.length>0) {
+    var casesVent = moreFilteredData.map(function(d) {if(d.current_vent=="") return null; return d.current_vent});
+    datasets.push({
+      label: _('Künstlich beatmet'),
+      data: casesVent,
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      borderColor: '#115F5F',
+      backgroundColor: '#115F5F',
+      datalabels: {
+        align: 'end',
+        anchor: 'end'
+      }
+    });
+  }
   return {
     "cases": cases,
     "dateLabels": dateLabels,
-    "diff": diff
+    "diff": diff,
+    "datasets": datasets
   }
 }
 
@@ -1426,125 +1475,11 @@ function barChartCases(place) {
   }
 });
 
-  addFilterLengthButtons(canvas, chart, place);
-}
-
-function barChartHospitalisations(place) {
-  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
-  var hospitalFiltered = filteredData.filter(function(d) { if(d.current_hosp!="") return d});
-  if(hospitalFiltered.length==0) return;
-  var div = document.getElementById("container_"+place);
-  var canvas = document.createElement("canvas");
-  //canvas.className  = "myClass";
-  if(filteredData.length==1) {
-    var text = filteredData[0].date+": "+filteredData[0].current_hosp+" hospitalisiert";
-    if(filteredData[0].current_icu!="") text+=" , "+filteredData[0].current_icu+" in Intensivbehandlung";
-    if(filteredData[0].current_vent!="") text+=" , "+filteredData[0].current_vent+" künstlich beatmet";
-    div.appendChild(document.createElement("br"));
-    div.appendChild(document.createTextNode(text));
-  }
-  else {
-    canvas.id = "hosp"+place;
-    canvas.height=250;
-    div.appendChild(canvas);
-    //canvas.width=350+filteredData.length*40;
-  }
-  if(!filteredData || filteredData.length<2) return;
-  var moreFilteredData = filteredData; //.filter(function(d) { if(d.ncumul_conf!="") return d});
-  var dateLabels = moreFilteredData.map(function(d) {
-    var dateSplit = d.date.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var date = new Date(year,month,day);
-    return date;
-  });
-  var datasets = [];
-  var casesHosp = moreFilteredData.map(function(d) {if(d.current_hosp=="") return null; return d.current_hosp});
-  datasets.push({
-    label: _('Hospitalisiert'),
-    data: casesHosp,
-    fill: false,
-    cubicInterpolationMode: 'monotone',
-    spanGaps: true,
-    borderColor: '#CCCC00',
-    backgroundColor: '#CCCC00',
-    datalabels: {
-      align: 'end',
-      anchor: 'end'
-    }
-  });
-  var filteredForICU = moreFilteredData.filter(function(d) { if(d.current_icu!="") return d});
-  if(filteredForICU.length>0) {
-    var casesICU = moreFilteredData.map(function(d) {if(d.current_icu=="") return null; return d.current_icu});
-    datasets.push({
-      label: _('In Intensivbehandlung'),
-      data: casesICU,
-      fill: false,
-      cubicInterpolationMode: 'monotone',
-      spanGaps: true,
-      borderColor: '#CF5F5F',
-      backgroundColor: '#CF5F5F',
-      datalabels: {
-        align: 'end',
-        anchor: 'end'
-      }
-    });
-  }
-  var filteredForVent = moreFilteredData.filter(function(d) { if(d.current_vent!="") return d});
-  if(filteredForVent.length>0) {
-    var casesVent = moreFilteredData.map(function(d) {if(d.current_vent=="") return null; return d.current_vent});
-    datasets.push({
-      label: _('Künstlich beatmet'),
-      data: casesVent,
-      fill: false,
-      cubicInterpolationMode: 'monotone',
-      spanGaps: true,
-      borderColor: '#115F5F',
-      backgroundColor: '#115F5F',
-      datalabels: {
-        align: 'end',
-        anchor: 'end'
-      }
-    });
-  }
-  /*
-  var filteredForIsolated = moreFilteredData.filter(function(d) { if(d.current_isolated!="") return d});
-  if(filteredForIsolated.length>0) {
-    var casesIsolated = moreFilteredData.map(function(d) {if(d.current_isolated=="") return null; return d.current_isolated});
-    datasets.push({
-      label: _('In Isolation'),
-      data: casesIsolated,
-      fill: false,
-      cubicInterpolationMode: 'monotone',
-      spanGaps: true,
-      borderColor: '#AF5500',
-      backgroundColor: '#AF5500',
-      datalabels: {
-        align: 'end',
-        anchor: 'end'
-      }
-    });
-  }
-  var filteredForQuarantined = moreFilteredData.filter(function(d) { if(d.current_quarantined!="") return d});
-  if(filteredForQuarantined.length>0) {
-    var casesQuarantined = moreFilteredData.map(function(d) {if(d.current_quarantined=="") return null; return d.current_quarantined});
-    datasets.push({
-      label: _('In Quarantäne'),
-      data: casesQuarantined,
-      fill: false,
-      cubicInterpolationMode: 'monotone',
-      spanGaps: true,
-      borderColor: '#3333AA',
-      backgroundColor: '#3333AA',
-      datalabels: {
-        align: 'end',
-        anchor: 'end'
-      }
-    });
-  }
-  */
-  var chart = new Chart(canvas.id, {
+  var canvas2 = document.createElement("canvas");
+  canvas2.id = "hosp"+place;
+  canvas2.height=250;
+  div.appendChild(canvas2);
+  var chartHosp = new Chart(canvas2.id, {
     type: 'line',
     options: {
       responsive: false,
@@ -1596,11 +1531,11 @@ function barChartHospitalisations(place) {
       }
     },
     data: {
-      labels: dateLabels,
-      datasets: datasets
+      labels: filter.dateLabels,
+      datasets: filter.datasets
     }
   });
-
+  addFilterLengthButtons(canvas, place, chart, chartHosp);
 }
 
 function getScales(mode) {
@@ -1729,16 +1664,16 @@ function setLanguageNav() {
   ul.appendChild(li);
 }
 
-function addFilterLengthButtons(elementAfter, chart, place) {
+function addFilterLengthButtons(elementAfter, place, chart, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  if(getDeviceState()==2) addFilterLengthButton(div, chart, _('Letzte 30 Tage'), 2, getDeviceState()==2, place);
-  addFilterLengthButton(div, chart, _('Ab Juni'), 1, getDeviceState()!=2, place);
-  addFilterLengthButton(div, chart, _('Ab März'), 0, false, place);
+  if(getDeviceState()==2) addFilterLengthButton(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp);
+  addFilterLengthButton(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp);
+  addFilterLengthButton(div, place, _('Ab März'), 0, false, chart, chartHosp);
   elementAfter.before(div);
 }
 
-function addFilterLengthButton(container, chart, name, mode, isActive, place) {
+function addFilterLengthButton(container, place, name, mode, isActive, chart, chartHosp) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
@@ -1768,6 +1703,11 @@ function addFilterLengthButton(container, chart, name, mode, isActive, place) {
     };
     chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
+
+    chartHosp.data.labels = filter.dateLabels;
+    chartHosp.data.datasets = filter.datasets;
+    chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
+    chartHosp.update(0);
   });
   container.append(button);
 }
