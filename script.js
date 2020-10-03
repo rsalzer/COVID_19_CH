@@ -453,7 +453,7 @@ function processActualData() {
     timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
     if(actual.date == timeNow.toISOString().substring(0,10)) {
       var diff = parseInt(now) - casesYesterday;
-      diffTotal += diff;
+      if(actual.abbreviation_canton_and_fl!="FL") diffTotal += diff;
     }
     td.appendChild(document.createTextNode(diff));
     tr.appendChild(td);
