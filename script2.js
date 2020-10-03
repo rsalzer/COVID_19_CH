@@ -402,7 +402,6 @@ function processData() {
   // console.log("Start All CH");
   barChartAllCH();
   // console.log("End All CH / Start Deaths");
-  barChartAllCHDeaths();
   // console.log("End Deaths CH / Start Hosp");
   barChartAllCHHospitalisations();
   // console.log("End Hosp CH");
@@ -736,9 +735,9 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
     };
 }
 
-function barChartAllCH() {
-  date = new Date();
-  date.setTime(getDateForMode((getDeviceState()==2) ? 2 : 1).getTime());
+function filterAllCH(mode) {
+  var date = new Date();
+  date.setTime(getDateForMode(mode).getTime());
   date.setDate(date.getDate()-1); //3.6. is better as start...
   var now = new Date();
   now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
@@ -756,34 +755,136 @@ function barChartAllCH() {
     singleDayObject.data = [];
     for(var i=0; i<cantons.length-1; i++) { //without FL
       var canton = cantons[i];
-      var cantonTotal = getNumConf(canton, date, "ncumul_conf");
+      var cantonTotal = getDataForDay(canton, date);
       if(cantonTotal==null) {
         if(dataPerDay.length>0) {
           cantonTotal = Object.assign({}, dataPerDay[dataPerDay.length-1].data[i]);
-          cantonTotal.diff = null;
+          cantonTotal.diff_ncumul_deceased = null;
+          cantonTotal.diff_ncumul_conf = null;
         }
         else {
           cantonTotal = {
             canton: canton,
             date: _("Keine Daten"),
-            ncumul_conf: 0
+            ncumul_conf: 0,
+            ncumul_deceased: 0
           };
         }
       }
       else if(dataPerDay.length>0){
-          cantonTotal.diff = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
+          cantonTotal.diff_ncumul_conf = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
+          if(Number.isNaN(cantonTotal.ncumul_deceased)) {
+            cantonTotal.ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased
+            cantonTotal.diff_ncumul_deceased = null;
+          }
+          else {
+            cantonTotal.diff_ncumul_deceased = cantonTotal.ncumul_deceased - dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
+          }
       }
       singleDayObject.data.push(cantonTotal);
     }
-    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
-    singleDayObject.total = total;
-    var diffTotal = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff; }, 0);
-    singleDayObject.diffTotal = diffTotal;
+    singleDayObject.total_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
+    singleDayObject.total_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_deceased; }, 0);
+    singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff_ncumul_conf; }, 0);
+    singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff_ncumul_deceased; }, 0);
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
   }
+  dataPerDay.splice(0,3);
+  var dateLabels = dataPerDay.map(function(d) {
+    var dateSplit = d.date.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var date = new Date(year,month,day);
+    return date;
+  });
+  return {
+    "dataPerDay": dataPerDay,
+    "dateLabels": dateLabels
+  }
+  alert("Finished Filter CH");
+}
+
+function addFilterLengthButtonsCH(elementAfter, chart, chartDeaths) {
+  var place = "CH";
+  var div = document.createElement('div');
+  div.className = "chartButtons";
+  if(getDeviceState()==2) addFilterLengthButtonCH(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartDeaths);
+  addFilterLengthButtonCH(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartDeaths);
+  addFilterLengthButtonCH(div, place, _('Ab März'), 0, false, chart, chartDeaths);
+  elementAfter.before(div);
+}
+
+function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, chartDeaths) {
+  var button = document.createElement('button');
+  button.className = "chartButton";
+  if (isActive) button.classList.add('active');
+  button.innerHTML = name;
+  button.addEventListener('click', function() {
+    this.classList.add('active');
+    getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
+    var filter = filterAllCH(mode);
+    var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
+    chart.data.labels = filter.dateLabels;
+    chart.data.datasets[0].data = diff;
+    chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
+    chart.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_conf");
+    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.update(0);
+
+    var deathDiff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
+    chartDeaths.data.labels = filter.dateLabels;
+    chartDeaths.data.datasets[0].data = deathDiff;
+    chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
+    chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
+    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartDeaths.update(0);
+
+    // chartHosp.data.labels = filter.dateLabels;
+    // chartHosp.data.datasets = filter.datasets;
+    // chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
+    // chartHosp.update(0);
+  });
+  container.append(button);
+}
+
+function getCHCallbacks(filter, variable) {
+  return {
+    label: function(tooltipItems, data) {
+      var value = tooltipItems.value;
+      var index = tooltipItems.index;
+      var totalPerDay = filter.dataPerDay[index]["total_"+variable];
+      var changeStr = "";
+      var tabbing = 6-(""+totalPerDay).length;
+      var padding = " ".repeat(tabbing);
+      return padding+totalPerDay+"        Diff: "+value;
+    },
+    afterBody: function(tooltipItems, data) {
+      //console.log(tooltipItems);
+      //console.log(data);
+      multistringText = [""];
+      var index = tooltipItems[0].index;
+      var dataForThisDay = filter.dataPerDay[index];
+      var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b[variable]-a[variable]});
+      sorted.forEach(function(item) {
+        var tabbing = 5-(""+item[variable]).length;
+        var padding = " ".repeat(tabbing);
+        var diffStr = item["diff_"+variable]!=null?item["diff_"+variable]:""
+        multistringText.push(item.canton+":"+padding+item[variable]+" ("+item.date+") "+diffStr);
+      });
+
+      return multistringText;
+    }
+  };
+}
+
+function barChartAllCH() {
   // console.log("End preping CH cases");
   //console.log(dataPerDay);
+  var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
+  var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
+
   var place = "CH";
   var section = document.getElementById("detail");
   var article = document.createElement("article");
@@ -803,18 +904,6 @@ function barChartAllCH() {
   article.appendChild(div);
   section.appendChild(article);
   div.scrollLeft = 1700;
-  var dateLabels = dataPerDay.map(function(d) {
-    var dateSplit = d.date.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var date = new Date(year,month,day);
-    return date;
-  });
-  var diff = dataPerDay.map(function(d) {return d.diffTotal});
-  dateLabels.splice(0,3);
-  diff.splice(0,3);
-  dataPerDay.splice(0,3);
   var chart = new Chart(canvas.id, {
     type: 'bar',
     options: {
@@ -837,33 +926,7 @@ function barChartAllCH() {
         position : 'custom',
         caretSize: 0,
         bodyFontFamily: 'IBM Plex Mono',
-        callbacks: {
-          label: function(tooltipItems, data) {
-            var value = tooltipItems.value;
-            var index = tooltipItems.index;
-            var totalPerDay = dataPerDay[index].total;
-            var changeStr = "";
-            var tabbing = 6-(""+totalPerDay).length;
-            var padding = " ".repeat(tabbing);
-            return padding+totalPerDay+"        Diff: "+value;
-          },
-          afterBody: function(tooltipItems, data) {
-            //console.log(tooltipItems);
-            //console.log(data);
-            multistringText = [""];
-            var index = tooltipItems[0].index;
-            var dataForThisDay = dataPerDay[index];
-            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
-            sorted.forEach(function(item) {
-              var tabbing = 5-(""+item.ncumul_conf).length;
-              var padding = " ".repeat(tabbing);
-              var diffStr = item.diff!=null?item.diff:""
-              multistringText.push(item.canton+":"+padding+item.ncumul_conf+" ("+item.date+") "+diffStr);
-            });
-
-            return multistringText;
-          }
-        }
+        callbacks: getCHCallbacks(filter, "ncumul_conf")
       },
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
@@ -876,7 +939,7 @@ function barChartAllCH() {
       }
   },
   data: {
-    labels: dateLabels,
+    labels: filter.dateLabels,
     datasets: [
       {
         data: diff,
@@ -902,44 +965,13 @@ function barChartAllCH() {
   }
 });
 
-  addAxisButtons(canvas, chart);
+  var chartDeaths = barChartAllCHDeaths(filter);
+  addFilterLengthButtonsCH(canvas, chart, chartDeaths);
 }
 
-function barChartAllCHDeaths() {
-  date = getDateForMode(1);
-  var now = new Date();
-  //alert(now.toISOString());
-  var dataPerDay = [];
-  while(date<now) {
-    var dateString = date.toISOString();
-    dateString = dateString.substring(0,10);
-    if (verbose) {
-      console.log(dateString);
-    }
-    var singleDayObject = {};
-    singleDayObject.date = dateString;
-    singleDayObject.data = [];
-    for(var i=0; i<cantons.length-1; i++) { //without FL
-      var canton = cantons[i];
-      var cantonTotal = getNumConf(canton, date, "ncumul_deceased");
-      if(cantonTotal==null) {
-        if(dataPerDay.length>0)
-          cantonTotal = dataPerDay[dataPerDay.length-1].data[i];
-        else {
-          cantonTotal = {
-            canton: canton,
-            date: _("Keine Daten"),
-            ncumul_deceased: 0
-          };
-        }
-      }
-      singleDayObject.data.push(cantonTotal);
-    }
-    var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_deceased; }, 0);
-    singleDayObject.total = total;
-    dataPerDay.push(singleDayObject);
-    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
-  }
+function barChartAllCHDeaths(filter) {
+  var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
+
   //console.log(dataPerDay);
   var place = "CH";
   var section = document.getElementById("detail");
@@ -948,17 +980,9 @@ function barChartAllCHDeaths() {
   canvas.id = place+"_deaths";
   canvas.height=470;
   div.appendChild(canvas);
-  var dateLabels = dataPerDay.map(function(d) {
-    var dateSplit = d.date.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var date = new Date(year,month,day);
-    return date;
-  });
-  var cases = dataPerDay.map(function(d) {return d.total});
+
   var chart = new Chart(canvas.id, {
-    type: 'line',
+    type: 'bar',
     options: {
       responsive: false,
       layout: {
@@ -979,52 +1003,23 @@ function barChartAllCHDeaths() {
         position : 'custom',
         caretSize: 0,
         bodyFontFamily: 'IBM Plex Mono',
-        callbacks: {
-          label: function(tooltipItems, data) {
-            var value = tooltipItems.value;
-            var index = tooltipItems.index;
-            var changeStr = "";
-            if(index>0) {
-                var change = parseInt(value)-parseInt(cases[index-1]);
-                var label = change>0 ? "+"+change : change;
-                changeStr = " ("+label+")";
-            }
-            var tabbing = 6-value.length;
-            var padding = " ".repeat(tabbing);
-            return padding+value+changeStr;
-          },
-          afterBody: function(tooltipItems, data) {
-            //console.log(tooltipItems);
-            //console.log(data);
-            multistringText = [""];
-            var index = tooltipItems[0].index;
-            var dataForThisDay = dataPerDay[index];
-            var sorted = Array.from(dataForThisDay.data).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
-            sorted.forEach(function(item) {
-              var tabbing = 5-(""+item.ncumul_deceased).length;
-              var padding = " ".repeat(tabbing);
-              var dateLabel = "";
-              if(index>=dataPerDay.length-2) {
-                if(item.date.charAt(0)!='2') dateLabel = "";
-                else dateLabel = " ("+item.date+")";
-              }
-              multistringText.push(item.canton+":"+padding+item.ncumul_deceased+dateLabel);
-            });
-
-            return multistringText;
-          }
-        }
+        callbacks: getCHCallbacks(filter, "ncumul_deceased")
       },
       scales: getScales(1),
       plugins: {
-        datalabels: getDataLabels()
+        datalabels: {
+          color: inDarkMode() ? '#ccc' : 'black',
+          font: {
+            weight: 'bold'
+          }
         }
+      }
   },
   data: {
-    labels: dateLabels,
+    labels: filter.dateLabels,
     datasets: [
       {
-        data: cases,
+        data: diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
@@ -1042,7 +1037,7 @@ function barChartAllCHDeaths() {
   }
 });
 
-  addAxisButtons(canvas, chart);
+  return chart;
 }
 
 function barChartAllCHHospitalisations() {
@@ -1178,6 +1173,23 @@ function barChartAllCHHospitalisations() {
   addAxisButtons(canvas, chart);
 }
 
+function getDataForDay(canton, date) {
+  var dateString = date.toISOString();
+  dateString = dateString.substring(0,10);
+  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d.ncumul_conf!="") return d});
+  if(filteredData.length>0) {
+    if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
+    var obj = {
+      canton: canton,
+      date: dateString,
+      ncumul_conf: parseInt(filteredData[filteredData.length-1].ncumul_conf),
+      ncumul_deceased: parseInt(filteredData[filteredData.length-1].ncumul_deceased)
+    };
+    return obj;
+  }
+  return null;
+}
+
 function getNumConf(canton, date, variable) {
   var dateString = date.toISOString();
   dateString = dateString.substring(0,10);
@@ -1192,26 +1204,6 @@ function getNumConf(canton, date, variable) {
     return obj;
   }
   return null;
-  // for(var i=1; i<=50; i++) {
-  //   date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()-1));
-  //   dateString = date.toISOString().substring(0,10);
-  //   filteredData = prefilter.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString && d[variable]!="") return d});
-  //   if(filteredData.length>0) {
-  //     if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
-  //     var obj = {
-  //       canton: canton,
-  //       date: dateString,
-  //     };
-  //     obj[variable] = parseInt(filteredData[filteredData.length-1][variable])
-  //     return obj;
-  //   }
-  // }
-  // var obj = {
-  //   canton: canton,
-  //   date: _("Keine Daten"),
-  // };
-  // obj[variable] = 0;
-  // return obj;
 }
 
 var dateNOW = new Date();
