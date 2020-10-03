@@ -452,7 +452,7 @@ function processActualData() {
     timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
     if(actual.date == timeNow.toISOString().substring(0,10)) {
       var diff = parseInt(now) - casesYesterday;
-      diffTotal += diff;
+      if(actual.abbreviation_canton_and_fl!="FL") diffTotal += diff;
     }
     td.appendChild(document.createTextNode(diff));
     tr.appendChild(td);
@@ -722,84 +722,6 @@ function processActualHospitalisation() {
 
 }
 
-/*
-d3.json('https://api.github.com/repos/openZH/covid_19/commits?path=COVID19_Cases_Cantons_CH_total.csv&page=1&per_page=1', function(error, data) {
-  var lastUpdateDiv = document.getElementById('latestUpdate');
-  lastUpdateDiv.innerHTML = "<i>Letztes Update der offiziellen Daten: "+data[0].commit.committer.date.substring(0,10)+" ("+data[0].commit.message+")</i>";
-});
-*/
-
-/*
-d3.csv('https://raw.githubusercontent.com/daenuprobst/covid19-cases-switzerland/master/covid19_cases_switzerland.csv', function(error, csvdata) {
-  var div = document.getElementById("inofficial");
-  var canvas = document.createElement("canvas");
-  //canvas.className  = "myClass";
-  canvas.id = 'chinofficial';
-  canvas.height=300;
-  canvas.width=300+csvdata.length*30;
-  div.appendChild(canvas);
-  var dateLabels = csvdata.map(function(d) {return d.Date});
-  var testedPos = csvdata.map(function(d) {return d.CH});
-  var chart = new Chart('chinofficial', {
-    type: 'bar',
-    options: {
-      responsive: false,
-      legend: {
-        display: false
-      },
-      title: {
-        display: true,
-        text: _('Unbestätigte Fälle Schweiz')
-      },
-      tooltips: {
-						mode: "index",
-						intersect: true,
-			},
-      scales: {
-        xAxes: [{
-                  stacked: true,
-                  id: "bar-x-axis1"
-                }],
-      yAxes: [{
-        stacked: false,
-        ticks: {
-          beginAtZero: true,
-          suggestedMax: 10,
-        },
-      }]
-  },
-      plugins: {
-        labels: {
-          render: function (args) {
-               var index = args.index;
-               var value = args.value;
-               if(index==0) return "";
-               var lastValue = args.dataset.data[index-1];
-               var percentageChange = value/lastValue - 1;
-               var rounded = Math.round(percentageChange * 100);
-               var label = ""+rounded;
-               if(rounded >= 0) label = "+"+label+"%";
-               else label = "-"+label+"%";
-               return label;
-            }
-          }
-        }
-    },
-    data: {
-      labels: dateLabels,
-      datasets: [
-        {
-          data: testedPos,
-          backgroundColor: '#F15F36',
-          borderWidth: 1,
-          label: "Positiv getestet"
-        }
-      ]
-    }
-  });
-});
-*/
-
 Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- custom is now the new option for the tooltip position
     /** @type {Chart.Tooltip} */
     var tooltip = this;
@@ -815,8 +737,11 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
 }
 
 function barChartAllCH() {
-  date = getDateForMode(1);
+  date = new Date();
+  date.setTime(getDateForMode((getDeviceState()==2) ? 2 : 1).getTime());
+  date.setDate(date.getDate()-1); //3.6. is better as start...
   var now = new Date();
+  now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
   //alert(now.toISOString());
   var dataPerDay = [];
   // console.log("Start preping CH cases");
@@ -833,8 +758,10 @@ function barChartAllCH() {
       var canton = cantons[i];
       var cantonTotal = getNumConf(canton, date, "ncumul_conf");
       if(cantonTotal==null) {
-        if(dataPerDay.length>0)
-          cantonTotal = dataPerDay[dataPerDay.length-1].data[i];
+        if(dataPerDay.length>0) {
+          cantonTotal = Object.assign({}, dataPerDay[dataPerDay.length-1].data[i]);
+          cantonTotal.diff = null;
+        }
         else {
           cantonTotal = {
             canton: canton,
@@ -843,10 +770,15 @@ function barChartAllCH() {
           };
         }
       }
+      else if(dataPerDay.length>0){
+          cantonTotal.diff = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
+      }
       singleDayObject.data.push(cantonTotal);
     }
     var total = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
     singleDayObject.total = total;
+    var diffTotal = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff; }, 0);
+    singleDayObject.diffTotal = diffTotal;
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
   }
@@ -879,9 +811,12 @@ function barChartAllCH() {
     var date = new Date(year,month,day);
     return date;
   });
-  var cases = dataPerDay.map(function(d) {return d.total});
+  var diff = dataPerDay.map(function(d) {return d.diffTotal});
+  dateLabels.splice(0,3);
+  diff.splice(0,3);
+  dataPerDay.splice(0,3);
   var chart = new Chart(canvas.id, {
-    type: 'line',
+    type: 'bar',
     options: {
       responsive: false,
       layout: {
@@ -897,7 +832,7 @@ function barChartAllCH() {
         text: _('Bestätigte Fälle')
       },
       tooltips: {
-        mode: 'nearest',
+        mode: 'index',
         intersect: false,
         position : 'custom',
         caretSize: 0,
@@ -906,15 +841,11 @@ function barChartAllCH() {
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
             var index = tooltipItems.index;
+            var totalPerDay = dataPerDay[index].total;
             var changeStr = "";
-            if(index>0) {
-                var change = parseInt(value)-parseInt(cases[index-1]);
-                var label = change>0 ? "+"+change : change;
-                changeStr = " ("+label+")";
-            }
-            var tabbing = 6-value.length;
+            var tabbing = 6-(""+totalPerDay).length;
             var padding = " ".repeat(tabbing);
-            return padding+value+changeStr;
+            return padding+totalPerDay+"        Diff: "+value;
           },
           afterBody: function(tooltipItems, data) {
             //console.log(tooltipItems);
@@ -926,23 +857,29 @@ function barChartAllCH() {
             sorted.forEach(function(item) {
               var tabbing = 5-(""+item.ncumul_conf).length;
               var padding = " ".repeat(tabbing);
-              multistringText.push(item.canton+":"+padding+item.ncumul_conf+" ("+item.date+")");
+              var diffStr = item.diff!=null?item.diff:""
+              multistringText.push(item.canton+":"+padding+item.ncumul_conf+" ("+item.date+") "+diffStr);
             });
 
             return multistringText;
           }
         }
       },
-      scales: getScales(1),
+      scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
-        datalabels: getDataLabels()
+        datalabels: {
+          color: inDarkMode() ? '#ccc' : 'black',
+          font: {
+            weight: 'bold'
+          }
+        }
       }
   },
   data: {
     labels: dateLabels,
     datasets: [
       {
-        data: cases,
+        data: diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
@@ -950,8 +887,9 @@ function barChartAllCH() {
         backgroundColor: '#F15F36',
         datalabels: {
           align: /*'end',*/ function (context) {
-                var index = context.dataIndex;
-                return index % 2 == 0 ? 'top' : 'bottom';
+                // var index = context.dataIndex;
+                // return index % 2 == 0 ? 'top' : 'bottom';
+                return 'top';
           },
           offset: function (context) {
                 var index = context.dataIndex;
