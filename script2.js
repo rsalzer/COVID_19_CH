@@ -310,109 +310,71 @@ function getWorldDeaths(chTotal) {
 }
 
 function getCanton(i) {
-  // var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
-  var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
-  if(cantons[i] == "FL") {
-    var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
-  }
+  var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
+  // var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
+  // if(cantons[i] == "FL") {
+  //   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
+  // }
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
-        console.log(error.responseURL+" not found");
-        actualData.push({
-          date: _("Keine Daten"),
-          ncumul_conf: "",
-          abbreviation_canton_and_fl: cantons[i]
-        });
-        actualDeaths.push({
-          date: _("Keine Daten"),
-          ncumul_deceased: "",
-          abbreviation_canton_and_fl: cantons[i]
-        });
-        /*actualHospitalisation.push({
-          date: _("Keine Daten"),
-          ncumul_deceased: "",
-          abbreviation_canton_and_fl: cantons[i]
-        });*/
+        alert("Daten konnten nicht geladen werden");
       }
       else {
-        for(var x=0; x<csvdata.length; x++) {
-          if(!csvdata[x].abbreviation_canton_and_fl) continue;
-          if(csvdata[x].date.split(".").length>1) {
-            var splitDate = csvdata[x].date.split(".");
-            var day = splitDate[0];
-            var month = splitDate[1];
-            var year = splitDate[2];
-            csvdata[x].date = year+"-"+month+"-"+day;
-          }
-          data.push(csvdata[x]);
-        }
-        var latestData = csvdata[csvdata.length-1];
-        var filteredDataForDeaths = csvdata.filter(function(d) { if(d.ncumul_deceased && d.ncumul_deceased!="") return d});
-        if(filteredDataForDeaths.length==0) {
-          actualDeaths.push(latestData);
-        }
-        else {
-          actualDeaths.push(filteredDataForDeaths[filteredDataForDeaths.length-1]);
-        }
-        var filteredDataForHospitalisation = csvdata.filter(function(d) { if(d.current_hosp && d.current_hosp!="") return d});
-        if(filteredDataForHospitalisation.length==0) {
-          //actualHospitalisation.push(latestData);
-        }
-        else {
-          actualHospitalisation.push(filteredDataForHospitalisation[filteredDataForHospitalisation.length-1]);
-        }
-        var filteredDataForIsolation = csvdata.filter(function(d) { if((d.current_isolated!=null && d.current_isolated!="") || (d.current_quarantined!=null && d.current_quarantined!="")) return d});
-        if(filteredDataForIsolation.length==0) {
-          //actualHospitalisation.push(latestData);
-        }
-        else {
-          actualIsolation.push(filteredDataForIsolation[filteredDataForIsolation.length-1]);
-        }
-        var filteredDataForCases = csvdata.filter(function(d) { if(d.ncumul_conf && d.ncumul_conf!="") return d});
-        if(filteredDataForCases.length==0) {
-          actualData.push(latestData);
-        }
-        else {
-          actualData.push(filteredDataForCases[filteredDataForCases.length-1]);
-          lastData.push(filteredDataForCases[filteredDataForCases.length-2]);
-        }
-        if (verbose) {
-          console.log("added "+csvdata.length+" rows for "+cantons[i]);
-        }
-      }
-      if(i<cantons.length-1) {
-        getCanton(i+1);
-      }
-      else {
+        data = csvdata;
         processData();
       }
   });
 }
 
 function processData() {
-  document.getElementById("loadingspinner").style.display = 'none';
-  document.getElementById("loaded").style.display = 'block';
   var start = new Date();
-  // console.log("Process actual");
-  processActualData();
-  processActualDeaths();
-  processActualHospitalisation();
+  console.log("Process actual");
+  var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
+  processActualData(filter);
+  processActualDeaths(filter);
+  processActualHospitalisation(filter);
   // console.log("End actual");
-  getBAGIsolation();
+  //getBAGIsolation();
   // console.log("Start All CH");
-  barChartAllCH();
+
+  barChartAllCH(filter);
   // console.log("End All CH / Start Deaths");
   // console.log("End Deaths CH / Start Hosp");
   //barChartAllCHHospitalisations();
   // console.log("End Hosp CH");
+  console.log("Start Cantons");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(cantons[i]);
   }
-  //console.log("End Single Cantons");
+  console.log("End Single Cantons");
+  document.getElementById("loadingspinner").style.display = 'none';
+  document.getElementById("loaded").style.display = 'block';
 }
 
-function processActualData() {
-  var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+function processActualData(filter) {
+  var todaysData = filter.dataPerDay[filter.dataPerDay.length-1].data;
+  //var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+
+  // var timeNow = new Date();
+  // timeNow.setMinutes(timeNow.getMinutes()-timeNow.getTimezoneOffset()); //correct offset to UTC
+  // timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
+  for(var j=0; j<todaysData.length; j++) {
+    var today = todaysData[j];
+    var perCantonToday = today.ncumul_conf;
+    var dateSplit = today.date_ncumul_conf.split("-");
+    var day = parseInt(dateSplit[2]);
+    var month = parseInt(dateSplit[1])-1;
+    var year = parseInt(dateSplit[0]);
+    var d = new Date(Date.UTC(year,month,day))
+    d.setDate(d.getDate() - 14);
+    dateString = d.toISOString();
+    dateString = dateString.substring(0,10);
+    var perCanton14DaysAgo = filter.dataPerDay.filter(d => d.date == dateString)[0].data[j].ncumul_conf;
+    today.cases14DaysDiff = perCantonToday - perCanton14DaysAgo;
+    today.incidence = Math.round(today.cases14DaysDiff / population[cantons[j]] * 100000);
+    //console.log("Canton: "+cantons[j]+" Two weeks: "+today.cases14DaysDiff+" incidence: "+today.incidence);
+  }
+  var sortedActual = Array.from(todaysData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
   var firstTable = document.getElementById("confirmed_1");
   var secondTable = document.getElementById("confirmed_2");
   var total = 0;
@@ -424,81 +386,33 @@ function processActualData() {
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_conf;
-    if(actual.abbreviation_canton_and_fl!="FL" && now!="") {
-      total+=parseInt(now);
-    }
     var tr = document.createElement("tr");
     var td = document.createElement("td");
     var a = document.createElement("a");
-    a.className = "flag "+actual.abbreviation_canton_and_fl;
-    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
+    a.className = "flag "+actual.canton;
+    a.href = "#detail_"+actual.canton;
+    a.appendChild(document.createTextNode(actual.canton));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date.replace("2020-", "")));
+    td.appendChild(document.createTextNode(actual.date_ncumul_conf.replace("2020-", "")));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    var yesterday = lastData.filter(d => d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl)[0];
-    var casesYesterday = parseInt(yesterday.ncumul_conf);
-    var diff = "";
-    var timeNow = new Date();
-    timeNow.setMinutes(timeNow.getMinutes()-timeNow.getTimezoneOffset()); //correct offset to UTC
-    timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
-    if(actual.date == timeNow.toISOString().substring(0,10)) {
-      var diff = parseInt(now) - casesYesterday;
-      if(actual.abbreviation_canton_and_fl!="FL") diffTotal += diff;
-    }
-    td.appendChild(document.createTextNode(diff));
+    td.appendChild(document.createTextNode(actual.diff_ncumul_conf!=null?actual.diff_ncumul_conf:""));
     tr.appendChild(td);
-
-    var dateSplit = actual.date.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var d = new Date(Date.UTC(year,month,day))
-    d.setDate(d.getDate() - 14);
-    dateString = d.toISOString();
-    dateString = dateString.substring(0,10);
-    //console.log("today: "+day+" -14: "+dateString);
-
-    var filtered14DaysAgo = data.filter(d => (d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl && d.date == dateString));
-    var cases14DaysDiff = "";
-    var incidence = "";
-    var risk;
-    if(filtered14DaysAgo.length>0) {
-      var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
-      cases14DaysDiff = parseInt(now) - cases14DaysAgo;
-      var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
-      var risk = "low";
-      if(incidence>=60) risk = "medium";
-      if(incidence>=120) risk = "high";
-    }
-    else { // another day back if does not exist...
-      d.setDate(d.getDate() - 1);
-      dateString = d.toISOString();
-      dateString = dateString.substring(0,10);
-      filtered14DaysAgo = data.filter(d => (d.abbreviation_canton_and_fl == actual.abbreviation_canton_and_fl && d.date == dateString));
-      if(filtered14DaysAgo.length>0) {
-        var cases14DaysAgo = parseInt(filtered14DaysAgo[filtered14DaysAgo.length-1].ncumul_conf);
-        cases14DaysDiff = parseInt(now) - cases14DaysAgo;
-        var incidence = Math.round(cases14DaysDiff / population[actual.abbreviation_canton_and_fl] * 100000);
-        var risk = "low";
-        if(incidence>=60) risk = "medium";
-        if(incidence>=120) risk = "high";
-      }
-    }
-    if(cases14DaysDiff!="")
-      cases14DaysTotal += cases14DaysDiff
+    var risk = "low";
+    if(actual.incidence>=60) risk = "medium";
+    if(actual.incidence>=120) risk = "high";
+    cases14DaysTotal += actual.cases14DaysDiff
     td = document.createElement("td");
-    td.innerHTML = cases14DaysDiff;
+    td.innerHTML = actual.cases14DaysDiff;
     tr.appendChild(td);
     td = document.createElement("td");
-    td.innerHTML = "<span class=\"risk "+risk+"\">"+incidence+"</span>";
+    td.innerHTML = "<span class=\"risk "+risk+"\">"+actual.incidence+"</span>";
     tr.appendChild(td);
 
     /*
@@ -520,13 +434,14 @@ function processActualData() {
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  var formattedTotal = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formattedTotal = filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   var formatted14DayCases = cases14DaysTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formattedDiff = filter.dataPerDay[filter.dataPerDay.length-1].diffTotal_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   var incidenceCH = Math.round(cases14DaysTotal / population["CH"] * 100000);
   var riskCH = "low";
   if(incidenceCH>=60) riskCH = "medium";
   if(incidenceCH>=120) riskCH = "high";
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+diffTotal+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"risk "+riskCH+"\">"+incidenceCH+"</span></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+formattedDiff+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"risk "+riskCH+"\">"+incidenceCH+"</span></td>";
   secondTable.append(tr);
   getWorldData(total);
   //document.getElementById("last").append(firstTable);
@@ -535,54 +450,41 @@ function processActualData() {
 }
 
 var totalDeaths;
-function processActualDeaths() {
-  var sortedActual = Array.from(actualDeaths).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
+function processActualDeaths(filter) {
+  var sortedActual = Array.from(filter.dataPerDay[filter.dataPerDay.length-1].data).sort(function(a, b){return b.ncumul_deceased-a.ncumul_deceased});
   var firstTable = document.getElementById("death_1");
   var secondTable = document.getElementById("death_2");
-  var total = 0;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
     if(i<sortedActual.length/2) table = firstTable;
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_deceased;
-    if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-
     var tr = document.createElement("tr");
     var td = document.createElement("td");
     var a = document.createElement("a");
-    a.className = "flag "+actual.abbreviation_canton_and_fl;
-    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
+    a.className = "flag "+actual.canton;
+    a.href = "#detail_"+actual.canton;
+    a.appendChild(document.createTextNode(actual.canton));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date));
+    td.appendChild(document.createTextNode(actual.date_ncumul_deceased));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    if(actual.source && actual.source.substring(0,2)=="ht") {
-      a = document.createElement("a");
-      a.innerHTML = "&#x2197;&#xFE0E;";
-      a.href = actual.source;
-      td.appendChild(a);
-    }
-    else {
-      a = document.createElement("a");
-      a.innerHTML = "&#x2197;&#xFE0E;";
-      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      td.appendChild(a);
-    }
+    var change = document.createTextNode(actual.diff_ncumul_deceased!=null?actual.diff_ncumul_deceased:"");
+    td.appendChild(change);
     tr.appendChild(td);
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_deceased+"</b></td><td>"+filter.dataPerDay[filter.dataPerDay.length-1].diffTotal_ncumul_deceased+"</td>";
   secondTable.append(tr);
-  totalDeaths = total;
+  totalDeaths = filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_deceased;
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
 }
 
@@ -656,8 +558,9 @@ function processActualIsolation() {
   table.append(tr);
 }
 
-function processActualHospitalisation() {
-  var sortedActual = Array.from(actualHospitalisation).sort(function(a, b){return b.current_hosp-a.current_hosp});
+function processActualHospitalisation(filter) {
+  var today = filter.dataPerDay[filter.dataPerDay.length-1];
+  var sortedActual = Array.from(today.data).sort(function(a, b){return b.current_hosp-a.current_hosp});
   var secondTable = document.getElementById("hospitalised_2");
   var total = 0;
   var totalicu = 0;
@@ -668,52 +571,53 @@ function processActualHospitalisation() {
     table = secondTable;
     //else table = secondTable;
     var actual = sortedActual[i];
+    if(actual.date_current_hosp.charAt(0)!='2') continue;
     var now = actual.current_hosp;
-    if(actual.abbreviation_canton_and_fl!="FL" && now!="") total+=parseInt(now);
-    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_icu!="") totalicu+=parseInt(actual.current_icu);
-    if(actual.abbreviation_canton_and_fl!="FL" && actual.current_vent!="") totalvent+=parseInt(actual.current_vent);
+    if(actual.canton!="FL" && now!=null) total+=parseInt(now);
+    if(actual.canton!="FL" && actual.current_icu!=null) totalicu+=parseInt(actual.current_icu);
+    if(actual.canton!="FL" && actual.current_vent!=null) totalvent+=parseInt(actual.current_vent);
 
     var tr = document.createElement("tr");
     var td = document.createElement("td");
     var a = document.createElement("a");
-    a.className = "flag "+actual.abbreviation_canton_and_fl;
-    a.href = "#detail_"+actual.abbreviation_canton_and_fl;
-    a.appendChild(document.createTextNode(actual.abbreviation_canton_and_fl));
+    a.className = "flag "+actual.canton;
+    a.href = "#detail_"+actual.canton;
+    a.appendChild(document.createTextNode(actual.canton));
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date));
+    td.appendChild(document.createTextNode(actual.date_current_hosp));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    text = document.createTextNode(actual.current_icu);
+    text = document.createTextNode(actual.current_icu!=null?actual.current_icu:"");
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    text = document.createTextNode(actual.current_vent);
+    text = document.createTextNode(actual.current_vent!=null?actual.current_vent:"");
     td.appendChild(text);
     tr.appendChild(td);
-    td = document.createElement("td");
-    if(actual.source && actual.source.substring(0,2)=="ht") {
-      a = document.createElement("a");
-      a.innerHTML = "&#x2197;&#xFE0E;";
-      a.href = actual.source;
-      td.appendChild(a);
-    }
-    else {
-      a = document.createElement("a");
-      a.innerHTML = "&#x2197;&#xFE0E;";
-      a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
-      td.appendChild(a);
-    }
-    tr.appendChild(td);
+    // td = document.createElement("td");
+    // if(actual.source && actual.source.substring(0,2)=="ht") {
+    //   a = document.createElement("a");
+    //   a.innerHTML = "&#x2197;&#xFE0E;";
+    //   a.href = actual.source;
+    //   td.appendChild(a);
+    // }
+    // else {
+    //   a = document.createElement("a");
+    //   a.innerHTML = "&#x2197;&#xFE0E;";
+    //   a.href = "https://github.com/openZH/covid_19/blob/master/fallzahlen_kanton_total_csv/COVID19_Fallzahlen_Kanton_"+actual.abbreviation_canton_and_fl+"_total.csv";
+    //   td.appendChild(a);
+    // }
+    // tr.appendChild(td);
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td><td></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td>"; //"<td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
@@ -750,6 +654,7 @@ Chart.Tooltip.positioners.custombar = function(elements, eventPosition) { //<-- 
 }
 
 function filterAllCH(mode) {
+  console.log("Start Filtering");
   var date = new Date();
   date.setTime(getDateForMode(mode).getTime());
   date.setDate(date.getDate()-1); //3.6. is better as start...
@@ -759,7 +664,7 @@ function filterAllCH(mode) {
   var dataPerDay = [];
   var emptyFirst = {};
   emptyFirst.data = [];
-  for(var j=0; j<cantons.length-1; j++) {
+  for(var j=0; j<cantons.length; j++) {
     var canton = cantons[j];
     var cantonTotal = {
       canton: canton,
@@ -768,7 +673,9 @@ function filterAllCH(mode) {
       date_current_hosp: _("Keine Daten"),
       ncumul_conf: 0,
       ncumul_deceased: 0,
-      current_hosp: 0
+      current_hosp: 0,
+      current_icu: 0,
+      current_vent: 0
     };
     emptyFirst.data.push(cantonTotal);
   }
@@ -784,7 +691,7 @@ function filterAllCH(mode) {
     var singleDayObject = {};
     singleDayObject.date = dateString;
     singleDayObject.data = [];
-    for(var i=0; i<cantons.length-1; i++) { //without FL
+    for(var i=0; i<cantons.length; i++) {
       var canton = cantons[i];
       var cantonTotal = getDataForDay(canton, date);
       if(cantonTotal==null) {
@@ -814,6 +721,8 @@ function filterAllCH(mode) {
 
           if(Number.isNaN(cantonTotal.current_hosp)) {
             cantonTotal.current_hosp = dataPerDay[dataPerDay.length-1].data[i].current_hosp;
+            cantonTotal.current_vent = dataPerDay[dataPerDay.length-1].data[i].current_vent;
+            cantonTotal.current_icu = dataPerDay[dataPerDay.length-1].data[i].current_icu;
             cantonTotal.date_current_hosp = dataPerDay[dataPerDay.length-1].data[i].date_current_hosp;
             cantonTotal.diff_current_hosp = null;
             //console.log("Old ncumul death for: "+canton+" date: "+dateString);
@@ -823,12 +732,12 @@ function filterAllCH(mode) {
       }
       singleDayObject.data.push(cantonTotal);
     }
-    singleDayObject.total_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_conf; }, 0);
-    singleDayObject.total_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return acc + val.ncumul_deceased; }, 0);
-    singleDayObject.total_current_hosp = singleDayObject.data.reduce(function(acc, val) { return acc + val.current_hosp; }, 0);
-    singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff_ncumul_conf; }, 0);
-    singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff_ncumul_deceased; }, 0);
-    singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return acc + val.diff_current_hosp; }, 0);
+    singleDayObject.total_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.ncumul_conf : acc; }, 0);
+    singleDayObject.total_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.ncumul_deceased : acc; }, 0);
+    singleDayObject.total_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.current_hosp: acc; }, 0);
+    singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_conf: acc; }, 0);
+    singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_deceased: acc; }, 0);
+    singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_hosp: acc; }, 0);
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
   }
@@ -841,6 +750,7 @@ function filterAllCH(mode) {
     var date = new Date(year,month,day);
     return date;
   });
+  console.log("Finished filtering");
   return {
     "dataPerDay": dataPerDay,
     "dateLabels": dateLabels
@@ -919,10 +829,12 @@ function getCHCallbacks(filter, variable) {
       var dataForThisDay = filter.dataPerDay[index];
       var sorted = Array.from(dataForThisDay.data).sort(function(a, b){ if(a[variable]==b[variable]) return b["date_"+variable]<a["date_"+variable]?1:-1;  return b[variable]-a[variable]});
       sorted.forEach(function(item) {
-        var tabbing = 5-(""+item[variable]).length;
-        var padding = " ".repeat(tabbing);
-        var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
-        multistringText.push(item.canton+":"+padding+item[variable]+" ("+item["date_"+variable]+") "+diffStr);
+        if(item.canton!="FL") {
+          var tabbing = 5-(""+item[variable]).length;
+          var padding = " ".repeat(tabbing);
+          var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
+          multistringText.push(item.canton+":"+padding+item[variable]+" ("+item["date_"+variable]+") "+diffStr);
+        }
       });
 
       return multistringText;
@@ -930,10 +842,9 @@ function getCHCallbacks(filter, variable) {
   };
 }
 
-function barChartAllCH() {
+function barChartAllCH(filter) {
   // console.log("End preping CH cases");
   //console.log(dataPerDay);
-  var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
   var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
 
   var place = "CH";
@@ -1093,9 +1004,7 @@ function barChartAllCHDeaths(filter) {
 }
 
 function barChartAllCHHospitalisations(filter) {
-  console.log(filter.dataPerDay);
   var cases = filter.dataPerDay.map(function(d) {return d.total_current_hosp});
-  //console.log(dataPerDay);
   var place = "CH";
   var section = document.getElementById("detail");
   var div = document.getElementById("container_CH");
@@ -1166,6 +1075,8 @@ function getDataForDay(canton, date) {
       ncumul_conf: parseInt(filteredData[filteredData.length-1].ncumul_conf),
       ncumul_deceased: parseInt(filteredData[filteredData.length-1].ncumul_deceased),
       current_hosp: parseInt(filteredData[filteredData.length-1].current_hosp),
+      current_icu: filteredData[filteredData.length-1].current_icu!=""?parseInt(filteredData[filteredData.length-1].current_icu):null,
+      current_vent: filteredData[filteredData.length-1].current_vent!=""?parseInt(filteredData[filteredData.length-1].current_vent):null,
       date_ncumul_conf: dateString,
       date_ncumul_deceased: dateString,
       date_current_hosp: dateString
