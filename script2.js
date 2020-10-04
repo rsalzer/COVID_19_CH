@@ -1036,7 +1036,7 @@ function barChartAllCHDeaths(filter) {
         text: _('Verstorbene')
       },
       tooltips: {
-        mode: 'nearest',
+        mode: 'index',
         intersect: false,
         position : 'custom',
         caretSize: 0,
