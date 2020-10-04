@@ -101,8 +101,17 @@ setLanguageNav();
 
 //console.log("START");
 getCanton(0);
+
+function showInternational() {
+  getWorldData();
+  var div = document.getElementById("internationalData");
+  div.style.display = "block";
+  var a = document.getElementById("internationalLink");
+  a.style.display = "none";
+}
+
 var worldData;
-function getWorldData(chTotal) {
+function getWorldData() {
   d3.csv("https://open-covid-19.github.io/data/data_latest.csv", function(error, csvdata) {
       if(error!=null) {
         console.log(error.responseURL+" not found");
@@ -110,7 +119,7 @@ function getWorldData(chTotal) {
 
       worldData = csvdata.filter(function(d) { if(d.Key==d.CountryCode) return d; }); //only use countries;
       var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
-      if(ch && ch[0]) ch[0].Confirmed = ""+chTotal;
+      if(ch && ch[0]) ch[0].Confirmed = ""+total;
       parseWorldData();
       getWorldDataRelative(false);
   });
@@ -351,6 +360,7 @@ function processData() {
   document.getElementById("loaded").style.display = 'block';
 }
 
+var total;
 function processActualData(filter) {
   var todaysData = filter.dataPerDay[filter.dataPerDay.length-1].data;
   //var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
@@ -377,7 +387,6 @@ function processActualData(filter) {
   var sortedActual = Array.from(todaysData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
   var firstTable = document.getElementById("confirmed_1");
   var secondTable = document.getElementById("confirmed_2");
-  var total = 0;
   var diffTotal = 0;
   var cases14DaysTotal = 0;
   for(var i=0; i<sortedActual.length; i++) {
@@ -443,7 +452,6 @@ function processActualData(filter) {
   if(incidenceCH>=120) riskCH = "high";
   tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+formattedDiff+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"risk "+riskCH+"\">"+incidenceCH+"</span></td>";
   secondTable.append(tr);
-  getWorldData(total);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));

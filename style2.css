@@ -191,6 +191,11 @@ table a:hover {
 table img {
 	margin-right: 0.5em;
 }
+
+#internationalData {
+  display: none;
+}
+
 .state-indicator {
     position: absolute;
     top: -999em;
