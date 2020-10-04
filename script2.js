@@ -735,6 +735,20 @@ Chart.Tooltip.positioners.custom = function(elements, eventPosition) { //<-- cus
     };
 }
 
+Chart.Tooltip.positioners.custombar = function(elements, eventPosition) { //<-- custom is now the new option for the tooltip position
+    /** @type {Chart.Tooltip} */
+    var tooltip = this;
+
+    /* ... */
+
+    var half = eventPosition.x - 150;
+    if(half< 100) half = eventPosition.x + 150;
+    return {
+        x: half,
+        y: 30
+    };
+}
+
 function filterAllCH(mode) {
   var date = new Date();
   date.setTime(getDateForMode(mode).getTime());
@@ -960,7 +974,7 @@ function barChartAllCH() {
       tooltips: {
         mode: 'index',
         intersect: false,
-        position : 'custom',
+        position : 'custombar',
         caretSize: 0,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "ncumul_conf")
@@ -1038,7 +1052,7 @@ function barChartAllCHDeaths(filter) {
       tooltips: {
         mode: 'index',
         intersect: false,
-        position : 'custom',
+        position : 'custombar',
         caretSize: 0,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "ncumul_deceased")
