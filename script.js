@@ -797,7 +797,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartDeaths.data.datasets[0].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
-    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
+    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chartDeaths.update(0);
 
     var totalHosp = filter.dataPerDay.map(function(d) {return d.total_current_hosp});
