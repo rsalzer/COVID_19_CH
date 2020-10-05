@@ -490,7 +490,7 @@ function processActualDeaths(filter) {
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_deceased+"</b></td><td>"+filter.dataPerDay[filter.dataPerDay.length-1].diffTotal_ncumul_deceased+"</td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_deceased+"</b></td><td><b>"+filter.dataPerDay[filter.dataPerDay.length-1].diffTotal_ncumul_deceased+"</b></td>";
   secondTable.append(tr);
   totalDeaths = filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_deceased;
   //document.getElementById("last").append(document.createTextNode("Total CH gemäss Summe Kantone: "+total));
