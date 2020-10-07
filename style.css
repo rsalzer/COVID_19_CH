@@ -29,7 +29,7 @@ body {
 	padding-left: 5vw;
 	padding-right: 5vw;
 	padding-top: 1em;
-	max-width: 640px;
+	max-width: 680px;
 }
 #page-nav ul {
 	list-style: none;
@@ -68,7 +68,7 @@ main a {
 	color: inherit;
 }
 main p {
-	max-width: 640px;
+	max-width: 680px;
 	margin: 1em 0;
 }
 main h1 {
@@ -154,7 +154,7 @@ table tr td:nth-child(3) {
 }
 .table-group {
 /* 	background-color: lightblue; */
-	max-width: 640px;
+	max-width: 680px;
 }
 .table-group table {
 	display: inline-table;
@@ -248,7 +248,7 @@ table img {
 /* !wide-table */
 table.wide {
 	width: 100%;
-	max-width: 640px;
+	max-width: 680px;
 }
 @media (max-width: 660px) {
 	table.wide {
@@ -348,7 +348,7 @@ button {
 	text-decoration: underline;
 }
 .rightButtonDiv {
-   max-width: 640px;
+   max-width: 680px;
    text-align: right;
 }
 .internationalButton {
@@ -508,7 +508,7 @@ button {
 }
 #page-footer > * {
 	font-size: 0.8em;
-	max-width: 640px;
+	max-width: 680px;
 }
 
 

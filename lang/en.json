@@ -76,5 +76,18 @@
     "In Quarantäne": "In quarantine",
     "Da nicht alle Kantone Daten zu Isolation/Quarantäne direkt bereitstellen, wird die Tabelle durch Daten des BAGs ergänzt.": "Since not all cantons provide isolation / quarantine data directly, the table is supplemented by data from the FOPH.",
     "BAG": "FOPH",
+    "Neu": "New",
+    "pro": "per",
+    "Die Risiko-Ampel orientiert sich an den Kriterien des BAG für die Einstufung von Gebieten mit erhöhtem Ansteckungsrisiko.": "The risk traffic light is based on the criteria of the FOPH for the classification of areas with an increased risk of infection.",
+    "Anzahl Neuinfektionen pro 100'000 Einwohner'innen in 14 Tagen": "Number of new infections per 100,000 inhabitants in 14 days",
+    "bis 60:": "till 60:",
+    "über 60 bis 120:": "60-120:",
+    "über 120:": "over 120:",
+    "mässiges Ansteckungsrisiko": "moderate risk of infection",
+    "erhöhtes Ansteckungsrisiko": "increased risk of infection",
+    "hohes Ansteckungsrisiko": "high risk of infection",
+    "Ab März": "From march",
+    "Ab Juni": "From june",
+    "Letzte 30 Tage": "Last 30 days",
     "": ""
 }
