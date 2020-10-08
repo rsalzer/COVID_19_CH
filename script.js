@@ -805,7 +805,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartHosp.data.datasets[0].data = totalHosp;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, "current_hosp");
-    chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
     chartHosp.update(0);
 
     // chartHosp.data.labels = filter.dateLabels;
