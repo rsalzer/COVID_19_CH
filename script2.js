@@ -1354,7 +1354,7 @@ function setLanguageNav() {
 function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  if(getDeviceState()==2) addFilterLengthButton(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp);
+  if(getDeviceState()==2) addFilterLengthButton(div, placenr, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp);
   addFilterLengthButton(div, placenr, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp);
   addFilterLengthButton(div, placenr, _('Ab März'), 0, false, chart, chartHosp);
   elementAfter.before(div);
