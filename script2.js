@@ -88,12 +88,8 @@ const cartesianAxesTypes = {
 };
 
 var verbose = false;
-var actualData = [];
-var lastData = [];
-var actualDeaths = [];
-var actualHospitalisation = [];
-var actualIsolation = [];
 var data = [];
+
 Chart.defaults.global.defaultFontFamily = "IBM Plex Sans";
 document.getElementById("loaded").style.display = 'none';
 
@@ -102,228 +98,8 @@ setLanguageNav();
 //console.log("START");
 getCanton(0);
 
-function showInternational() {
-  getWorldData();
-  var div = document.getElementById("internationalData");
-  div.style.display = "block";
-  var a = document.getElementById("internationalLink");
-  a.style.display = "none";
-}
-
-var worldData;
-function getWorldData() {
-  d3.csv("https://open-covid-19.github.io/data/data_latest.csv", function(error, csvdata) {
-      if(error!=null) {
-        console.log(error.responseURL+" not found");
-      }
-
-      worldData = csvdata.filter(function(d) { if(d.Key==d.CountryCode) return d; }); //only use countries;
-      var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
-      if(ch && ch[0]) ch[0].Confirmed = ""+total;
-      parseWorldData();
-      getWorldDataRelative(false);
-  });
-}
-
-var countryPage = 0;
-function worldDataForward() {
-  if(countryPage==10) return;
-  countryPage++;
-  parseWorldData();
-}
-
-function worldDataBackward() {
-  if(countryPage==0) return;
-  countryPage--;
-  parseWorldData();
-}
-
-var countryPageRelative = 0;
-function worldDataRelativeForward() {
-  if(countryPageRelative==10) return;
-  countryPageRelative++;
-  getWorldDataRelative(withoutSmallCountries);
-}
-
-function worldDataRelativeBackward() {
-  if(countryPageRelative==0) return;
-  countryPageRelative--;
-  getWorldDataRelative(withoutSmallCountries);
-}
-
-function formatCountryName(name) {
-  var country = name.replace(" of America","").replace("Democratic Republic", "DR.").replace("Republic", "Rep.");
-  if(country.length>=19) country = country.substring(0,18)+".";
-  return country;
-}
-
-function parseWorldData() {
-      var start = countryPage*20;
-      var end = start+20;
-      var sorted = Array.from(worldData).sort(function(a, b){return b.Confirmed-a.Confirmed}).slice(start,end);
-      //var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
-      //console.log("Sorted per Capita:");
-      //console.log(sortedPerCapita);
-
-      var firstTable = document.getElementById("international1");
-      firstTable.innerHTML = "";
-      for(var i=0; i<20; i++) {
-        var single = sorted[i];
-        var date = single.Date;
-        var splitDate = date.split("-");
-        var year = splitDate[0];
-        var month = parseInt(splitDate[1]);
-        var day = parseInt(splitDate[2]);
-        var dateString = day+"."+month+"."+year;
-        var country = formatCountryName(single.CountryName);
-        var cases = ""+parseInt(single.Confirmed);
-        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-        var short = single.CountryCode.toLowerCase();
-        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
-        var tr = document.createElement("tr");
-        if(short=="ch") {
-          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-          tr.className = "ch";
-        }
-        else {
-          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-        }
-        firstTable.appendChild(tr);
-      }
-      getWorldDeaths(totalDeaths);
-}
-
-var withoutSmallCountries = false;
-function getWorldDataRelative(withoutSmall) {
-      withoutSmallCountries = withoutSmall;
-      var start = countryPageRelative*20;
-      var end = start+20;
-      var all = Array.from(worldData);
-      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
-      if(withoutSmall) {
-        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
-        document.getElementById("withoutSmallButton").classList.add('active');
-        document.getElementById("withSmallButton").classList.remove('active');
-      }
-      else {
-        document.getElementById("withSmallButton").classList.add('active');
-        document.getElementById("withoutSmallButton").classList.remove('active');
-      }
-      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(start,end);
-      var firstTable = document.getElementById("relative1");
-      firstTable.innerHTML = "";
-      for(var i=0; i<20; i++) {
-        var single = sortedPerCapita[i];
-        var date = single.Date;
-        var splitDate = date.split("-");
-        var year = splitDate[0];
-        var month = parseInt(splitDate[1]);
-        var day = parseInt(splitDate[2]);
-        var dateString = day+"."+month+"."+year;
-        var country = formatCountryName(single.CountryName);
-        var confirmed = parseFloat(single.Confirmed);
-        var population = parseFloat(single.Population);
-        var exact = confirmed/population*1000000;
-        var rounded = Math.round(exact);
-        var cases = ""+rounded;
-        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-        var short = single.CountryCode.toLowerCase();
-        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
-        var tr = document.createElement("tr");
-        if(short=="ch") {
-          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-          tr.className = "ch";
-        }
-        else {
-          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-        }
-        firstTable.appendChild(tr);
-      }
-      getWorldDeathRelative(withoutSmall);
-}
-
-function getWorldDeathRelative(withoutSmall) {
-      var start = countryPageRelative*20;
-      var end = start+20;
-      var all = Array.from(worldData);
-      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
-      if(withoutSmall) {
-        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
-      }
-      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(start,end);
-      var firstTable = document.getElementById("relative2");
-      firstTable.innerHTML = "";
-      for(var i=0; i<20; i++) {
-        var single = sortedPerCapita[i];
-        var date = single.Date;
-        var splitDate = date.split("-");
-        var year = splitDate[0];
-        var month = parseInt(splitDate[1]);
-        var day = parseInt(splitDate[2]);
-        var dateString = day+"."+month+"."+year;
-        var country = formatCountryName(single.CountryName);
-        var confirmed = parseFloat(single.Deaths);
-        var population = parseFloat(single.Population);
-        var exact = confirmed/population*1000000;
-        var rounded = Math.round(exact);
-        var cases = ""+rounded;
-        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-        var short = single.CountryCode.toLowerCase();
-        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
-        var tr = document.createElement("tr");
-        if(short=="ch") {
-          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-          tr.className = "ch";
-        }
-        else {
-          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-        }
-        firstTable.appendChild(tr);
-      }
-}
-
-function getWorldDeaths(chTotal) {
-  if(worldData==null) return;
-  var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
-  if(ch && ch[0]) ch[0].Deaths = ""+chTotal;
-
-  var start = countryPage*20;
-  var end = start+20;
-  var sorted = Array.from(worldData).sort(function(a, b){return b.Deaths-a.Deaths}).slice(start,end);
-
-  var firstTable = document.getElementById("international2");
-  firstTable.innerHTML = "";
-  for(var i=0; i<20; i++) {
-    var single = sorted[i];
-    var date = single.Date;
-    var splitDate = date.split("-");
-    var year = splitDate[0];
-    var month = parseInt(splitDate[1]);
-    var day = parseInt(splitDate[2]);
-    var dateString = day+"."+month+"."+year;
-    var country = formatCountryName(single.CountryName);
-    var cases = ""+parseInt(single.Deaths);
-    var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-    var short = single.CountryCode.toLowerCase();
-    var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
-    var tr = document.createElement("tr");
-    if(short=="ch") {
-      tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
-      tr.className = "ch";
-    }
-    else {
-      tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
-    }
-    firstTable.appendChild(tr);
-  }
-}
-
 function getCanton(i) {
   var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
-  // var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_Kanton_'+cantons[i]+'_total.csv';
-  // if(cantons[i] == "FL") {
-  //   var url = 'https://raw.githubusercontent.com/openZH/covid_19/master/fallzahlen_kanton_total_csv_v2/COVID19_Fallzahlen_FL_total.csv';
-  // }
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
         alert("Daten konnten nicht geladen werden");
@@ -338,7 +114,10 @@ function getCanton(i) {
 function processData() {
   var start = new Date();
   console.log("Process actual");
+  prepareData();
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
+
+
   processActualData(filter);
   processActualDeaths(filter);
   processActualHospitalisation(filter);
@@ -661,11 +440,13 @@ Chart.Tooltip.positioners.custombar = function(elements, eventPosition) { //<-- 
     };
 }
 
-function filterAllCH(mode) {
-  console.log("Start Filtering");
+var mainData;
+function prepareData() {
+  console.log("Start Processing Data");
+  var mode = 0;
   var date = new Date();
   date.setTime(getDateForMode(mode).getTime());
-  date.setDate(date.getDate()-1); //3.6. is better as start...
+  date.setDate(date.getDate()); //3.6. is better as start...
   var now = new Date();
   now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
   //alert(now.toISOString());
@@ -688,14 +469,14 @@ function filterAllCH(mode) {
     emptyFirst.data.push(cantonTotal);
   }
   dataPerDay.push(emptyFirst);
-
+  var completeIndex = 0;
   // console.log("Start preping CH cases");
   while(date<now) {
     var dateString = date.toISOString();
     dateString = dateString.substring(0,10);
-    if (verbose) {
-      console.log(dateString);
-    }
+    // if(dateString=="2020-06-02") {
+    //   console.log("2020-06-02: Index: "+dataPerDay.length);
+    // }
     var singleDayObject = {};
     singleDayObject.date = dateString;
     singleDayObject.data = [];
@@ -746,10 +527,41 @@ function filterAllCH(mode) {
     singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_conf: acc; }, 0);
     singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_deceased: acc; }, 0);
     singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_hosp: acc; }, 0);
+    var isComplete = singleDayObject.data.reduce(
+      function(acc, val) {
+        return (acc&&(val.date_ncumul_conf==singleDayObject.date))
+      }, true);
+    if(isComplete) completeIndex = dataPerDay.length;
+    singleDayObject.diffAvg7Days = null;
+    if(dataPerDay.length>9) {
+      var diff7Days = singleDayObject.total_ncumul_conf - dataPerDay[dataPerDay.length-7].total_ncumul_conf;
+      singleDayObject.diffAvg7Days = Math.round(diff7Days / 7);
+    }
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
   }
-  dataPerDay.splice(0,4);
+  dataPerDay.splice(0,1);
+  mainData = {};
+  mainData.days = dataPerDay;
+  mainData.completeIndex = dataPerDay.length - completeIndex;
+  console.log("CompleteIndex: " + mainData.completeIndex);
+  console.log("Finished processing data");
+}
+
+
+function filterAllCH(mode) {
+  var dataPerDay;
+  switch (mode) {
+    case 0:
+      dataPerDay = mainData.days.slice(0);
+      break;
+    case 1:
+      dataPerDay = mainData.days.slice(99);
+      break;
+    case 2:
+      dataPerDay = mainData.days.slice(mainData.days.length-30);
+      break;
+  }
   var dateLabels = dataPerDay.map(function(d) {
     var dateSplit = d.date.split("-");
     var day = parseInt(dateSplit[2]);
@@ -758,7 +570,8 @@ function filterAllCH(mode) {
     var date = new Date(year,month,day);
     return date;
   });
-  console.log("Finished filtering");
+  //console.log("Finished filtering");
+  //console.log(dataPerDay);
   return {
     "dataPerDay": dataPerDay,
     "dateLabels": dateLabels
@@ -785,11 +598,17 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
     var filter = filterAllCH(mode);
     var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
+    var avgs = filter.dataPerDay.map(d => d.diffAvg7Days);
+    var completeIndex = mainData.completeIndex;
+    avgs.splice(avgs.length-completeIndex+1, completeIndex);
+    var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex)?"#F15F36":"#999999aa";});
     chart.data.labels = filter.dateLabels;
-    chart.data.datasets[0].data = diff;
+    chart.data.datasets[0].data = avgs;
+    chart.data.datasets[1].data = diff;
+    chart.data.datasets[1].backgroundColor = backgroundColors;
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_conf");
-    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
 
     var deathDiff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
@@ -797,7 +616,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartDeaths.data.datasets[0].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
-    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
+    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chartDeaths.update(0);
 
     var totalHosp = filter.dataPerDay.map(function(d) {return d.total_current_hosp});
@@ -805,7 +624,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartHosp.data.datasets[0].data = totalHosp;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, "current_hosp");
-    chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
     chartHosp.update(0);
 
     // chartHosp.data.labels = filter.dateLabels;
@@ -820,6 +639,7 @@ function getCHCallbacks(filter, variable) {
   return {
     label: function(tooltipItems, data) {
       var value = tooltipItems.value;
+      if(data.datasets.length>1 && tooltipItems.datasetIndex==0) return "            7d-Avg: +"+value;
       var index = tooltipItems.index;
       var totalPerDay = filter.dataPerDay[index]["total_"+variable];
       var changeStr = "";
@@ -832,6 +652,7 @@ function getCHCallbacks(filter, variable) {
     afterBody: function(tooltipItems, data) {
       //console.log(tooltipItems);
       //console.log(data);
+      if(data.datasets.length>1 && tooltipItems.datasetIndex==0) return "";
       multistringText = [""];
       var index = tooltipItems[0].index;
       var dataForThisDay = filter.dataPerDay[index];
@@ -854,7 +675,10 @@ function barChartAllCH(filter) {
   // console.log("End preping CH cases");
   //console.log(dataPerDay);
   var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
-
+  var avgs = filter.dataPerDay.map(d => d.diffAvg7Days);
+  var completeIndex = mainData.completeIndex;
+  avgs.splice(avgs.length-completeIndex, completeIndex);
+  var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex-1)?"#F15F36":"#999999aa";});
   var place = "CH";
   var section = document.getElementById("detail");
   var article = document.createElement("article");
@@ -901,6 +725,7 @@ function barChartAllCH(filter) {
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
         datalabels: {
+          display: false,
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
             weight: 'bold'
@@ -912,18 +737,23 @@ function barChartAllCH(filter) {
     labels: filter.dateLabels,
     datasets: [
       {
+        label: '7d-Avg',
+        data: avgs,
+        backgroundColor: inDarkMode() ? 'white' : '#777777',
+        borderColor: inDarkMode() ? 'white' : '#777777',
+        fill: false,
+        type: 'line'
+      },
+      {
         data: diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
         borderColor: '#F15F36',
-        backgroundColor: '#F15F36',
+        backgroundColor: backgroundColors,
         datalabels: {
-          align: /*'end',*/ function (context) {
-                // var index = context.dataIndex;
-                // return index % 2 == 0 ? 'top' : 'bottom';
-                return 'top';
-          },
+          display: true,
+          align: 'top',
           offset: function (context) {
                 var index = context.dataIndex;
                 return index % 2 == 0 ? 5 : 10;
@@ -1587,4 +1417,220 @@ function inDarkMode() {
     return true;
   }
   return false;
+}
+
+function showInternational() {
+  getWorldData();
+  var div = document.getElementById("internationalData");
+  div.style.display = "block";
+  var a = document.getElementById("internationalLink");
+  a.style.display = "none";
+}
+
+var worldData;
+function getWorldData() {
+  d3.csv("https://open-covid-19.github.io/data/data_latest.csv", function(error, csvdata) {
+      if(error!=null) {
+        console.log(error.responseURL+" not found");
+      }
+
+      worldData = csvdata.filter(function(d) { if(d.Key==d.CountryCode) return d; }); //only use countries;
+      var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
+      if(ch && ch[0]) ch[0].Confirmed = ""+total;
+      parseWorldData();
+      getWorldDataRelative(false);
+  });
+}
+
+var countryPage = 0;
+function worldDataForward() {
+  if(countryPage==10) return;
+  countryPage++;
+  parseWorldData();
+}
+
+function worldDataBackward() {
+  if(countryPage==0) return;
+  countryPage--;
+  parseWorldData();
+}
+
+var countryPageRelative = 0;
+function worldDataRelativeForward() {
+  if(countryPageRelative==10) return;
+  countryPageRelative++;
+  getWorldDataRelative(withoutSmallCountries);
+}
+
+function worldDataRelativeBackward() {
+  if(countryPageRelative==0) return;
+  countryPageRelative--;
+  getWorldDataRelative(withoutSmallCountries);
+}
+
+function formatCountryName(name) {
+  var country = name.replace(" of America","").replace("Democratic Republic", "DR.").replace("Republic", "Rep.");
+  if(country.length>=19) country = country.substring(0,18)+".";
+  return country;
+}
+
+function parseWorldData() {
+      var start = countryPage*20;
+      var end = start+20;
+      var sorted = Array.from(worldData).sort(function(a, b){return b.Confirmed-a.Confirmed}).slice(start,end);
+      //var sortedPerCapita = Array.from(worldData).sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(0,25);
+      //console.log("Sorted per Capita:");
+      //console.log(sortedPerCapita);
+
+      var firstTable = document.getElementById("international1");
+      firstTable.innerHTML = "";
+      for(var i=0; i<20; i++) {
+        var single = sorted[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = formatCountryName(single.CountryName);
+        var cases = ""+parseInt(single.Confirmed);
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
+      }
+      getWorldDeaths(totalDeaths);
+}
+
+var withoutSmallCountries = false;
+function getWorldDataRelative(withoutSmall) {
+      withoutSmallCountries = withoutSmall;
+      var start = countryPageRelative*20;
+      var end = start+20;
+      var all = Array.from(worldData);
+      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
+      if(withoutSmall) {
+        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
+        document.getElementById("withoutSmallButton").classList.add('active');
+        document.getElementById("withSmallButton").classList.remove('active');
+      }
+      else {
+        document.getElementById("withSmallButton").classList.add('active');
+        document.getElementById("withoutSmallButton").classList.remove('active');
+      }
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Confirmed)/parseFloat(b.Population)-parseFloat(a.Confirmed)/parseFloat(a.Population)}).slice(start,end);
+      var firstTable = document.getElementById("relative1");
+      firstTable.innerHTML = "";
+      for(var i=0; i<20; i++) {
+        var single = sortedPerCapita[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = formatCountryName(single.CountryName);
+        var confirmed = parseFloat(single.Confirmed);
+        var population = parseFloat(single.Population);
+        var exact = confirmed/population*1000000;
+        var rounded = Math.round(exact);
+        var cases = ""+rounded;
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
+      }
+      getWorldDeathRelative(withoutSmall);
+}
+
+function getWorldDeathRelative(withoutSmall) {
+      var start = countryPageRelative*20;
+      var end = start+20;
+      var all = Array.from(worldData);
+      all = all.filter(function(d) { if(d.Population!="0" && d.Population!="") return d });
+      if(withoutSmall) {
+        all = all.filter(function(d) { if(parseInt(d.Population) > 100000) return d });
+      }
+      var sortedPerCapita = all.sort(function(a, b){return parseFloat(b.Deaths)/parseFloat(b.Population)-parseFloat(a.Deaths)/parseFloat(a.Population)}).slice(start,end);
+      var firstTable = document.getElementById("relative2");
+      firstTable.innerHTML = "";
+      for(var i=0; i<20; i++) {
+        var single = sortedPerCapita[i];
+        var date = single.Date;
+        var splitDate = date.split("-");
+        var year = splitDate[0];
+        var month = parseInt(splitDate[1]);
+        var day = parseInt(splitDate[2]);
+        var dateString = day+"."+month+"."+year;
+        var country = formatCountryName(single.CountryName);
+        var confirmed = parseFloat(single.Deaths);
+        var population = parseFloat(single.Population);
+        var exact = confirmed/population*1000000;
+        var rounded = Math.round(exact);
+        var cases = ""+rounded;
+        var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+        var short = single.CountryCode.toLowerCase();
+        var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+        var tr = document.createElement("tr");
+        if(short=="ch") {
+          tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+          tr.className = "ch";
+        }
+        else {
+          tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+        }
+        firstTable.appendChild(tr);
+      }
+}
+
+function getWorldDeaths(chTotal) {
+  if(worldData==null) return;
+  var ch = worldData.filter(function(d) { if(d.Key=="CH") return d});
+  if(ch && ch[0]) ch[0].Deaths = ""+chTotal;
+
+  var start = countryPage*20;
+  var end = start+20;
+  var sorted = Array.from(worldData).sort(function(a, b){return b.Deaths-a.Deaths}).slice(start,end);
+
+  var firstTable = document.getElementById("international2");
+  firstTable.innerHTML = "";
+  for(var i=0; i<20; i++) {
+    var single = sorted[i];
+    var date = single.Date;
+    var splitDate = date.split("-");
+    var year = splitDate[0];
+    var month = parseInt(splitDate[1]);
+    var day = parseInt(splitDate[2]);
+    var dateString = day+"."+month+"."+year;
+    var country = formatCountryName(single.CountryName);
+    var cases = ""+parseInt(single.Deaths);
+    var formattedCases = cases.replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+    var short = single.CountryCode.toLowerCase();
+    var countryFlag = '<span class="flag flag-icon-'+short+' flag-icon-squared">'+country+'</span>'
+    var tr = document.createElement("tr");
+    if(short=="ch") {
+      tr.innerHTML = "<td><b>"+(start+i+1)+".</b></td><td><b>"+countryFlag+"</b></td><td><b>"+formattedCases+"</b></td>";
+      tr.className = "ch";
+    }
+    else {
+      tr.innerHTML = "<td>"+(start+i+1)+".</td><td>"+countryFlag+"</td><td>"+formattedCases+"</td>";
+    }
+    firstTable.appendChild(tr);
+  }
 }
