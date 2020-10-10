@@ -1157,6 +1157,7 @@ function filterCases(place, mode) {
   //Hospitalisations:
   var datasets = [];
   var casesHosp = moreFilteredData.map(function(d) {if(d.current_hosp=="") return null; return d.current_hosp});
+  casesHosp.splice(0,1);
   datasets.push({
     label: _('Hospitalisiert'),
     data: casesHosp,
@@ -1171,6 +1172,7 @@ function filterCases(place, mode) {
     }
   });
   var filteredForICU = moreFilteredData.filter(function(d) { if(d.current_icu!="") return d});
+  filteredForICU.splice(0,1);
   if(filteredForICU.length>0) {
     var casesICU = moreFilteredData.map(function(d) {if(d.current_icu=="") return null; return d.current_icu});
     datasets.push({
@@ -1188,6 +1190,7 @@ function filterCases(place, mode) {
     });
   }
   var filteredForVent = moreFilteredData.filter(function(d) { if(d.current_vent!="") return d});
+  filteredForVent.splice(0,1);
   if(filteredForVent.length>0) {
     var casesVent = moreFilteredData.map(function(d) {if(d.current_vent=="") return null; return d.current_vent});
     datasets.push({
