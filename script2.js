@@ -132,7 +132,7 @@ function processData() {
   // console.log("End Hosp CH");
   console.log("Start Cantons");
   for(var i=0; i<cantons.length; i++) {
-    barChartCases(cantons[i]);
+    barChartCases(i);
   }
   console.log("End Single Cantons");
   document.getElementById("loadingspinner").style.display = 'none';
@@ -488,16 +488,25 @@ function prepareData() {
         cantonTotal.diff_ncumul_deceased = null;
         cantonTotal.diff_ncumul_conf = null;
         cantonTotal.diff_current_hosp = null;
+        cantonTotal.diff_current_vent = null;
+        cantonTotal.diff_current_icu = null;
+        cantonTotal.diffAvg7Days = null;
       }
       else {
           if(Number.isNaN(cantonTotal.ncumul_conf)) {
             cantonTotal.ncumul_conf = dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
             cantonTotal.date_ncumul_conf = dataPerDay[dataPerDay.length-1].data[i].date_ncumul_conf;
             cantonTotal.diff_ncumul_conf = null;
+            cantonTotal.diffAvg7Days = null;
             //console.log("Old ncumul conf for: "+canton+" date: "+dateString);
           }
-          else
+          else {
             cantonTotal.diff_ncumul_conf = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
+            if(dataPerDay.length>9) {
+              var diff7Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-7].data[i].ncumul_conf;
+              cantonTotal.diffAvg7Days = Math.round(diff7Days / 7);
+            }
+          }
 
           if(Number.isNaN(cantonTotal.ncumul_deceased)) {
             cantonTotal.ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
@@ -514,10 +523,15 @@ function prepareData() {
             cantonTotal.current_icu = dataPerDay[dataPerDay.length-1].data[i].current_icu;
             cantonTotal.date_current_hosp = dataPerDay[dataPerDay.length-1].data[i].date_current_hosp;
             cantonTotal.diff_current_hosp = null;
+            cantonTotal.diff_current_vent = null;
+            cantonTotal.diff_current_icu = null;
             //console.log("Old ncumul death for: "+canton+" date: "+dateString);
           }
-          else
+          else {
             cantonTotal.diff_current_hosp = cantonTotal.current_hosp - dataPerDay[dataPerDay.length-1].data[i].current_hosp;
+            if(cantonTotal.current_vent!=null) cantonTotal.diff_current_vent = cantonTotal.current_vent - dataPerDay[dataPerDay.length-1].data[i].current_vent;
+            if(cantonTotal.current_icu!=null) cantonTotal.diff_current_icu = cantonTotal.current_icu - dataPerDay[dataPerDay.length-1].data[i].current_icu;
+          }
       }
       singleDayObject.data.push(cantonTotal);
     }
@@ -739,8 +753,9 @@ function barChartAllCH(filter) {
       {
         label: '7d-Avg',
         data: avgs,
-        backgroundColor: inDarkMode() ? 'white' : '#777777',
-        borderColor: inDarkMode() ? 'white' : '#777777',
+        backgroundColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        borderColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        pointRadius: 0,
         fill: false,
         type: 'line'
       },
@@ -955,10 +970,13 @@ function getDateForMode(mode) {
   }
 }
 
-function filterCases(place, mode) {
-  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
+function filterCases(placenr, mode) {
+  var place = cantons[placenr];
+  //var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
+  var filteredData = mainData.days.map(function(d) { var canton = d.data[placenr]; canton.date = d.date; return canton;});
+  //console.log(testData);
   if(!filteredData || filteredData.length<2) return;
-  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!="") return d});
+  var moreFilteredData = filteredData.filter(function(d) { if(d.ncumul_conf!=null) return d});
   if(mode!=0) {
     var referenceDate = getDateForMode(mode);
     moreFilteredData = moreFilteredData.filter(function(d) {
@@ -978,15 +996,13 @@ function filterCases(place, mode) {
     var date = new Date(year,month,day);
     return date;
   });
-  var cases = moreFilteredData.map(function(d) {return d.ncumul_conf});
-  var diff = [0];
-  for (var i = 1; i < cases.length; i++) diff.push(cases[i] - cases[i - 1]);
-  dateLabels.splice(0,1);
-  cases.splice(0,1);
-  diff.splice(0,1);
+  var cases = moreFilteredData.map(d => d.ncumul_conf);
+  var diff = moreFilteredData.map(d => d.diff_ncumul_conf);
+  var avgs = moreFilteredData.map(d => d.diffAvg7Days);
+
   //Hospitalisations:
   var datasets = [];
-  var casesHosp = moreFilteredData.map(function(d) {if(d.current_hosp=="") return null; return d.current_hosp});
+  var casesHosp = moreFilteredData.map(function(d) {if(d.diff_current_hosp==null) return null; return d.current_hosp});
   datasets.push({
     label: _('Hospitalisiert'),
     data: casesHosp,
@@ -1000,9 +1016,9 @@ function filterCases(place, mode) {
       anchor: 'end'
     }
   });
-  var filteredForICU = moreFilteredData.filter(function(d) { if(d.current_icu!="") return d});
+  var filteredForICU = moreFilteredData.filter(function(d) { if(d.diff_current_icu!=null) return d});
   if(filteredForICU.length>0) {
-    var casesICU = moreFilteredData.map(function(d) {if(d.current_icu=="") return null; return d.current_icu});
+    var casesICU = moreFilteredData.map(function(d) {if(d.diff_current_icu==null) return null; return d.current_icu});
     datasets.push({
       label: _('In Intensivbehandlung'),
       data: casesICU,
@@ -1017,9 +1033,9 @@ function filterCases(place, mode) {
       }
     });
   }
-  var filteredForVent = moreFilteredData.filter(function(d) { if(d.current_vent!="") return d});
+  var filteredForVent = moreFilteredData.filter(function(d) { if(d.diff_current_vent!=null) return d});
   if(filteredForVent.length>0) {
-    var casesVent = moreFilteredData.map(function(d) {if(d.current_vent=="") return null; return d.current_vent});
+    var casesVent = moreFilteredData.map(function(d) {if(d.diff_current_vent==null) return null; return d.current_vent});
     datasets.push({
       label: _('Künstlich beatmet'),
       data: casesVent,
@@ -1038,11 +1054,13 @@ function filterCases(place, mode) {
     "cases": cases,
     "dateLabels": dateLabels,
     "diff": diff,
+    "avgs": avgs,
     "datasets": datasets
   }
 }
 
-function barChartCases(place) {
+function barChartCases(placenr) {
+  var place = cantons[placenr];
   var section = document.getElementById("detail");
   var article = document.createElement("article");
   article.id="detail_"+place;
@@ -1071,7 +1089,7 @@ function barChartCases(place) {
   article.appendChild(div);
   section.appendChild(article);
   div.scrollLeft = 1700;
-  var filter = filterCases(place, (getDeviceState()==2) ? 2 : 1);
+  var filter = filterCases(placenr, (getDeviceState()==2) ? 2 : 1);
   var chart = new Chart(canvas.id, {
     type: 'bar',
     options: {
@@ -1093,26 +1111,18 @@ function barChartCases(place) {
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
-          label: function(tooltipItems, data) {
+          afterLabel: function(tooltipItems, data) {
+            if(tooltipItems.datasetIndex==0) return "";
             var index = tooltipItems.index;
             var value = filter.cases[index];
-            var change;
-            if(index>0) {
-                change = parseInt(value)-parseInt(filter.cases[index-1]);
-            }
-            else {
-                change = parseInt(tooltipItems.value);
-            }
-            var label = change>0 ? "+"+change : change;
-            var changeStr = " ("+label+")";
-            return value+changeStr;
+            return "Total : "+value;
           }
         }
       },
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
-        datalabels:
-        {
+        datalabels: {
+          display: false,
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
             weight: 'bold'
@@ -1124,6 +1134,19 @@ function barChartCases(place) {
     labels: filter.dateLabels,
     datasets: [
       {
+        label: '7d-Avg',
+        data: filter.avgs,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        pointRadius: 0,
+        borderWidth: 2,
+        backgroundColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        borderColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        fill: false,
+        type: 'line'
+      },
+      {
+        label: 'Diff. ',
         data: filter.diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
@@ -1132,7 +1155,8 @@ function barChartCases(place) {
         backgroundColor: '#F15F36',
         datalabels: {
           align: 'end',
-          anchor: 'end'
+          anchor: 'end',
+          display: true
         }
       }
     ]
@@ -1199,7 +1223,7 @@ function barChartCases(place) {
       datasets: filter.datasets
     }
   });
-  addFilterLengthButtons(canvas, place, chart, chartHosp);
+  addFilterLengthButtons(canvas, placenr, chart, chartHosp);
 }
 
 function getScales(mode) {
@@ -1327,16 +1351,16 @@ function setLanguageNav() {
   ul.appendChild(li);
 }
 
-function addFilterLengthButtons(elementAfter, place, chart, chartHosp) {
+function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
   if(getDeviceState()==2) addFilterLengthButton(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp);
-  addFilterLengthButton(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp);
-  addFilterLengthButton(div, place, _('Ab März'), 0, false, chart, chartHosp);
+  addFilterLengthButton(div, placenr, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp);
+  addFilterLengthButton(div, placenr, _('Ab März'), 0, false, chart, chartHosp);
   elementAfter.before(div);
 }
 
-function addFilterLengthButton(container, place, name, mode, isActive, chart, chartHosp) {
+function addFilterLengthButton(container, placenr, name, mode, isActive, chart, chartHosp) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
@@ -1344,27 +1368,20 @@ function addFilterLengthButton(container, place, name, mode, isActive, chart, ch
   button.addEventListener('click', function() {
     this.classList.add('active');
     getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
-    var filter = filterCases(place, mode);
+    var filter = filterCases(placenr, mode);
     chart.data.labels = filter.dateLabels;
-    chart.data.datasets[0].data = filter.diff;
+    chart.data.datasets[0].data = filter.avgs;
+    chart.data.datasets[1].data = filter.diff;
+    chart.data.datasets[1].datalabels.display = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = {
-      label: function(tooltipItems, data) {
+      afterLabel: function(tooltipItems, data) {
+        if(tooltipItems.datasetIndex==0) return "";
         var index = tooltipItems.index;
         var value = filter.cases[index];
-        var change;
-        if(index>0) {
-            change = parseInt(value)-parseInt(filter.cases[index-1]);
-        }
-        else {
-            change = parseInt(tooltipItems.value);
-        }
-        var label = change>0 ? "+"+change : change;
-        var changeStr = " ("+label+")";
-        return value+changeStr;
+        return "Total : "+value;
       }
     };
-    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
 
     chartHosp.data.labels = filter.dateLabels;
