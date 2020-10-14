@@ -976,9 +976,8 @@ function getDateForMode(mode) {
   }
 }
 
-let selectedMode = -1;
+
 function filterCases(placenr, mode) {
-  selectedMode = mode;
   var place = cantons[placenr];
   //var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
   var filteredData = mainData.days.map(function(d) { var canton = d.data[placenr]; canton.date = d.date; return canton;});
@@ -1391,8 +1390,13 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
       this.classList.add('active');
       getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
     }
-    if(mode==-1) mode = selectedMode;
-    var filter = filterCases(placenr, mode);
+    if(mode==-1) {
+      chart.mode = chart.mode!=undefined?chart.mode:(getDeviceState()==2?2:1);
+    }
+    else {
+      chart.mode = mode;
+    }
+    var filter = filterCases(placenr, chart.mode);
     chart.data.labels = filter.dateLabels;
     var pointBackgroundColor = filter.incidences.map(function (d) { return (d<60)?"green":(d>=120?"red":"orange");});
     chart.data.datasets[0].data = chart.showIncidences?filter.incidences:filter.avgs;
@@ -1401,7 +1405,8 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chart.data.datasets[0].pointBorderColor = pointBackgroundColor;
     chart.data.datasets[0].pointRadius = chart.showIncidences?4:0;
     chart.data.datasets[1].data = chart.showIncidences?null:filter.diff;
-    chart.data.datasets[1].datalabels.display = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
+    chart.data.datasets[1].datalabels.display = (chart.mode==0 || (getDeviceState()==2 && chart.mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = {
       afterLabel: function(tooltipItems, data) {
@@ -1418,7 +1423,13 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.update(0);
   });
-  container.append(button);
+  if(isIncidenceButton) {
+    var span = document.createElement('span');
+    span.append(button);
+    container.append(span);
+  }
+  else
+    container.append(button);
 }
 
 function addAxisButtons(elementAfter, chart) {
