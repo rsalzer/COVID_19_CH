@@ -543,9 +543,9 @@ function prepareData() {
     singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_hosp: acc; }, 0);
     var isComplete = singleDayObject.data.reduce(
       function(acc, val) {
-        return (acc&&(val.date_ncumul_conf==singleDayObject.date))
-      }, true);
-    if(isComplete) completeIndex = dataPerDay.length;
+        return acc+(val.date_ncumul_conf==singleDayObject.date?1:0);
+      }, 0);
+    if(isComplete>=singleDayObject.data.length-1) completeIndex = dataPerDay.length;
     singleDayObject.diffAvg7Days = null;
     if(dataPerDay.length>9) {
       var diff7Days = singleDayObject.total_ncumul_conf - dataPerDay[dataPerDay.length-7].total_ncumul_conf;
