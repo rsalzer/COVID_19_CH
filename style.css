@@ -335,6 +335,9 @@ button {
   .chartButton:hover {
   	border-bottom: 2px solid transparent;
   }
+  .chartButton:focus {
+  	border-bottom: 2px solid transparent;
+  }
 }
 .notes {
 	font-size: 0.8em;
