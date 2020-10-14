@@ -4,6 +4,7 @@
     --color-main: #000;
     --color-background: #fff;
     --canvas-minwidth: 2700px;
+    --maxwidth: 700px;
 }
 @media (prefers-color-scheme: dark) {
     :root {
@@ -29,7 +30,7 @@ body {
 	padding-left: 5vw;
 	padding-right: 5vw;
 	padding-top: 1em;
-	max-width: 680px;
+	max-width: var(--maxwidth);
 }
 #page-nav ul {
 	list-style: none;
@@ -68,7 +69,7 @@ main a {
 	color: inherit;
 }
 main p {
-	max-width: 680px;
+	max-width: var(--maxwidth);
 	margin: 1em 0;
 }
 main h1 {
@@ -154,7 +155,7 @@ table tr td:nth-child(3) {
 }
 .table-group {
 /* 	background-color: lightblue; */
-	max-width: 680px;
+	max-width: var(--maxwidth);
 }
 .table-group table {
 	display: inline-table;
@@ -349,7 +350,7 @@ button {
 	text-decoration: underline;
 }
 .rightButtonDiv {
-   max-width: 680px;
+   max-width: var(--maxwidth);
    text-align: right;
 }
 .internationalButton {
@@ -509,7 +510,7 @@ button {
 }
 #page-footer > * {
 	font-size: 0.8em;
-	max-width: 680px;
+	max-width: var(--maxwidth);
 }
 
 
