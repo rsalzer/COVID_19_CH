@@ -321,6 +321,27 @@ button {
 	width: 100%
     clear: both;
 }
+.chartButton {
+    float: right;
+    display: block;
+    margin: 1em 1em 0 0;
+    padding: 0.2em 0;
+	color: var(--color-main);
+    background-color: transparent;
+    border: 0;
+	  border-bottom: 2px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    text-decoration: capitalize;
+    color: var(--color-main);
+}
+.chartButton:hover {
+	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
+}
+.chartButton:focus {
+    outline: none;
+}
 @media (max-width: 660px) {
 	canvas {
 	  width: 100%;
@@ -339,6 +360,12 @@ button {
   	border-bottom: 2px solid transparent;
   }
 }
+.chartButton.active {
+  cursor: default;
+	border-bottom: 2px solid #000;
+	border-color: var(--color-main);
+}
+
 .notes {
 	font-size: 0.8em;
 }
@@ -386,33 +413,6 @@ button {
 }
 .internationalButton.active {
 	cursor: default;
-	border-bottom: 2px solid #000;
-	border-color: var(--color-main);
-}
-
-.chartButton {
-    float: right;
-    display: block;
-    margin: 1em 1em 0 0;
-    padding: 0.2em 0;
-	color: var(--color-main);
-    background-color: transparent;
-    border: 0;
-	  border-bottom: 2px solid transparent;
-    cursor: pointer;
-    text-decoration: none;
-    text-decoration: capitalize;
-    color: var(--color-main);
-}
-.chartButton:hover {
-	border-bottom: 2px solid #000;
-	border-color: var(--color-main);
-}
-.chartButton:focus {
-    outline: none;
-}
-.chartButton.active {
-    cursor: default;
 	border-bottom: 2px solid #000;
 	border-color: var(--color-main);
 }
