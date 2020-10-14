@@ -558,6 +558,7 @@ function prepareData() {
   mainData = {};
   mainData.days = dataPerDay;
   mainData.completeIndex = dataPerDay.length - completeIndex;
+  total = mainData.days[mainData.days.length-1].total_ncumul_conf;
   //console.log("CompleteIndex: " + mainData.completeIndex);
   //console.log("Finished processing data");
 }
