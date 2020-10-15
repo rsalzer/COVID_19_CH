@@ -491,6 +491,7 @@ function prepareData() {
         cantonTotal.diff_current_vent = null;
         cantonTotal.diff_current_icu = null;
         cantonTotal.diffAvg7Days = null;
+        cantonTotal.incidences14Days = null;
       }
       else {
           if(Number.isNaN(cantonTotal.ncumul_conf)) {
@@ -498,6 +499,7 @@ function prepareData() {
             cantonTotal.date_ncumul_conf = dataPerDay[dataPerDay.length-1].data[i].date_ncumul_conf;
             cantonTotal.diff_ncumul_conf = null;
             cantonTotal.diffAvg7Days = null;
+            cantonTotal.incidences14Days = null;
             //console.log("Old ncumul conf for: "+canton+" date: "+dateString);
           }
           else {
@@ -505,9 +507,12 @@ function prepareData() {
             if(dataPerDay.length>9) {
               var diff7Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-7].data[i].ncumul_conf;
               cantonTotal.diffAvg7Days = Math.round(diff7Days / 7);
+              if(dataPerDay.length>15) {
+                var diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-14].data[i].ncumul_conf;
+                cantonTotal.incidences14Days = Math.round(diff14Days / population[canton] * 100000);
+              }
             }
           }
-
           if(Number.isNaN(cantonTotal.ncumul_deceased)) {
             cantonTotal.ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
             cantonTotal.date_ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].date_ncumul_deceased;
@@ -544,7 +549,7 @@ function prepareData() {
     var isComplete = singleDayObject.data.reduce(
       function(acc, val) {
         return acc+(val.date_ncumul_conf==singleDayObject.date?1:0);
-    }, 0);
+      }, 0);
     if(isComplete>=singleDayObject.data.length-1) completeIndex = dataPerDay.length;
     singleDayObject.diffAvg7Days = null;
     if(dataPerDay.length>9) {
@@ -971,6 +976,7 @@ function getDateForMode(mode) {
   }
 }
 
+
 function filterCases(placenr, mode) {
   var place = cantons[placenr];
   //var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==place) return d});
@@ -1000,6 +1006,7 @@ function filterCases(placenr, mode) {
   var cases = moreFilteredData.map(d => d.ncumul_conf);
   var diff = moreFilteredData.map(d => d.diff_ncumul_conf);
   var avgs = moreFilteredData.map(d => d.diffAvg7Days);
+  var incidences = moreFilteredData.map(d => d.incidences14Days);
 
   //Hospitalisations:
   var datasets = [];
@@ -1056,6 +1063,7 @@ function filterCases(placenr, mode) {
     "dateLabels": dateLabels,
     "diff": diff,
     "avgs": avgs,
+    "incidences": incidences,
     "datasets": datasets
   }
 }
@@ -1355,25 +1363,50 @@ function setLanguageNav() {
 function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  if(getDeviceState()==2) addFilterLengthButton(div, placenr, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp);
-  addFilterLengthButton(div, placenr, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp);
-  addFilterLengthButton(div, placenr, _('Ab März'), 0, false, chart, chartHosp);
+  addFilterLengthButton(div, placenr, _('Inz/100k'), -1, false, chart, chartHosp, true);
+  if(getDeviceState()==2) addFilterLengthButton(div, placenr, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp, false);
+  addFilterLengthButton(div, placenr, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp, false);
+  addFilterLengthButton(div, placenr, _('Ab März'), 0, false, chart, chartHosp, false);
   elementAfter.before(div);
 }
 
-function addFilterLengthButton(container, placenr, name, mode, isActive, chart, chartHosp) {
+function addFilterLengthButton(container, placenr, name, mode, isActive, chart, chartHosp, isIncidenceButton) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
   button.innerHTML = name;
   button.addEventListener('click', function() {
-    this.classList.add('active');
-    getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
-    var filter = filterCases(placenr, mode);
+    if(isIncidenceButton) {
+      if(this.classList.contains('active')) {
+        this.classList.remove('active');
+        chart.showIncidences = false;
+      }
+      else {
+        this.classList.add('active');
+        chart.showIncidences = true;
+      }
+    }
+    else {
+      this.classList.add('active');
+      getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
+    }
+    if(mode==-1) {
+      chart.mode = chart.mode!=undefined?chart.mode:(getDeviceState()==2?2:1);
+    }
+    else {
+      chart.mode = mode;
+    }
+    var filter = filterCases(placenr, chart.mode);
     chart.data.labels = filter.dateLabels;
-    chart.data.datasets[0].data = filter.avgs;
-    chart.data.datasets[1].data = filter.diff;
-    chart.data.datasets[1].datalabels.display = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    var pointBackgroundColor = filter.incidences.map(function (d) { return (d<60)?"green":(d>=120?"red":"orange");});
+    chart.data.datasets[0].data = chart.showIncidences?filter.incidences:filter.avgs;
+    chart.data.datasets[0].label = chart.showIncidences?_('Inz/100k'):_('7d-Avg');
+    chart.data.datasets[0].pointBackgroundColor = pointBackgroundColor;
+    chart.data.datasets[0].pointBorderColor = pointBackgroundColor;
+    chart.data.datasets[0].pointRadius = chart.showIncidences?4:0;
+    chart.data.datasets[1].data = chart.showIncidences?null:filter.diff;
+    chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
+    chart.data.datasets[1].datalabels.display = (chart.mode==0 || (getDeviceState()==2 && chart.mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = {
       afterLabel: function(tooltipItems, data) {
@@ -1390,7 +1423,13 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.update(0);
   });
-  container.append(button);
+  if(isIncidenceButton) {
+    var span = document.createElement('span');
+    span.append(button);
+    container.append(span);
+  }
+  else
+    container.append(button);
 }
 
 function addAxisButtons(elementAfter, chart) {
