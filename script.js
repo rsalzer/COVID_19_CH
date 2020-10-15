@@ -519,8 +519,9 @@ function prepareData() {
             cantonTotal.diff_ncumul_deceased = null;
             //console.log("Old ncumul death for: "+canton+" date: "+dateString);
           }
-          else
+          else {
             cantonTotal.diff_ncumul_deceased = cantonTotal.ncumul_deceased - dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
+          }
 
           if(Number.isNaN(cantonTotal.current_hosp)) {
             cantonTotal.current_hosp = dataPerDay[dataPerDay.length-1].data[i].current_hosp;
@@ -555,6 +556,8 @@ function prepareData() {
     if(dataPerDay.length>9) {
       var diff7Days = singleDayObject.total_ncumul_conf - dataPerDay[dataPerDay.length-7].total_ncumul_conf;
       singleDayObject.diffAvg7Days = Math.round(diff7Days / 7);
+      var diffDeath7Days = singleDayObject.total_ncumul_deceased - dataPerDay[dataPerDay.length-7].total_ncumul_deceased;
+      singleDayObject.diffDeathAvg7Days = Math.round(diffDeath7Days * 10 / 7) / 10;
     }
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
@@ -633,10 +636,14 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
 
     var deathDiff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
     chartDeaths.data.labels = filter.dateLabels;
-    chartDeaths.data.datasets[0].data = deathDiff;
+    var avgDeaths = filter.dataPerDay.map(d => d.diffDeathAvg7Days);
+    var completeIndex = mainData.completeIndex;
+    avgDeaths.splice(avgDeaths.length-completeIndex+1, completeIndex);
+    chartDeaths.data.datasets[0].data = avgDeaths;
+    chartDeaths.data.datasets[1].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
-    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chartDeaths.update(0);
 
     var totalHosp = filter.dataPerDay.map(function(d) {return d.total_current_hosp});
@@ -786,14 +793,16 @@ function barChartAllCH(filter) {
   }
 });
 
-  var chartDeaths = barChartAllCHDeaths(filter);
   var chartHosp = barChartAllCHHospitalisations(filter);
+  var chartDeaths = barChartAllCHDeaths(filter);
   addFilterLengthButtonsCH(canvas, chart, chartDeaths, chartHosp);
 }
 
 function barChartAllCHDeaths(filter) {
-  var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
-
+  var diff = filter.dataPerDay.map(d => d.diffTotal_ncumul_deceased);
+  var avgs = filter.dataPerDay.map(d => d.diffDeathAvg7Days);
+  var completeIndex = mainData.completeIndex;
+  avgs.splice(avgs.length-completeIndex, completeIndex);
   //console.log(dataPerDay);
   var place = "CH";
   var section = document.getElementById("detail");
@@ -830,6 +839,7 @@ function barChartAllCHDeaths(filter) {
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
         datalabels: {
+          display: false,
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
             weight: 'bold'
@@ -841,6 +851,15 @@ function barChartAllCHDeaths(filter) {
     labels: filter.dateLabels,
     datasets: [
       {
+        label: '7d-Avg',
+        data: avgs,
+        backgroundColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        borderColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        pointRadius: 0,
+        fill: false,
+        type: 'line'
+      },
+      {
         data: diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
@@ -848,10 +867,8 @@ function barChartAllCHDeaths(filter) {
         borderColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         backgroundColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         datalabels: {
-          align: 'end', /*function (context) {
-                var index = context.dataIndex;
-                return index % 2 == 0 ? 'top' : 'bottom';
-          },*/
+          display: true,
+          align: 'top',
           anchor: 'end'
         }
       }
