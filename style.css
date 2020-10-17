@@ -321,6 +321,14 @@ button {
 	width: 100%
     clear: both;
 }
+
+.chartButtons span {
+  padding-left:10px;
+  padding-right:10px;
+  display: inline-flex;
+  float: right;
+}
+
 .chartButton {
     float: right;
     display: block;

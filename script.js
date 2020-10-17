@@ -601,14 +601,11 @@ function filterAllCH(mode) {
   }
 }
 
-function addFilterLengthButtonsCH(elementAfter, chart, chartDeaths, chartHosp) {
+function addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp) {
   var place = "CH";
-  var div = document.createElement('div');
-  div.className = "chartButtons";
   if(getDeviceState()==2) addFilterLengthButtonCH(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(div, place, _('Ab März'), 0, false, chart, chartDeaths, chartHosp);
-  elementAfter.before(div);
 }
 
 function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, chartDeaths, chartHosp) {
@@ -795,7 +792,8 @@ function barChartAllCH(filter) {
 
   var chartHosp = barChartAllCHHospitalisations(filter);
   var chartDeaths = barChartAllCHDeaths(filter);
-  addFilterLengthButtonsCH(canvas, chart, chartDeaths, chartHosp);
+  var div = addAxisButtons(canvas, chart, chartDeaths, chartHosp);
+  addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp);
 }
 
 function barChartAllCHDeaths(filter) {
@@ -1449,15 +1447,18 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     container.append(button);
 }
 
-function addAxisButtons(elementAfter, chart) {
+function addAxisButtons(elementAfter, chart, chartDeaths, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addAxisButton(div, chart, _('Logarithmisch'), cartesianAxesTypes.LOGARITHMIC, false);
-  addAxisButton(div, chart, _('Linear'), cartesianAxesTypes.LINEAR, true);
+  var span = document.createElement("span");
+  addAxisButton(span, chart, chartDeaths, chartHosp, _('Logarithmisch'), cartesianAxesTypes.LOGARITHMIC, false);
+  addAxisButton(span, chart, chartDeaths, chartHosp, _('Linear'), cartesianAxesTypes.LINEAR, true);
+  div.append(span);
   elementAfter.before(div);
+  return div;
 }
 
-function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
+function addAxisButton(container, chart, chartDeaths, chartHosp, name, cartesianAxisType, isActive) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
@@ -1468,6 +1469,12 @@ function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
 
     chart.options.scales.yAxes[0].type = cartesianAxisType;
     chart.update();
+
+    chartDeaths.options.scales.yAxes[0].type = cartesianAxisType;
+    chartDeaths.update();
+
+    chartHosp.options.scales.yAxes[0].type = cartesianAxisType;
+    chartHosp.update();
   });
   container.append(button);
 }
