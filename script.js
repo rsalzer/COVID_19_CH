@@ -379,12 +379,32 @@ function processActualHospitalisation(filter) {
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
+
+    var hospDiff = actual.diff_current_hosp!=null?parseInt(actual.diff_current_hosp)>0?"(+"+actual.diff_current_hosp+")":"("+actual.diff_current_hosp+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(hospDiff);
+    td.appendChild(text);
+    tr.appendChild(td);
+
     td = document.createElement("td");
     text = document.createTextNode(actual.current_icu!=null?actual.current_icu:"");
     td.appendChild(text);
     tr.appendChild(td);
+
+    var icuDiff = actual.diff_current_icu!=null?parseInt(actual.diff_current_icu)>0?"(+"+actual.diff_current_icu+")":"("+actual.diff_current_icu+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(icuDiff);
+    td.appendChild(text);
+    tr.appendChild(td);
+
     td = document.createElement("td");
     text = document.createTextNode(actual.current_vent!=null?actual.current_vent:"");
+    td.appendChild(text);
+    tr.appendChild(td);
+
+    var ventDiff = actual.diff_current_vent!=null?parseInt(actual.diff_current_vent)>0?"(+"+actual.diff_current_vent+")":"("+actual.diff_current_vent+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(ventDiff);
     td.appendChild(text);
     tr.appendChild(td);
     // td = document.createElement("td");
@@ -404,7 +424,10 @@ function processActualHospitalisation(filter) {
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td>"; //"<td></td>";
+  var totalDiffHosp = today.diffTotal_current_hosp>0?"(+"+today.diffTotal_current_hosp+")":"("+today.diffTotal_current_hosp+")";
+  var totalDiffIcu = today.diffTotal_current_icu>0?"(+"+today.diffTotal_current_icu+")":"("+today.diffTotal_current_icu+")";
+  var totalDiffVent = today.diffTotal_current_vent>0?"(+"+today.diffTotal_current_vent+")":"("+today.diffTotal_current_vent+")";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalDiffHosp+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalDiffIcu+"</b></td><td><b>"+totalvent+"</b></td><td><b>"+totalDiffVent+"</b></td>"; //"<td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
@@ -536,7 +559,9 @@ function prepareData() {
           else {
             cantonTotal.diff_current_hosp = cantonTotal.current_hosp - dataPerDay[dataPerDay.length-1].data[i].current_hosp;
             if(cantonTotal.current_vent!=null) cantonTotal.diff_current_vent = cantonTotal.current_vent - dataPerDay[dataPerDay.length-1].data[i].current_vent;
+            else cantonTotal.diff_current_vent = null;
             if(cantonTotal.current_icu!=null) cantonTotal.diff_current_icu = cantonTotal.current_icu - dataPerDay[dataPerDay.length-1].data[i].current_icu;
+            else cantonTotal.diff_current_icu = null;
           }
       }
       singleDayObject.data.push(cantonTotal);
@@ -547,6 +572,8 @@ function prepareData() {
     singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_conf: acc; }, 0);
     singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_deceased: acc; }, 0);
     singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_hosp: acc; }, 0);
+    singleDayObject.diffTotal_current_icu = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_icu: acc; }, 0);
+    singleDayObject.diffTotal_current_vent = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_vent: acc; }, 0);
     var isComplete = singleDayObject.data.reduce(
       function(acc, val) {
         return acc+(val.date_ncumul_conf==singleDayObject.date?1:0);

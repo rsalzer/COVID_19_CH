@@ -285,6 +285,14 @@ table.wide th:nth-child(2) span {
 	transform: none;
 	padding-left: 0;
 }
+table.wide th:nth-child(2) {
+  width: 25%;
+}
+table.wide th:nth-child(4),
+table.wide th:nth-child(6),
+table.wide th:nth-child(8) {
+  width: 10%;
+}
 h3 {
 	margin-bottom: 1em;
 	font-size: 1.125rem;
