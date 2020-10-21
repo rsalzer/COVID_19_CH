@@ -647,8 +647,8 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
     var avgs = filter.dataPerDay.map(d => d.diffAvg7Days);
     var completeIndex = mainData.completeIndex;
-    avgs.splice(avgs.length-completeIndex+1, completeIndex);
-    var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex)?"#F15F36":"#999999aa";});
+    avgs.splice(avgs.length-completeIndex, completeIndex);
+    var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex-1)?"#F15F36":"#999999aa";});
     chart.data.labels = filter.dateLabels;
     chart.data.datasets[0].data = avgs;
     chart.data.datasets[1].data = diff;
@@ -662,7 +662,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartDeaths.data.labels = filter.dateLabels;
     var avgDeaths = filter.dataPerDay.map(d => d.diffDeathAvg7Days);
     var completeIndex = mainData.completeIndex;
-    avgDeaths.splice(avgDeaths.length-completeIndex+1, completeIndex);
+    avgDeaths.splice(avgDeaths.length-completeIndex, completeIndex);
     chartDeaths.data.datasets[0].data = avgDeaths;
     chartDeaths.data.datasets[1].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
