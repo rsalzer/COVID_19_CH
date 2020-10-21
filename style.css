@@ -250,7 +250,6 @@ table img {
 table.wide {
 	width: 100%;
 	max-width: 500px;
-  table-layout: fixed;
 }
 @media (max-width: 660px) {
 	table.wide {
