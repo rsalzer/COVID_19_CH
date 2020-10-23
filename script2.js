@@ -710,21 +710,30 @@ function getCHCallbacks(filter, variable) {
       multistringText = [""];
       var index = tooltipItems[0].index;
       var dataForThisDay = filter.dataPerDay[index];
-      var sorted = Array.from(dataForThisDay.data).sort(function(a, b){ if(a[variable]==b[variable]) return b["date_"+variable]<a["date_"+variable]?1:-1;  return b[variable]-a[variable]});
+      var sorted = Array.from(dataForThisDay.data).sort(function(a, b){ if(a[variable]==b[variable]) return b.canton<a.canton;  return b[variable]-a[variable]});
+      var emptyCantons = [];
       sorted.forEach(function(item) {
         if(item.canton!="FL") {
           var singleItem = item[variable];
           var date = item["date_"+variable];
           if(variable.startsWith("current_")) date = item["date_current_hosp"];
           if(singleItem==null) {
-            date = _("Keine Daten");
-            singleItem = 0;
+            emptyCantons.push(item.canton);
+            return;
           }
           var tabbing = 5-(""+singleItem).length;
           var padding = " ".repeat(tabbing);
           var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
           multistringText.push(item.canton+":"+padding+singleItem+" ("+date+") "+diffStr);
         }
+      });
+      emptyCantons.forEach(function(item) {
+        var date = _("Keine Daten");
+        var singleItem = 0;
+        var tabbing = 5-(""+singleItem).length;
+        var padding = " ".repeat(tabbing);
+        var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
+        multistringText.push(item+":"+padding+singleItem+" ("+date+") "+diffStr);
       });
 
       return multistringText;
