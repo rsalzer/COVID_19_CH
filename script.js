@@ -200,7 +200,8 @@ function processActualData(filter) {
     td.innerHTML = actual.cases14DaysDiff;
     tr.appendChild(td);
     td = document.createElement("td");
-    td.innerHTML = "<span class=\"risk "+risk+"\">"+actual.incidence+"</span>";
+    var inc = actual.incidence>1000?">1k":actual.incidence;
+    td.innerHTML = "<span class=\"risk "+risk+"\">"+inc+"</span>";
     tr.appendChild(td);
 
     /*
