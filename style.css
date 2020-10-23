@@ -115,7 +115,7 @@ section > * > article:last-child {
 }
 table {
 	font-family: "IBM Plex Mono", monospace;
-	font-size: 14px;
+	font-size: 13.5px;
 	border-collapse: collapse;
 }
 table td,
