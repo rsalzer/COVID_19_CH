@@ -113,7 +113,7 @@ function getCanton(i) {
 
 function processData() {
   var start = new Date();
-  console.log("Process actual");
+  //console.log("Process actual");
   prepareData();
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
 
@@ -130,11 +130,11 @@ function processData() {
   // console.log("End Deaths CH / Start Hosp");
   //barChartAllCHHospitalisations();
   // console.log("End Hosp CH");
-  console.log("Start Cantons");
+  //console.log("Start Cantons");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(i);
   }
-  console.log("End Single Cantons");
+  //console.log("End Single Cantons");
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
 }
@@ -373,18 +373,38 @@ function processActualHospitalisation(filter) {
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date_current_hosp));
+    td.appendChild(document.createTextNode(getDeviceState()==2?actual.date_current_hosp.replace("2020-", ""):actual.date_current_hosp));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
     td.appendChild(text);
     tr.appendChild(td);
+
+    var hospDiff = actual.diff_current_hosp!=null?parseInt(actual.diff_current_hosp)>0?"(+"+actual.diff_current_hosp+")":"("+actual.diff_current_hosp+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(hospDiff);
+    td.appendChild(text);
+    tr.appendChild(td);
+
     td = document.createElement("td");
     text = document.createTextNode(actual.current_icu!=null?actual.current_icu:"");
     td.appendChild(text);
     tr.appendChild(td);
+
+    var icuDiff = actual.diff_current_icu!=null?parseInt(actual.diff_current_icu)>0?"(+"+actual.diff_current_icu+")":"("+actual.diff_current_icu+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(icuDiff);
+    td.appendChild(text);
+    tr.appendChild(td);
+
     td = document.createElement("td");
     text = document.createTextNode(actual.current_vent!=null?actual.current_vent:"");
+    td.appendChild(text);
+    tr.appendChild(td);
+
+    var ventDiff = actual.diff_current_vent!=null?parseInt(actual.diff_current_vent)>0?"(+"+actual.diff_current_vent+")":"("+actual.diff_current_vent+")":"";
+    td = document.createElement("td");
+    text = document.createTextNode(ventDiff);
     td.appendChild(text);
     tr.appendChild(td);
     // td = document.createElement("td");
@@ -404,7 +424,10 @@ function processActualHospitalisation(filter) {
     secondTable.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalvent+"</b></td>"; //"<td></td>";
+  var totalDiffHosp = today.diffTotal_current_hosp>0?"(+"+today.diffTotal_current_hosp+")":"("+today.diffTotal_current_hosp+")";
+  var totalDiffIcu = today.diffTotal_current_icu>0?"(+"+today.diffTotal_current_icu+")":"("+today.diffTotal_current_icu+")";
+  var totalDiffVent = today.diffTotal_current_vent>0?"(+"+today.diffTotal_current_vent+")":"("+today.diffTotal_current_vent+")";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></span></td><td><b>TOTAL</b></td><td><b>"+total+"</b></td><td><b>"+totalDiffHosp+"</b></td><td><b>"+totalicu+"</b></td><td><b>"+totalDiffIcu+"</b></td><td><b>"+totalvent+"</b></td><td><b>"+totalDiffVent+"</b></td>"; //"<td></td>";
   secondTable.append(tr);
 
   //document.getElementById("last").append(secondTable);
@@ -442,7 +465,7 @@ Chart.Tooltip.positioners.custombar = function(elements, eventPosition) { //<-- 
 
 var mainData;
 function prepareData() {
-  console.log("Start Processing Data");
+  //console.log("Start Processing Data");
   var mode = 0;
   var date = new Date();
   date.setTime(getDateForMode(mode).getTime());
@@ -519,8 +542,9 @@ function prepareData() {
             cantonTotal.diff_ncumul_deceased = null;
             //console.log("Old ncumul death for: "+canton+" date: "+dateString);
           }
-          else
+          else {
             cantonTotal.diff_ncumul_deceased = cantonTotal.ncumul_deceased - dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
+          }
 
           if(Number.isNaN(cantonTotal.current_hosp)) {
             cantonTotal.current_hosp = dataPerDay[dataPerDay.length-1].data[i].current_hosp;
@@ -535,7 +559,9 @@ function prepareData() {
           else {
             cantonTotal.diff_current_hosp = cantonTotal.current_hosp - dataPerDay[dataPerDay.length-1].data[i].current_hosp;
             if(cantonTotal.current_vent!=null) cantonTotal.diff_current_vent = cantonTotal.current_vent - dataPerDay[dataPerDay.length-1].data[i].current_vent;
+            else cantonTotal.diff_current_vent = null;
             if(cantonTotal.current_icu!=null) cantonTotal.diff_current_icu = cantonTotal.current_icu - dataPerDay[dataPerDay.length-1].data[i].current_icu;
+            else cantonTotal.diff_current_icu = null;
           }
       }
       singleDayObject.data.push(cantonTotal);
@@ -543,9 +569,13 @@ function prepareData() {
     singleDayObject.total_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.ncumul_conf : acc; }, 0);
     singleDayObject.total_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.ncumul_deceased : acc; }, 0);
     singleDayObject.total_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.current_hosp: acc; }, 0);
+    singleDayObject.total_current_icu = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.current_icu: acc; }, 0);
+    singleDayObject.total_current_vent = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL"? acc + val.current_vent: acc; }, 0);
     singleDayObject.diffTotal_ncumul_conf = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_conf: acc; }, 0);
     singleDayObject.diffTotal_ncumul_deceased = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_ncumul_deceased: acc; }, 0);
     singleDayObject.diffTotal_current_hosp = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_hosp: acc; }, 0);
+    singleDayObject.diffTotal_current_icu = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_icu: acc; }, 0);
+    singleDayObject.diffTotal_current_vent = singleDayObject.data.reduce(function(acc, val) { return val.canton!="FL" ? acc + val.diff_current_vent: acc; }, 0);
     var isComplete = singleDayObject.data.reduce(
       function(acc, val) {
         return acc+(val.date_ncumul_conf==singleDayObject.date?1:0);
@@ -555,6 +585,8 @@ function prepareData() {
     if(dataPerDay.length>9) {
       var diff7Days = singleDayObject.total_ncumul_conf - dataPerDay[dataPerDay.length-7].total_ncumul_conf;
       singleDayObject.diffAvg7Days = Math.round(diff7Days / 7);
+      var diffDeath7Days = singleDayObject.total_ncumul_deceased - dataPerDay[dataPerDay.length-7].total_ncumul_deceased;
+      singleDayObject.diffDeathAvg7Days = Math.round(diffDeath7Days * 10 / 7) / 10;
     }
     dataPerDay.push(singleDayObject);
     date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
@@ -563,12 +595,12 @@ function prepareData() {
   mainData = {};
   mainData.days = dataPerDay;
   mainData.completeIndex = dataPerDay.length - completeIndex;
-  console.log("CompleteIndex: " + mainData.completeIndex);
-  console.log("Finished processing data");
   total = mainData.days[mainData.days.length-1].total_ncumul_conf;
+  //console.log("CompleteIndex: " + mainData.completeIndex);
+  //console.log("Finished processing data");
 }
 
-
+var activeFilter;
 function filterAllCH(mode) {
   var dataPerDay;
   switch (mode) {
@@ -592,20 +624,18 @@ function filterAllCH(mode) {
   });
   //console.log("Finished filtering");
   //console.log(dataPerDay);
-  return {
+  activeFilter = {
     "dataPerDay": dataPerDay,
     "dateLabels": dateLabels
-  }
+  };
+  return activeFilter;
 }
 
-function addFilterLengthButtonsCH(elementAfter, chart, chartDeaths, chartHosp) {
+function addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp) {
   var place = "CH";
-  var div = document.createElement('div');
-  div.className = "chartButtons";
   if(getDeviceState()==2) addFilterLengthButtonCH(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(div, place, _('Ab März'), 0, false, chart, chartDeaths, chartHosp);
-  elementAfter.before(div);
 }
 
 function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, chartDeaths, chartHosp) {
@@ -620,8 +650,8 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
     var avgs = filter.dataPerDay.map(d => d.diffAvg7Days);
     var completeIndex = mainData.completeIndex;
-    avgs.splice(avgs.length-completeIndex+1, completeIndex);
-    var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex)?"#F15F36":"#999999aa";});
+    avgs.splice(avgs.length-completeIndex, completeIndex);
+    var backgroundColors = filter.dataPerDay.map(function (d, index) { return (index<=diff.length-completeIndex-1)?"#F15F36":"#999999aa";});
     chart.data.labels = filter.dateLabels;
     chart.data.datasets[0].data = avgs;
     chart.data.datasets[1].data = diff;
@@ -633,17 +663,21 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
 
     var deathDiff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
     chartDeaths.data.labels = filter.dateLabels;
-    chartDeaths.data.datasets[0].data = deathDiff;
+    var avgDeaths = filter.dataPerDay.map(d => d.diffDeathAvg7Days);
+    var completeIndex = mainData.completeIndex;
+    avgDeaths.splice(avgDeaths.length-completeIndex, completeIndex);
+    chartDeaths.data.datasets[0].data = avgDeaths;
+    chartDeaths.data.datasets[1].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
-    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chartDeaths.update(0);
 
-    var totalHosp = filter.dataPerDay.map(function(d) {return d.total_current_hosp});
+    var totalHosp = filter.dataPerDay.map(function(d) {return d["total_"+hospitalisationMode]});
     chartHosp.data.labels = filter.dateLabels;
     chartHosp.data.datasets[0].data = totalHosp;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
-    chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, "current_hosp");
+    chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, hospitalisationMode);
     chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
     chartHosp.update(0);
 
@@ -679,10 +713,17 @@ function getCHCallbacks(filter, variable) {
       var sorted = Array.from(dataForThisDay.data).sort(function(a, b){ if(a[variable]==b[variable]) return b["date_"+variable]<a["date_"+variable]?1:-1;  return b[variable]-a[variable]});
       sorted.forEach(function(item) {
         if(item.canton!="FL") {
-          var tabbing = 5-(""+item[variable]).length;
+          var singleItem = item[variable];
+          var date = item["date_"+variable];
+          if(variable.startsWith("current_")) date = item["date_current_hosp"];
+          if(singleItem==null) {
+            date = _("Keine Daten");
+            singleItem = 0;
+          }
+          var tabbing = 5-(""+singleItem).length;
           var padding = " ".repeat(tabbing);
           var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
-          multistringText.push(item.canton+":"+padding+item[variable]+" ("+item["date_"+variable]+") "+diffStr);
+          multistringText.push(item.canton+":"+padding+singleItem+" ("+date+") "+diffStr);
         }
       });
 
@@ -786,14 +827,17 @@ function barChartAllCH(filter) {
   }
 });
 
-  var chartDeaths = barChartAllCHDeaths(filter);
   var chartHosp = barChartAllCHHospitalisations(filter);
-  addFilterLengthButtonsCH(canvas, chart, chartDeaths, chartHosp);
+  var chartDeaths = barChartAllCHDeaths(filter);
+  var div = addAxisButtons(canvas, chart, chartDeaths, chartHosp);
+  addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp);
 }
 
 function barChartAllCHDeaths(filter) {
-  var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
-
+  var diff = filter.dataPerDay.map(d => d.diffTotal_ncumul_deceased);
+  var avgs = filter.dataPerDay.map(d => d.diffDeathAvg7Days);
+  var completeIndex = mainData.completeIndex;
+  avgs.splice(avgs.length-completeIndex, completeIndex);
   //console.log(dataPerDay);
   var place = "CH";
   var section = document.getElementById("detail");
@@ -830,6 +874,7 @@ function barChartAllCHDeaths(filter) {
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
         datalabels: {
+          display: false,
           color: inDarkMode() ? '#ccc' : 'black',
           font: {
             weight: 'bold'
@@ -841,6 +886,15 @@ function barChartAllCHDeaths(filter) {
     labels: filter.dateLabels,
     datasets: [
       {
+        label: '7d-Avg',
+        data: avgs,
+        backgroundColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        borderColor: inDarkMode() ? '#FFFFFF80' : '#77777780',
+        pointRadius: 0,
+        fill: false,
+        type: 'line'
+      },
+      {
         data: diff,
         fill: false,
         cubicInterpolationMode: 'monotone',
@@ -848,10 +902,8 @@ function barChartAllCHDeaths(filter) {
         borderColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         backgroundColor: inDarkMode() ? 'rgba(150, 150, 150, 1)' : '#010101',
         datalabels: {
-          align: 'end', /*function (context) {
-                var index = context.dataIndex;
-                return index % 2 == 0 ? 'top' : 'bottom';
-          },*/
+          display: true,
+          align: 'top',
           anchor: 'end'
         }
       }
@@ -867,6 +919,9 @@ function barChartAllCHHospitalisations(filter) {
   var place = "CH";
   var section = document.getElementById("detail");
   var div = document.getElementById("container_CH");
+  var buttonsDiv = document.createElement('div');
+  buttonsDiv.className = "chartButtons";
+  div.appendChild(buttonsDiv);
   var canvas = document.createElement("canvas");
   canvas.id = place+"_hosp";
   canvas.height=470;
@@ -891,7 +946,7 @@ function barChartAllCHHospitalisations(filter) {
       tooltips: {
         mode: 'nearest',
         intersect: false,
-        position : 'custom',
+        position : 'custombar',
         caretSize: 0,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "current_hosp")
@@ -900,28 +955,57 @@ function barChartAllCHHospitalisations(filter) {
       plugins: {
         datalabels: getDataLabels()
       }
-  },
-  data: {
-    labels: filter.dateLabels,
-    datasets: [
-      {
-        data: cases,
-        fill: false,
-        cubicInterpolationMode: 'monotone',
-        spanGaps: true,
-        borderColor: '#CCCC00',
-        backgroundColor: '#CCCC00',
-        datalabels: {
-          align: 'end',
-          anchor: 'end'
+    },
+    data: {
+      labels: filter.dateLabels,
+      datasets: [
+        {
+          data: cases,
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          spanGaps: true,
+          borderColor: '#CCCC00',
+          backgroundColor: '#CCCC00',
+          datalabels: {
+            align: 'end',
+            anchor: 'end'
+          }
         }
-      }
-    ]
-  }
-});
+      ]
+    }
+  });
 
+  addHospitalisationButtons(buttonsDiv, chart);
   return chart;
 }
+
+var hospitalisationMode = "current_hosp";
+function addHospitalisationButtons(div, chart) {
+  addHospitalisationButton(div, _('Hospitalisierungen'), "current_hosp", true, chart, '#CCCC00');
+  addHospitalisationButton(div, _('In Intensivbehandlung'), "current_icu", false, chart, '#CF5F5F');
+  addHospitalisationButton(div, _('Künstlich beamtet'), "current_vent", false, chart, '#115F5F');
+}
+
+function addHospitalisationButton(container, name, mode, isActive, chartHosp, color) {
+  var button = document.createElement('button');
+  button.className = "chartButton";
+  if (isActive) button.classList.add('active');
+  button.innerHTML = name;
+  button.addEventListener('click', function() {
+    hospitalisationMode = mode;
+    this.classList.add('active');
+    getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
+    var totalHosp = activeFilter.dataPerDay.map(function(d) {return d["total_"+mode]});
+    chartHosp.data.labels = activeFilter.dateLabels;
+    chartHosp.data.datasets[0].data = totalHosp;
+    chartHosp.data.datasets[0].borderColor = color;
+    chartHosp.data.datasets[0].backgroundColor = color;
+    chartHosp.options.tooltips.callbacks = getCHCallbacks(activeFilter, mode);
+    chartHosp.update(0);
+  });
+  container.append(button);
+}
+
 
 function getDataForDay(canton, date) {
   var dateString = date.toISOString();
@@ -1432,15 +1516,18 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     container.append(button);
 }
 
-function addAxisButtons(elementAfter, chart) {
+function addAxisButtons(elementAfter, chart, chartDeaths, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addAxisButton(div, chart, _('Logarithmisch'), cartesianAxesTypes.LOGARITHMIC, false);
-  addAxisButton(div, chart, _('Linear'), cartesianAxesTypes.LINEAR, true);
+  var span = document.createElement("span");
+  addAxisButton(span, chart, chartDeaths, chartHosp, _('Logarithmisch'), cartesianAxesTypes.LOGARITHMIC, false);
+  addAxisButton(span, chart, chartDeaths, chartHosp, _('Linear'), cartesianAxesTypes.LINEAR, true);
+  div.append(span);
   elementAfter.before(div);
+  return div;
 }
 
-function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
+function addAxisButton(container, chart, chartDeaths, chartHosp, name, cartesianAxisType, isActive) {
   var button = document.createElement('button');
   button.className = "chartButton";
   if (isActive) button.classList.add('active');
@@ -1451,6 +1538,12 @@ function addAxisButton(container, chart, name, cartesianAxisType, isActive) {
 
     chart.options.scales.yAxes[0].type = cartesianAxisType;
     chart.update();
+
+    chartDeaths.options.scales.yAxes[0].type = cartesianAxisType;
+    chartDeaths.update();
+
+    chartHosp.options.scales.yAxes[0].type = cartesianAxisType;
+    chartHosp.update();
   });
   container.append(button);
 }
