@@ -991,9 +991,9 @@ function barChartAllCHHospitalisations(filter) {
 
 var hospitalisationMode = "current_hosp";
 function addHospitalisationButtons(div, chart) {
-  addHospitalisationButton(div, _('Hospitalisierungen'), "current_hosp", true, chart, '#CCCC00');
+  addHospitalisationButton(div, _('Hospitalisiert'), "current_hosp", true, chart, '#CCCC00');
   addHospitalisationButton(div, _('In Intensivbehandlung'), "current_icu", false, chart, '#CF5F5F');
-  addHospitalisationButton(div, _('Künstlich beamtet'), "current_vent", false, chart, '#115F5F');
+  addHospitalisationButton(div, _('Künstlich beatmet'), "current_vent", false, chart, '#115F5F');
 }
 
 function addHospitalisationButton(container, name, mode, isActive, chartHosp, color) {
