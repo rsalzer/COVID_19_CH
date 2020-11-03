@@ -449,13 +449,9 @@ button {
 .risk.low:after { background-color: green; }
 
 .newrisk {
-	content: '';
-	width: 1rem;
-	height: 1rem;
 	border-radius: 0.5rem;
-	background-color: #ccc;
-	margin-left: 0.5rem;
-	margin-top: 1px;
+	color: black;
+	margin: 1px;
 	vertical-align: top;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
