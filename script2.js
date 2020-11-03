@@ -200,7 +200,7 @@ function processActualData(filter) {
     td.innerHTML = actual.cases14DaysDiff;
     tr.appendChild(td);
     td = document.createElement("td");
-    td.innerHTML = "<span class=\"risk "+risk+"\">"+actual.incidence+"</span>";
+    td.innerHTML = "<span class=\"newrisk "+risk+"\">"+actual.incidence+"</span>";
     tr.appendChild(td);
 
     /*
@@ -229,7 +229,7 @@ function processActualData(filter) {
   var riskCH = "low";
   if(incidenceCH>=60) riskCH = "medium";
   if(incidenceCH>=120) riskCH = "high";
-  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+formattedDiff+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"risk "+riskCH+"\">"+incidenceCH+"</span></td>";
+  tr.innerHTML = "<td><a class='flag CH' href='#detail_CH'><b>CH</b></a></td><td><b>TOTAL</b></td><td><b>"+formattedTotal+"</b></td><td><b>"+formattedDiff+"</b></td><td><b>"+formatted14DayCases+"</b></td><td><span class=\"newrisk "+riskCH+"\">"+incidenceCH+"</span></td>";
   secondTable.append(tr);
   //document.getElementById("last").append(firstTable);
   //document.getElementById("last").append(secondTable);

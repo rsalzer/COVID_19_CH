@@ -448,6 +448,22 @@ button {
 .risk.medium:after { background-color: orange; }
 .risk.low:after { background-color: green; }
 
+.newrisk {
+	content: '';
+	width: 1rem;
+	height: 1rem;
+	border-radius: 0.5rem;
+	background-color: #ccc;
+	margin-left: 0.5rem;
+	margin-top: 1px;
+	vertical-align: top;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+.newrisk.high { background-color: red; }
+.newrisk.medium { background-color: orange; }
+.newrisk.low { background-color: green; }
+
 .legend {
 	list-style: none;
 }
