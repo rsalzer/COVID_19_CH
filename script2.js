@@ -155,7 +155,7 @@ function processActualData(filter) {
     var month = parseInt(dateSplit[1])-1;
     var year = parseInt(dateSplit[0]);
     var d = new Date(Date.UTC(year,month,day))
-    d.setDate(d.getDate() - 14);
+    d.setDate(d.getDate() - 13);
     dateString = d.toISOString();
     dateString = dateString.substring(0,10);
     var perCanton14DaysAgo = filter.dataPerDay.filter(d => d.date == dateString)[0].data[j].ncumul_conf;
@@ -990,9 +990,9 @@ function barChartAllCHHospitalisations(filter) {
 
 var hospitalisationMode = "current_hosp";
 function addHospitalisationButtons(div, chart) {
-  addHospitalisationButton(div, _('Hospitalisierungen'), "current_hosp", true, chart, '#CCCC00');
+  addHospitalisationButton(div, _('Hospitalisiert'), "current_hosp", true, chart, '#CCCC00');
   addHospitalisationButton(div, _('In Intensivbehandlung'), "current_icu", false, chart, '#CF5F5F');
-  addHospitalisationButton(div, _('Künstlich beamtet'), "current_vent", false, chart, '#115F5F');
+  addHospitalisationButton(div, _('Künstlich beatmet'), "current_vent", false, chart, '#115F5F');
 }
 
 function addHospitalisationButton(container, name, mode, isActive, chartHosp, color) {
