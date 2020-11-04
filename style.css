@@ -125,6 +125,13 @@ table th {
 	border-top: 1px solid #ccc;
 	border-bottom: 1px solid #ccc;
 }
+table th.pointer {
+  cursor: pointer;
+}
+table th.active {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
 @media (prefers-color-scheme: dark) {
 	table td,
 	table th {

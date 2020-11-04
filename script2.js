@@ -118,7 +118,7 @@ function processData() {
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
 
 
-  processActualData(filter);
+  processActualData(filter, "ncumul_conf");
   processActualDeaths(filter);
   processActualHospitalisation(filter);
   // console.log("End actual");
@@ -140,7 +140,11 @@ function processData() {
 }
 
 var total;
-function processActualData(filter) {
+function processActualData(filter, mode) {
+  if(filter==null) filter = activeFilter;
+  var selectedHead = document.getElementById("head_"+mode);
+  selectedHead.classList.add("active");
+  getSiblings(selectedHead, "th.active").forEach(element => element.classList.remove('active'));
   var todaysData = filter.dataPerDay[filter.dataPerDay.length-1].data;
   //var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
 
@@ -163,9 +167,11 @@ function processActualData(filter) {
     today.incidence = Math.round(today.cases14DaysDiff / population[cantons[j]] * 100000);
     //console.log("Canton: "+cantons[j]+" Two weeks: "+today.cases14DaysDiff+" incidence: "+today.incidence);
   }
-  var sortedActual = Array.from(todaysData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
+  var sortedActual = Array.from(todaysData).sort(function(a, b){return b[mode]-a[mode]});
   var firstTable = document.getElementById("confirmed_1");
+  firstTable.innerHTML = "";
   var secondTable = document.getElementById("confirmed_2");
+  secondTable.innerHTML = "";
   var diffTotal = 0;
   var cases14DaysTotal = 0;
   for(var i=0; i<sortedActual.length; i++) {
