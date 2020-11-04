@@ -79,13 +79,13 @@
       <div class="table-group">
           <table>
 						<thead>
-							<tr>
-								<th>Kanton</th>
-								<th>Datum</th>
-								<th>Fälle</th>
-								<th>Neu</th>
-                <th>2W</th>
-                <th>pro<br>&nbsp;&nbsp;100k</th>
+              <tr>
+								<th id="head_canton" class="pointer" onclick="processActualData(null, 'canton');">Kanton</th>
+								<th id="head_date_ncumul_conf">Datum</th>
+								<th id="head_ncumul_conf" class="pointer" onclick="processActualData(null, 'ncumul_conf');">Fälle</th>
+								<th id="head_diff_ncumul_conf" class="pointer" onclick="processActualData(null, 'diff_ncumul_conf');">Neu</th>
+                <th id="head_cases14DaysDiff" class="pointer" onclick="processActualData(null, 'cases14DaysDiff');">2W</th>
+                <th id="head_incidence" class="pointer" onclick="processActualData(null, 'incidence');">pro<br>&nbsp;&nbsp;100k</th>
 							</tr>
 						</thead>
 						<tbody id="confirmed_1">
