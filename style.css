@@ -457,14 +457,14 @@ button {
 
 .newrisk {
 	border-radius: 0.5rem;
-	color: black;
+	color: white;
 	margin: 1px;
 	vertical-align: top;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
 }
 .newrisk.high { background-color: red; }
-.newrisk.medium { background-color: orange; }
+.newrisk.medium { background-color: orange; color: black; }
 .newrisk.low { background-color: green; }
 
 .legend {
