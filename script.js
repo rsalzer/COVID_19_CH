@@ -697,6 +697,17 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
 
 function getCHCallbacks(filter, variable) {
   return {
+    title: function(tooltipItems, data) {
+      var str = tooltipItems[0].label;
+      str = str.replace("Mon", _("Montag"));
+      str = str.replace("Tue", _("Dienstag"));
+      str = str.replace("Wed", _("Mittwoch"));
+      str = str.replace("Thu", _("Donnerstag"));
+      str = str.replace("Fri", _("Freitag"));
+      str = str.replace("Sat", _("Samstag"));
+      str = str.replace("Sun", _("Sonntag"));
+      return str;
+    },
     label: function(tooltipItems, data) {
       var value = tooltipItems.value;
       if(data.datasets.length>1 && tooltipItems.datasetIndex==0) return "            7d-Avg: +"+value;
@@ -1219,6 +1230,17 @@ function barChartCases(placenr) {
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
+          title: function(tooltipItems, data) {
+            var str = tooltipItems[0].label;
+            str = str.replace("Mon", _("Montag"));
+            str = str.replace("Tue", _("Dienstag"));
+            str = str.replace("Wed", _("Mittwoch"));
+            str = str.replace("Thu", _("Donnerstag"));
+            str = str.replace("Fri", _("Freitag"));
+            str = str.replace("Sat", _("Samstag"));
+            str = str.replace("Sun", _("Sonntag"));
+            return str;
+          },
           afterLabel: function(tooltipItems, data) {
             if(tooltipItems.datasetIndex==0) return "";
             var index = tooltipItems.index;
@@ -1297,6 +1319,17 @@ function barChartCases(placenr) {
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
+          title: function(tooltipItems, data) {
+            var str = tooltipItems[0].label;
+            str = str.replace("Mon", _("Montag"));
+            str = str.replace("Tue", _("Dienstag"));
+            str = str.replace("Wed", _("Mittwoch"));
+            str = str.replace("Thu", _("Donnerstag"));
+            str = str.replace("Fri", _("Freitag"));
+            str = str.replace("Sat", _("Samstag"));
+            str = str.replace("Sun", _(""));
+            return str;
+          },
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
             var index = tooltipItems.index;
@@ -1339,7 +1372,7 @@ function getScales(mode) {
     xAxes: [{
       type: 'time',
       time: {
-        tooltipFormat: 'DD.MM.YYYY',
+        tooltipFormat: 'ddd DD.MM.YYYY',
         unit: 'day',
         displayFormats: {
           day: 'DD.MM'
