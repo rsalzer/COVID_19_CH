@@ -1229,25 +1229,7 @@ function barChartCases(placenr) {
         mode: 'index',
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
-        callbacks: {
-          title: function(tooltipItems, data) {
-            var str = tooltipItems[0].label;
-            str = str.replace("Mon", _("Montag"));
-            str = str.replace("Tue", _("Dienstag"));
-            str = str.replace("Wed", _("Mittwoch"));
-            str = str.replace("Thu", _("Donnerstag"));
-            str = str.replace("Fri", _("Freitag"));
-            str = str.replace("Sat", _("Samstag"));
-            str = str.replace("Sun", _("Sonntag"));
-            return str;
-          },
-          afterLabel: function(tooltipItems, data) {
-            if(tooltipItems.datasetIndex==0) return "";
-            var index = tooltipItems.index;
-            var value = filter.cases[index];
-            return "Total : "+value;
-          }
-        }
+        callbacks: getCallbacks(filter),
       },
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
@@ -1365,6 +1347,28 @@ function barChartCases(placenr) {
     }
   });
   addFilterLengthButtons(canvas, placenr, chart, chartHosp);
+}
+
+function getCallbacks(filter) {
+  return {
+    title: function(tooltipItems, data) {
+      var str = tooltipItems[0].label;
+      str = str.replace("Mon", _("Montag"));
+      str = str.replace("Tue", _("Dienstag"));
+      str = str.replace("Wed", _("Mittwoch"));
+      str = str.replace("Thu", _("Donnerstag"));
+      str = str.replace("Fri", _("Freitag"));
+      str = str.replace("Sat", _("Samstag"));
+      str = str.replace("Sun", _("Sonntag"));
+      return str;
+    },
+    afterLabel: function(tooltipItems, data) {
+      if(tooltipItems.datasetIndex==0) return "";
+      var index = tooltipItems.index;
+      var value = filter.cases[index];
+      return "Total : "+value;
+    }
+  };
 }
 
 function getScales(mode) {
@@ -1540,14 +1544,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
     chart.data.datasets[1].datalabels.display = (chart.mode==0 || (getDeviceState()==2 && chart.mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
-    chart.options.tooltips.callbacks = {
-      afterLabel: function(tooltipItems, data) {
-        if(tooltipItems.datasetIndex==0) return "";
-        var index = tooltipItems.index;
-        var value = filter.cases[index];
-        return "Total : "+value;
-      }
-    };
+    chart.options.tooltips.callbacks = getCallbacks(filter);
     chart.update(0);
 
     chartHosp.data.labels = filter.dateLabels;
