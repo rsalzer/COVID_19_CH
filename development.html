@@ -75,17 +75,25 @@
       <div id="loadingspinner">Lade Daten...<br/><div class="lds-ring"><div></div><div></div><div></div><div></div></div></div>
       <div id="loaded">
 	  <article id="latest">
-			<h3>Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone</h3>
+			<h3>Stand der positiv getesteten Fälle (<span id="dateSpan"></span>)</h3>
+      <div class="rightButtonDiv">
+        <button class="internationalButton rightButton" onclick="activeDay-=7; processActualData()">-7d</button>
+        <button class="internationalButton rightButton" onclick="activeDay--; processActualData()">&#8592;&#xFE0E;</button>
+        <button id="day_other" class="internationalButton rightButton" onclick="activeDay++; processActualData()">&#8594;&#xFE0E;</button>
+        <button id="day_-2" class="internationalButton rightButton" onclick="processActualData(null, -2);">Vorgestern</button>
+        <button id="day_-1" class="internationalButton rightButton" onclick="processActualData(null, -1)">Gestern</button>
+        <button id="day_0" class="internationalButton rightButton" onclick="processActualData(null, 0)">Heute</button>
+      </div>
       <div class="table-group">
           <table>
 						<thead>
 							<tr>
 								<th id="head_canton" class="pointer" onclick="processActualData(null, 'canton');">Kanton</th>
 								<th id="head_date_ncumul_conf">Datum</th>
-								<th id="head_ncumul_conf" class="pointer" onclick="processActualData(null, 'ncumul_conf');">Fälle</th>
-								<th id="head_diff_ncumul_conf" class="pointer" onclick="processActualData(null, 'diff_ncumul_conf');">Neu</th>
-                <th id="head_cases14DaysDiff" class="pointer" onclick="processActualData(null, 'cases14DaysDiff');">2W</th>
-                <th id="head_incidence" class="pointer" onclick="processActualData(null, 'incidence');">pro<br>&nbsp;&nbsp;100k</th>
+								<th id="head_ncumul_conf" class="pointer" onclick="processActualData('ncumul_conf');">Fälle</th>
+								<th id="head_diff_ncumul_conf" class="pointer" onclick="processActualData('diff_ncumul_conf');">Neu</th>
+                <th id="head_cases14DaysDiff" class="pointer" onclick="processActualData('cases14DaysDiff');">2W</th>
+                <th id="head_incidence" class="pointer" onclick="processActualData('incidence');">pro<br>&nbsp;&nbsp;100k</th>
 							</tr>
 						</thead>
 						<tbody id="confirmed_1">
