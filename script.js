@@ -118,7 +118,7 @@ function processData() {
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
 
 
-  processActualData(filter, "ncumul_conf");
+  processActualData(null, null);
   processActualDeaths(filter);
   processActualHospitalisation(filter);
   // console.log("End actual");
@@ -140,12 +140,30 @@ function processData() {
 }
 
 var total;
-function processActualData(filter, mode) {
-  if(filter==null) filter = activeFilter;
+var activeMode = "ncumul_conf";
+var activeDay = 0; //0 = today; -1 = yesterday; -2 = two days ago;
+function processActualData(mode, chosenDay) {
+  if(mode==null) mode = activeMode;
+  if(chosenDay==null) chosenDay = activeDay;
+  if(chosenDay>0) chosenDay = 0;
+  if(mainData.days.length-1+chosenDay<0) chosenDay = -(mainData.days.length-1);
+  activeMode = mode;
+  activeDay = chosenDay;
+  //Highlight chosen Mode
   var selectedHead = document.getElementById("head_"+mode);
   selectedHead.classList.add("active");
   getSiblings(selectedHead, "th.active").forEach(element => element.classList.remove('active'));
-  var todaysData = filter.dataPerDay[filter.dataPerDay.length-1].data;
+
+  //Highlight chosen Day
+  var selectedDayHead = document.getElementById("day_"+chosenDay);
+  if(selectedDayHead==null) selectedDayHead = document.getElementById("day_other");
+  else selectedDayHead.classList.add("active");
+  getSiblings(selectedDayHead, "button.active").forEach(element => element.classList.remove('active'));
+
+  var todaysObject = mainData.days[mainData.days.length-1+chosenDay];
+  var todaysData = todaysObject.data;
+  var dateSpan = document.getElementById("dateSpan");
+  dateSpan.innerHTML = todaysObject.date;
   //var sortedActual = Array.from(actualData).sort(function(a, b){return b.ncumul_conf-a.ncumul_conf});
 
   // var timeNow = new Date();
@@ -154,15 +172,20 @@ function processActualData(filter, mode) {
   for(var j=0; j<todaysData.length; j++) {
     var today = todaysData[j];
     var perCantonToday = today.ncumul_conf;
-    var dateSplit = today.date_ncumul_conf.split("-");
-    var day = parseInt(dateSplit[2]);
-    var month = parseInt(dateSplit[1])-1;
-    var year = parseInt(dateSplit[0]);
-    var d = new Date(Date.UTC(year,month,day))
-    d.setDate(d.getDate() - 14);
-    dateString = d.toISOString();
-    dateString = dateString.substring(0,10);
-    var perCanton14DaysAgo = filter.dataPerDay.filter(d => d.date == dateString)[0].data[j].ncumul_conf;
+    var perCanton14DaysAgo = 0;
+    if(today.date_ncumul_conf!="Keine Daten") {
+      var dateSplit = today.date_ncumul_conf.split("-");
+      var day = parseInt(dateSplit[2]);
+      var month = parseInt(dateSplit[1])-1;
+      var year = parseInt(dateSplit[0]);
+      var d = new Date(Date.UTC(year,month,day))
+      d.setDate(d.getDate() - 14);
+      dateString = d.toISOString();
+      dateString = dateString.substring(0,10);
+      var dayObject14DaysAgo = mainData.days.filter(d => d.date == dateString);
+      if(dayObject14DaysAgo.length>0)
+        perCanton14DaysAgo = dayObject14DaysAgo[0].data[j].ncumul_conf;
+    }
     today.cases14DaysDiff = perCantonToday - perCanton14DaysAgo;
     today.incidence = Math.round(today.cases14DaysDiff / population[cantons[j]] * 100000);
     //console.log("Canton: "+cantons[j]+" Two weeks: "+today.cases14DaysDiff+" incidence: "+today.incidence);
@@ -228,9 +251,9 @@ function processActualData(filter, mode) {
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  var formattedTotal = filter.dataPerDay[filter.dataPerDay.length-1].total_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formattedTotal = mainData.days[mainData.days.length-1+chosenDay].total_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   var formatted14DayCases = cases14DaysTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  var formattedDiff = filter.dataPerDay[filter.dataPerDay.length-1].diffTotal_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formattedDiff = mainData.days[mainData.days.length-1+chosenDay].diffTotal_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
   var incidenceCH = Math.round(cases14DaysTotal / population["CH"] * 100000);
   var riskCH = "low";
   if(incidenceCH>=60) riskCH = "medium";
