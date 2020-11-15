@@ -159,7 +159,7 @@ function processActualData(filter, mode) {
     var month = parseInt(dateSplit[1])-1;
     var year = parseInt(dateSplit[0]);
     var d = new Date(Date.UTC(year,month,day))
-    d.setDate(d.getDate() - 13);
+    d.setDate(d.getDate() - 14);
     dateString = d.toISOString();
     dateString = dateString.substring(0,10);
     var perCanton14DaysAgo = filter.dataPerDay.filter(d => d.date == dateString)[0].data[j].ncumul_conf;
