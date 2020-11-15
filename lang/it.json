@@ -18,7 +18,7 @@
     "Fälle in Spitalbehandlung": "Casi trattati in ospedale",
     "Verstorbene": "Decessi",
     "Verstorbene gemäss Daten der Kantone": "Deceduti in base ai dati cantonali",
-    "Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone": "Stato attuale dei casi con risultato positivo al test secondo i dati dei Cantoni",
+    "Stand der positiv getesteten Fälle (": "Stato attuale dei casi con risultato positivo (",
     "Lade Daten...": "caricamento dati ...",
     "Übersicht": "Sommario",
     "Ab dem 9. März gilt ein neues Testregime. Nur noch Personen, die schwere Symptome, ein erhöhtes Komplikationsrisiko, oder in direktem Kontakt mit Patienten oder Bewohnern von Alters- und Pflegeheimen stehen, werden getestet.": "A partire dal 9 marzo ci sono nuovi criteri per effettuare un test. Vengono testate solo le persone che presentano sintomi gravi, un rischio elevato di complicanze o persone in contatto diretto con pazienti o residenti in case per anziani o di cura.",
@@ -97,5 +97,8 @@
     "Freitag": "Venerdì",
     "Samstag": "Sabato",
     "Sonntag": "Domenica",
+    "Heute": "Oggi",
+    "Gestern": "Ieri",
+    "Vorgestern": "L'altro ieri",
     "": ""
 }

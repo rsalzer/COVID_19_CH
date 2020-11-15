@@ -18,7 +18,7 @@
     "Fälle in Spitalbehandlung": "In hospital treatment",
     "Verstorbene": "Deceased",
     "Verstorbene gemäss Daten der Kantone": "Deceased based on the canton's data",
-    "Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone": "Persons tested positive based on the cantons data",
+    "Stand der positiv getesteten Fälle (": "Persons tested positive (",
     "Lade Daten...": "Loading data ...",
     "Übersicht": "Overview",
     "Ab dem 9. März gilt ein neues Testregime. Nur noch Personen, die schwere Symptome, ein erhöhtes Komplikationsrisiko, oder in direktem Kontakt mit Patienten oder Bewohnern von Alters- und Pflegeheimen stehen, werden getestet.": "A new test regime was applied on March 9. Only people who have severe symptoms, an increased risk of complications, or are in direct contact with patients or residents of retirement and nursing homes get tested.",
@@ -96,5 +96,8 @@
     "Freitag": "Friday",
     "Samstag": "Saturday",
     "Sonntag": "Sunday",
+    "Heute": "Today",
+    "Gestern": "Yesterday",
+    "Vorgestern": "Two days ago",
     "": ""
 }

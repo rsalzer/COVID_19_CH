@@ -18,7 +18,7 @@
     "Fälle in Spitalbehandlung": "Cas en traitement hospitalier",
     "Verstorbene": "décédé",
     "Verstorbene gemäss Daten der Kantone": "Décédé selon les données des cantons",
-    "Aktueller Stand der positiv getesteten Fälle gemäss Daten der Kantone": "Statut actuel des cas testés positifs selon les données des cantons",
+    "Stand der positiv getesteten Fälle (": "Statut actuel des cas testés positifs (",
     "Lade Daten...": "Chargement des données ...",
     "Übersicht": "Présentation",
     "Ab dem 9. März gilt ein neues Testregime. Nur noch Personen, die schwere Symptome, ein erhöhtes Komplikationsrisiko, oder in direktem Kontakt mit Patienten oder Bewohnern von Alters- und Pflegeheimen stehen, werden getestet.": "Un nouveau régime de test a court depuis le 9 mars. Seules les personnes qui présentent des symptômes graves, un risque accru de complications ou qui sont en contact direct avec des patients ou des résidents de maisons de retraite et de soins infirmiers sont testées.",
@@ -97,5 +97,8 @@
     "Freitag": "Vendredi",
     "Samstag": "Samedi",
     "Sonntag": "Dimanche",
+    "Heute": "Aujourd'hui",
+    "Gestern": "Hier",
+    "Vorgestern": "Avant hier",
     "": ""
 }
