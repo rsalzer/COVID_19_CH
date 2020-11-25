@@ -618,7 +618,7 @@ function prepareData() {
       singleDayObject.diffDeathAvg7Days = Math.round(diffDeath7Days * 10 / 7) / 10;
     }
     dataPerDay.push(singleDayObject);
-    date = new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()+1));
+    date.setDate(date.getDate() + 1);
   }
   dataPerDay.splice(0,1);
   mainData = {};
