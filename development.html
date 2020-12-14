@@ -16,7 +16,9 @@
     <script src="js/d3.v3.js"></script>
     <script src="js/Chart.bundle.min.js"></script>
     <script src="js/chartjs-plugin-datalabels.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-chart.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style2.css">
     <link rel="stylesheet" type="text/css" href="css/flag-icon.min.css">
     <link rel="localization" hreflang="fr" href="lang/fr.json" type="application/vnd.oftn.l10n+json"/>
     <link rel="localization" hreflang="en" href="lang/en.json" type="application/vnd.oftn.l10n+json"/>
@@ -50,7 +52,7 @@
       ga('send', 'pageview');
     </script>
   </head>
-  <body onload="loaded()">
+  <body onload="loaded()" ng-app="coronach">
     <a name="top"></a>
     <nav id="page-nav">
   		<ul>
@@ -311,7 +313,18 @@
     <section id="detail">
       <header>
   			<h2>Details</h2>
-	  </header>
+	    </header>
+      <article id="interactive" ng-controller="ChartCtrl" style="margin-bottom: 4em;">
+        <div style="width:90%;">
+          <canvas id="angularcanvas" class="chart chart-line angularchart" chart-data="data" chart-labels="labels" chart-series="series" chart-options="options" chart-dataset-override="datasetOverride"></canvas>
+        </div>
+        <div id="controls">
+          <div id="control_cantons">
+            <span class="chartHeading">Kantone:</span>
+            <button class="controlButton" ng-repeat="canton in angular_cantons" ng-click="showHideCanton($index)" ng-class="visibility[$index]?'active':''">{{canton}}</button>
+          </div>
+        </div>
+      </article>
     </section>
   </main>
   <footer id="page-footer">

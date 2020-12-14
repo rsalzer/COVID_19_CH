@@ -1,24 +1,24 @@
 var data;
 
-var oldDate = null;
-console.logCopy = console.log.bind(console);
-console.log = function(arguments)
-{
-    if (arguments.length)
-    {
-        var d = new Date();
-        if(oldDate==null) timestamp = '';
-        else {
-          var diff = d-oldDate;
-          var msec = diff;
-          var ss = Math.floor(msec / 1000);
-          msec -= ss * 1000;
-          var timestamp = '[' + ss + ':' + msec + '] ';
-        }
-        oldDate = d;
-        this.logCopy(timestamp, arguments);
-    }
-};
+// var oldDate = null;
+// console.logCopy = console.log.bind(console);
+// console.log = function(arguments)
+// {
+//     if (arguments.length)
+//     {
+//         var d = new Date();
+//         if(oldDate==null) timestamp = '';
+//         else {
+//           var diff = d-oldDate;
+//           var msec = diff;
+//           var ss = Math.floor(msec / 1000);
+//           msec -= ss * 1000;
+//           var timestamp = '[' + ss + ':' + msec + '] ';
+//         }
+//         oldDate = d;
+//         this.logCopy(timestamp, arguments);
+//     }
+// };
 
 const cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH', 'FL'];
 const population = {
@@ -134,6 +134,10 @@ function processData() {
   for(var i=0; i<cantons.length; i++) {
     barChartCases(i);
   }
+  var angularDiv = document.getElementById("interactive");
+  var scope = angular.element(angularDiv).scope()
+  scope.update();
+  scope.$apply();
   //console.log("End Single Cantons");
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
@@ -720,6 +724,17 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
 
 function getCHCallbacks(filter, variable) {
   return {
+    title: function(tooltipItems, data) {
+      var str = tooltipItems[0].label;
+      str = str.replace("Mon", _("Montag"));
+      str = str.replace("Tue", _("Dienstag"));
+      str = str.replace("Wed", _("Mittwoch"));
+      str = str.replace("Thu", _("Donnerstag"));
+      str = str.replace("Fri", _("Freitag"));
+      str = str.replace("Sat", _("Samstag"));
+      str = str.replace("Sun", _("Sonntag"));
+      return str;
+    },
     label: function(tooltipItems, data) {
       var value = tooltipItems.value;
       if(data.datasets.length>1 && tooltipItems.datasetIndex==0) return "            7d-Avg: +"+value;
@@ -801,6 +816,7 @@ function barChartAllCH(filter) {
     type: 'bar',
     options: {
       responsive: false,
+      maintainAspectRatio: false,
       layout: {
           padding: {
               right: 20
@@ -1241,14 +1257,7 @@ function barChartCases(placenr) {
         mode: 'index',
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
-        callbacks: {
-          afterLabel: function(tooltipItems, data) {
-            if(tooltipItems.datasetIndex==0) return "";
-            var index = tooltipItems.index;
-            var value = filter.cases[index];
-            return "Total : "+value;
-          }
-        }
+        callbacks: getCallbacks(filter),
       },
       scales: getScales((getDeviceState()==2) ? 2 : 1),
       plugins: {
@@ -1320,6 +1329,17 @@ function barChartCases(placenr) {
         intersect: false,
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: {
+          title: function(tooltipItems, data) {
+            var str = tooltipItems[0].label;
+            str = str.replace("Mon", _("Montag"));
+            str = str.replace("Tue", _("Dienstag"));
+            str = str.replace("Wed", _("Mittwoch"));
+            str = str.replace("Thu", _("Donnerstag"));
+            str = str.replace("Fri", _("Freitag"));
+            str = str.replace("Sat", _("Samstag"));
+            str = str.replace("Sun", _(""));
+            return str;
+          },
           label: function(tooltipItems, data) {
             var value = tooltipItems.value;
             var index = tooltipItems.index;
@@ -1357,12 +1377,34 @@ function barChartCases(placenr) {
   addFilterLengthButtons(canvas, placenr, chart, chartHosp);
 }
 
+function getCallbacks(filter) {
+  return {
+    title: function(tooltipItems, data) {
+      var str = tooltipItems[0].label;
+      str = str.replace("Mon", _("Montag"));
+      str = str.replace("Tue", _("Dienstag"));
+      str = str.replace("Wed", _("Mittwoch"));
+      str = str.replace("Thu", _("Donnerstag"));
+      str = str.replace("Fri", _("Freitag"));
+      str = str.replace("Sat", _("Samstag"));
+      str = str.replace("Sun", _("Sonntag"));
+      return str;
+    },
+    afterLabel: function(tooltipItems, data) {
+      if(tooltipItems.datasetIndex==0) return "";
+      var index = tooltipItems.index;
+      var value = filter.cases[index];
+      return "Total : "+value;
+    }
+  };
+}
+
 function getScales(mode) {
   return {
     xAxes: [{
       type: 'time',
       time: {
-        tooltipFormat: 'DD.MM.YYYY',
+        tooltipFormat: 'ddd DD.MM.YYYY',
         unit: 'day',
         displayFormats: {
           day: 'DD.MM'
@@ -1530,14 +1572,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
     chart.data.datasets[1].datalabels.display = (chart.mode==0 || (getDeviceState()==2 && chart.mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
-    chart.options.tooltips.callbacks = {
-      afterLabel: function(tooltipItems, data) {
-        if(tooltipItems.datasetIndex==0) return "";
-        var index = tooltipItems.index;
-        var value = filter.cases[index];
-        return "Total : "+value;
-      }
-    };
+    chart.options.tooltips.callbacks = getCallbacks(filter);
     chart.update(0);
 
     chartHosp.data.labels = filter.dateLabels;
@@ -1822,3 +1857,98 @@ function getWorldDeaths(chTotal) {
     firstTable.appendChild(tr);
   }
 }
+
+
+var app = angular.module('coronach', ['chart.js']);
+
+app.controller('ChartCtrl', ['$scope', function ($scope) {
+
+  $scope.angular_cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH'];
+  $scope.visibility = [];
+
+  $scope.angular_cantons.forEach((item) => {
+    $scope.visibility.push(false);
+  });
+
+
+  $scope.labels = [0,1,2];
+  $scope.series = ['Series A'];
+  $scope.data = [10,20,50];
+  $scope.onClick = function (points, evt) {
+    console.log(points, evt);
+  };
+  $scope.options = {
+    animation: false,
+    layout: {
+        padding: {
+            right: 20
+        }
+    },
+    legend: {
+      display: false
+    },
+    title: {
+      display: true,
+      text: _('Kantone im Vergleich')
+    },
+    tooltips: {
+      mode: 'nearest',
+      intersect: false,
+      caretSize: 0,
+      bodyFontFamily: 'IBM Plex Mono'
+    },
+    elements: {
+      point: { radius: 0 }
+    },
+    scales: getScales(0),
+    plugins: {
+      datalabels: {
+        display: false
+      }
+    }
+  };
+  $scope.datasetOverride = [{
+      label: "Kanton1",
+      borderColor: '#CCCC00',
+      backgroundColor: '#CCCC00',
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true
+  },
+  {
+      label: "Kanton2",
+      borderColor: '#CC0000',
+      backgroundColor: '#CC0000',
+      fill: false,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true
+  }];
+
+  $scope.showHideCanton = function(x) {
+    $scope.visibility[x] = !$scope.visibility[x];
+    $scope.update();
+  };
+
+  //$scope.colors = [ 'white' ];
+  $scope.update = function() {
+    $scope.data = [];
+    $scope.datasetOverride = [];
+    for(i=0; i<cantons.length-1; i++) {
+      var filter = filterCases(i, 0);
+      if(i==cantons.length-2) $scope.labels = filter.dateLabels;
+      var singleOverride = {
+          label: cantons[i],
+          hidden: !$scope.visibility[i],
+          // borderColor: '#CC0000',
+          // backgroundColor: '#CC0000',
+          fill: false,
+          cubicInterpolationMode: 'monotone',
+          spanGaps: true
+      }
+      $scope.datasetOverride.push(singleOverride);
+      $scope.data.push(filter.incidences);
+    }
+    //console.log($scope.colors);
+  }
+
+}]);
