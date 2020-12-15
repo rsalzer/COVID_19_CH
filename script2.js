@@ -96,7 +96,8 @@ document.getElementById("loaded").style.display = 'none';
 setLanguageNav();
 
 //console.log("START");
-getCanton(0);
+//getCanton(0);
+getJSON();
 
 function getCanton(i) {
   var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
@@ -111,10 +112,24 @@ function getCanton(i) {
   });
 }
 
+function getJSON() {
+  var url = "data/data.json";
+  d3.json(url, function(error, csvdata) {
+      if(error!=null) {
+        alert("Daten konnten nicht geladen werden");
+      }
+      else {
+        mainData = csvdata;
+        total = mainData.days[mainData.days.length-1].total_ncumul_conf;
+        processData();
+      }
+  });
+}
+
 function processData() {
   var start = new Date();
   //console.log("Process actual");
-  prepareData();
+  //prepareData();
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
 
 
@@ -630,7 +645,8 @@ function prepareData() {
   mainData.completeIndex = dataPerDay.length - completeIndex;
   total = mainData.days[mainData.days.length-1].total_ncumul_conf;
   //console.log("CompleteIndex: " + mainData.completeIndex);
-  //console.log("Finished processing data");
+  console.log("Finished processing data");
+  //console.log(JSON.stringify(mainData));
 }
 
 var activeFilter;
@@ -1145,6 +1161,7 @@ function filterCases(placenr, mode) {
   var diff = moreFilteredData.map(d => d.diff_ncumul_conf);
   var avgs = moreFilteredData.map(d => d.diffAvg7Days);
   var incidences = moreFilteredData.map(d => d.incidences14Days);
+  var deaths = moreFilteredData.map(d => d.diff_ncumul_deceased);
 
   //Hospitalisations:
   var datasets = [];
@@ -1202,7 +1219,8 @@ function filterCases(placenr, mode) {
     "diff": diff,
     "avgs": avgs,
     "incidences": incidences,
-    "datasets": datasets
+    "datasets": datasets,
+    "deaths": deaths
   }
 }
 
@@ -1879,6 +1897,7 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
   };
   $scope.options = {
     animation: false,
+    responsive: true,
     layout: {
         padding: {
             right: 20
@@ -1892,7 +1911,7 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
       text: _('Kantone im Vergleich')
     },
     tooltips: {
-      mode: 'nearest',
+      mode: 'index',
       intersect: false,
       caretSize: 0,
       bodyFontFamily: 'IBM Plex Mono'
@@ -1929,13 +1948,36 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
     $scope.update();
   };
 
+
+  $scope.startDate = getDateForMode(0);
+  $scope.endDate = new Date();
+
+  $scope.setEndDate = function(year, month, day) {
+    var date;
+    if(year==0) date = new Date();
+    else date = new Date(Date.UTC(year,month,day))
+    $scope.endDate = date;
+    $scope.options.scales.xAxes[0].ticks.max = date;
+    $scope.update();
+  }
+
   //$scope.colors = [ 'white' ];
   $scope.update = function() {
     $scope.data = [];
     $scope.datasetOverride = [];
+    var endIndex;
     for(i=0; i<cantons.length-1; i++) {
       var filter = filterCases(i, 0);
-      if(i==cantons.length-2) $scope.labels = filter.dateLabels;
+      if(i==0) {
+        console.log(filter);
+        endIndex = filter.dateLabels.findIndex(d => d.getTime()>$scope.endDate.getTime());
+        //alert(endIndex);
+      }
+      if(endIndex!=-1) {
+        filter.dateLabels = filter.dateLabels.splice(0,endIndex);
+        filter.avgs = filter.avgs.splice(0,endIndex);
+      }
+      $scope.labels = filter.dateLabels;
       var singleOverride = {
           label: cantons[i],
           hidden: !$scope.visibility[i],
@@ -1946,7 +1988,8 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
           spanGaps: true
       }
       $scope.datasetOverride.push(singleOverride);
-      $scope.data.push(filter.incidences);
+      var per100k = filter.avgs.map(d => d==null?null:Math.round(d / population[cantons[i]] * 1000000)/10);
+      $scope.data.push(per100k);
     }
     //console.log($scope.colors);
   }

@@ -315,13 +315,18 @@
   			<h2>Details</h2>
 	    </header>
       <article id="interactive" ng-controller="ChartCtrl" style="margin-bottom: 4em;">
-        <div style="width:90%;">
+        <div>
           <canvas id="angularcanvas" class="chart chart-line angularchart" chart-data="data" chart-labels="labels" chart-series="series" chart-options="options" chart-dataset-override="datasetOverride"></canvas>
         </div>
         <div id="controls">
-          <div id="control_cantons">
+          <div class="angulardiv">
             <span class="chartHeading">Kantone:</span>
             <button class="controlButton" ng-repeat="canton in angular_cantons" ng-click="showHideCanton($index)" ng-class="visibility[$index]?'active':''">{{canton}}</button>
+          </div>
+          <div class="angulardiv">
+            <span class="chartHeading">Enddatum:</span>
+            <button class="controlButton" ng-click="setEndDate(2020,7,1)">August</button>
+            <button class="controlButton" ng-click="setEndDate(0,0,0)">Heute</button>
           </div>
         </div>
       </article>
