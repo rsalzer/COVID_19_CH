@@ -322,11 +322,23 @@
           <div class="angulardiv">
             <span class="chartHeading">Kantone:</span>
             <button class="controlButton" ng-repeat="canton in angular_cantons" ng-click="showHideCanton($index)" ng-class="visibility[$index]?'active':''">{{canton}}</button>
+            <button class="controlButton" ng-click="showAllCantons()">Alle</button>
+            <button class="controlButton" ng-click="showNoCanton()">Keiner</button>
           </div>
           <div class="angulardiv">
-            <span class="chartHeading">Enddatum:</span>
-            <button class="controlButton" ng-click="setEndDate(2020,7,1)">August</button>
-            <button class="controlButton" ng-click="setEndDate(0,0,0)">Heute</button>
+            <span class="chartHeading">Daten:</span>
+            <button class="controlButton" ng-click="setDataset('ncumul_conf')" ng-class="dataset=='ncumul_conf'?'active':''">Fälle</button>
+            <button class="controlButton" ng-click="setDataset('ncumul_deceased')" ng-class="dataset=='ncumul_deceased'?'active':''">Todesfälle</button>
+          </div>
+          <div class="angulardiv">
+            <span class="chartHeading">Daten:</span>
+            <button class="controlButton" ng-click="relative=false; update()" ng-class="relative?'':'active'">Absolut</button>
+            <button class="controlButton" ng-click="relative=true; update()" ng-class="relative?'active':''">Pro 100k Einwohner</button>
+          </div>
+          <div class="angulardiv">
+            <span class="chartHeading">Zeitausschnitt:</span>
+            <button class="controlButton" ng-click="setEndDate(2020,7,1)">Erste Welle</button>
+            <button class="controlButton" ng-click="setEndDate(0,0,0)">Gesamt</button>
           </div>
         </div>
       </article>

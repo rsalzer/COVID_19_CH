@@ -96,8 +96,8 @@ document.getElementById("loaded").style.display = 'none';
 setLanguageNav();
 
 //console.log("START");
-//getCanton(0);
-getJSON();
+getCanton(0);
+//getJSON();
 
 function getCanton(i) {
   var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
@@ -129,7 +129,7 @@ function getJSON() {
 function processData() {
   var start = new Date();
   //console.log("Process actual");
-  //prepareData();
+  if(mainData==null) prepareData();
   var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
 
 
@@ -561,7 +561,8 @@ function prepareData() {
         cantonTotal.diff_current_hosp = null;
         cantonTotal.diff_current_vent = null;
         cantonTotal.diff_current_icu = null;
-        cantonTotal.diffAvg7Days = null;
+        cantonTotal.diff_ncumul_conf_Avg7Days = null;
+        cantonTotal.diff_ncumul_deceased_Avg7Days = null;
         cantonTotal.incidences14Days = null;
       }
       else {
@@ -569,7 +570,7 @@ function prepareData() {
             cantonTotal.ncumul_conf = dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
             cantonTotal.date_ncumul_conf = dataPerDay[dataPerDay.length-1].data[i].date_ncumul_conf;
             cantonTotal.diff_ncumul_conf = null;
-            cantonTotal.diffAvg7Days = null;
+            cantonTotal.diff_ncumul_conf_Avg7Days = null;
             cantonTotal.incidences14Days = null;
             //console.log("Old ncumul conf for: "+canton+" date: "+dateString);
           }
@@ -577,7 +578,7 @@ function prepareData() {
             cantonTotal.diff_ncumul_conf = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-1].data[i].ncumul_conf;
             if(dataPerDay.length>9) {
               var diff7Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-7].data[i].ncumul_conf;
-              cantonTotal.diffAvg7Days = Math.round(diff7Days / 7);
+              cantonTotal.diff_ncumul_conf_Avg7Days = Math.round(diff7Days / 7);
               if(dataPerDay.length>15) {
                 var diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-14].data[i].ncumul_conf;
                 cantonTotal.incidences14Days = Math.round(diff14Days / population[canton] * 100000);
@@ -588,10 +589,15 @@ function prepareData() {
             cantonTotal.ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
             cantonTotal.date_ncumul_deceased = dataPerDay[dataPerDay.length-1].data[i].date_ncumul_deceased;
             cantonTotal.diff_ncumul_deceased = null;
+            cantonTotal.diff_ncumul_deceased_Avg7Days = null;
             //console.log("Old ncumul death for: "+canton+" date: "+dateString);
           }
           else {
             cantonTotal.diff_ncumul_deceased = cantonTotal.ncumul_deceased - dataPerDay[dataPerDay.length-1].data[i].ncumul_deceased;
+            if(dataPerDay.length>9) {
+              var diff7Days = cantonTotal.ncumul_deceased - dataPerDay[dataPerDay.length-7].data[i].ncumul_deceased;
+              cantonTotal.diff_ncumul_deceased_Avg7Days = Math.round(diff7Days / 7 * 100)/100;
+            }
           }
 
           if(Number.isNaN(cantonTotal.current_hosp)) {
@@ -1159,7 +1165,8 @@ function filterCases(placenr, mode) {
   });
   var cases = moreFilteredData.map(d => d.ncumul_conf);
   var diff = moreFilteredData.map(d => d.diff_ncumul_conf);
-  var avgs = moreFilteredData.map(d => d.diffAvg7Days);
+  var diff_ncumul_conf_Avg7Days = moreFilteredData.map(d => d.diff_ncumul_conf_Avg7Days);
+  var diff_ncumul_deceased_Avg7Days = moreFilteredData.map(d => d.diff_ncumul_deceased_Avg7Days);
   var incidences = moreFilteredData.map(d => d.incidences14Days);
   var deaths = moreFilteredData.map(d => d.diff_ncumul_deceased);
 
@@ -1217,10 +1224,11 @@ function filterCases(placenr, mode) {
     "cases": cases,
     "dateLabels": dateLabels,
     "diff": diff,
-    "avgs": avgs,
+    "diff_ncumul_conf_Avg7Days": diff_ncumul_conf_Avg7Days,
     "incidences": incidences,
     "datasets": datasets,
-    "deaths": deaths
+    "deaths": deaths,
+    "diff_ncumul_deceased_Avg7Days": diff_ncumul_deceased_Avg7Days
   }
 }
 
@@ -1293,7 +1301,7 @@ function barChartCases(placenr) {
     datasets: [
       {
         label: '7d-Avg',
-        data: filter.avgs,
+        data: filter.diff_ncumul_conf_Avg7Days,
         cubicInterpolationMode: 'monotone',
         spanGaps: true,
         pointRadius: 0,
@@ -1440,8 +1448,7 @@ function getScales(mode) {
       type: cartesianAxesTypes.LINEAR,
       position: 'right',
       ticks: {
-        beginAtZero: true,
-        suggestedMax: 7,
+        beginAtZero: true
       },
       gridLines: {
           color: inDarkMode() ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'
@@ -1581,7 +1588,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     var filter = filterCases(placenr, chart.mode);
     chart.data.labels = filter.dateLabels;
     var pointBackgroundColor = filter.incidences.map(function (d) { return (d<60)?"green":(d>=120?"red":"orange");});
-    chart.data.datasets[0].data = chart.showIncidences?filter.incidences:filter.avgs;
+    chart.data.datasets[0].data = chart.showIncidences?filter.incidences:filter.diff_ncumul_conf_Avg7Days;
     chart.data.datasets[0].label = chart.showIncidences?_('Inz/100k'):_('7d-Avg');
     chart.data.datasets[0].pointBackgroundColor = pointBackgroundColor;
     chart.data.datasets[0].pointBorderColor = pointBackgroundColor;
@@ -1883,10 +1890,19 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
 
   $scope.angular_cantons = ['AG', 'AI', 'AR', 'BE', 'BL', 'BS', 'FR', 'GE', 'GL', 'GR', 'JU', 'LU', 'NE', 'NW', 'OW', 'SG', 'SH', 'SO', 'SZ', 'TG', 'TI', 'UR', 'VD', 'VS', 'ZG', 'ZH'];
   $scope.visibility = [];
-
   $scope.angular_cantons.forEach((item) => {
     $scope.visibility.push(false);
   });
+
+  $scope.showNoCanton = function() {
+    $scope.visibility.fill(false);
+    $scope.update();
+  };
+
+  $scope.showAllCantons = function() {
+    $scope.visibility.fill(true);
+    $scope.update();
+  };
 
 
   $scope.labels = [0,1,2];
@@ -1895,6 +1911,16 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
   $scope.onClick = function (points, evt) {
     console.log(points, evt);
   };
+
+  $scope.dataset = 'ncumul_conf';
+
+  $scope.relative = false;
+
+  $scope.setDataset = function(dataset) {
+    $scope.dataset = dataset;
+    $scope.update();
+  }
+
   $scope.options = {
     animation: false,
     responsive: true,
@@ -1968,6 +1994,7 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
     var endIndex;
     for(i=0; i<cantons.length-1; i++) {
       var filter = filterCases(i, 0);
+      var data = filter['diff_'+$scope.dataset+'_Avg7Days'];
       if(i==0) {
         console.log(filter);
         endIndex = filter.dateLabels.findIndex(d => d.getTime()>$scope.endDate.getTime());
@@ -1975,7 +2002,7 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
       }
       if(endIndex!=-1) {
         filter.dateLabels = filter.dateLabels.splice(0,endIndex);
-        filter.avgs = filter.avgs.splice(0,endIndex);
+        data = data.splice(0,endIndex);
       }
       $scope.labels = filter.dateLabels;
       var singleOverride = {
@@ -1988,8 +2015,10 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
           spanGaps: true
       }
       $scope.datasetOverride.push(singleOverride);
-      var per100k = filter.avgs.map(d => d==null?null:Math.round(d / population[cantons[i]] * 1000000)/10);
-      $scope.data.push(per100k);
+      if($scope.relative) {
+        data = data.map(d => d==null?null:Math.round(d / population[cantons[i]] * 10000000)/100);
+      }
+      $scope.data.push(data);
     }
     //console.log($scope.colors);
   }
