@@ -1893,6 +1893,7 @@ app.controller('ChartCtrl', ['$scope', function ($scope) {
   $scope.angular_cantons.forEach((item) => {
     $scope.visibility.push(false);
   });
+  $scope.visibility[$scope.visibility.length-1]=true;
 
   $scope.showNoCanton = function() {
     $scope.visibility.fill(false);
