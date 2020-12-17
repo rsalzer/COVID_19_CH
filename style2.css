@@ -30,10 +30,13 @@ body {
 	padding-right: 5vw;
 	padding-top: 1em;
 	max-width: 640px;
+  font-size: 0.8em;
 }
 #page-nav ul {
 	list-style: none;
 	display: flex;
+  flex-flow: row wrap;
+  justify-content: start;
 }
 #page-nav li {
 	margin-right: 1em;
@@ -43,7 +46,7 @@ body {
 	border-color: var(--color-main);
 	cursor: default;
 }
-#page-nav li:nth-child(4) {
+#page-nav li:nth-child(5) {
   margin-left: auto;
 }
 #page-nav li:last-child {
@@ -63,6 +66,7 @@ body {
 /* !main */
 main {
 	padding: 5vw;
+  padding-top: 2vw;
 }
 main a {
 	color: inherit;
