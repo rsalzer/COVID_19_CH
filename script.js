@@ -1475,48 +1475,34 @@ function setLanguageNav() {
       lang = 'en';
   }
   language = lang;
-  var href;
-  var ul = document.getElementsByTagName("ul")[0];
-  var li = document.createElement("li");
-  if(lang=="de") {
-    li.className = "here";
-    href = "#"
+  var mainlanguageButton = document.getElementById("mainlanguage");
+  mainlanguageButton.innerHTML = lang.toUpperCase();
+  var languagesDiv = document.getElementById("languages");
+  var a;
+  if(lang!="de") {
+    a = document.createElement("a");
+    a.href = "index.html?lang=de";
+    languagesDiv.appendChild(a);
+    a.innerHTML = "DE"
   }
-  else {
-    href = "index.html?lang=de";
+  if(lang!="fr") {
+    a = document.createElement("a");
+    a.href = "index.html?lang=fr";
+    languagesDiv.appendChild(a);
+    a.innerHTML = "FR"
   }
-  li.innerHTML = '<a href="'+href+'">DE</a>';
-  ul.appendChild(li);
-  li = document.createElement("li");
-  if(lang=="fr") {
-    li.className = "here";
-    href = "#"
+  if(lang!="it") {
+    a = document.createElement("a");
+    a.href = "index.html?lang=it";
+    languagesDiv.appendChild(a);
+    a.innerHTML = "IT"
   }
-  else {
-    href = "index.html?lang=fr";
+  if(lang!="en") {
+    a = document.createElement("a");
+    a.href = "index.html?lang=en";
+    languagesDiv.appendChild(a);
+    a.innerHTML = "EN"
   }
-  li.innerHTML = '<a href="'+href+'">FR</a>';
-  ul.appendChild(li);
-  li = document.createElement("li");
-  if(lang=="it") {
-    li.className = "here";
-    href = "#"
-  }
-  else {
-    href = "index.html?lang=it";
-  }
-  li.innerHTML = '<a href="'+href+'">IT</a>';
-  ul.appendChild(li);
-  li = document.createElement("li");
-  if(lang=="en") {
-    li.className = "here";
-    href = "#"
-  }
-  else {
-    href = "index.html?lang=en";
-  }
-  li.innerHTML = '<a href="'+href+'">EN</a>';
-  ul.appendChild(li);
 }
 
 function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
