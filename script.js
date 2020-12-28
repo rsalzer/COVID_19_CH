@@ -498,7 +498,6 @@ function prepareData() {
   var mode = 0;
   var date = new Date();
   date.setTime(getDateForMode(mode).getTime());
-  date.setDate(date.getDate()); //3.6. is better as start...
   var now = new Date();
   now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
   //alert(now.toISOString());
@@ -618,7 +617,7 @@ function prepareData() {
       singleDayObject.diffDeathAvg7Days = Math.round(diffDeath7Days * 10 / 7) / 10;
     }
     dataPerDay.push(singleDayObject);
-    date.setDate(date.getDate() + 1);
+    date.setTime(date.getTime()+86400000);
   }
   dataPerDay.splice(0,1);
   mainData = {};
