@@ -155,10 +155,13 @@ function processActualData(mode, chosenDay) {
   getSiblings(selectedHead, "th.active").forEach(element => element.classList.remove('active'));
 
   //Highlight chosen Day
-  var selectedDayHead = document.getElementById("day_"+chosenDay);
-  if(selectedDayHead==null) selectedDayHead = document.getElementById("day_other");
-  else selectedDayHead.classList.add("active");
-  getSiblings(selectedDayHead, "button.active").forEach(element => element.classList.remove('active'));
+  document.getElementById("day_0").classList.remove('active');
+  document.getElementById("day_-1").classList.remove('active');
+  document.getElementById("day_-2").classList.remove('active');
+  if(chosenDay>=-2) {
+    var selectedDayHead = document.getElementById("day_"+chosenDay);
+    selectedDayHead.classList.add("active");
+  }
 
   var todaysObject = mainData.days[mainData.days.length-1+chosenDay];
   var todaysData = todaysObject.data;
