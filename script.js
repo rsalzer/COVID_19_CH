@@ -1858,7 +1858,7 @@ function includeHTML() {
           if (this.status == 404) {elmnt.insertAdjacentHTML("afterbegin", "Page not found.");}
           /* Remove the attribute, and call this function once more: */
           elmnt.removeAttribute("url");
-          document.getElementById("pagenav_zh").className = "here";
+          document.getElementById("pagenav_ch").className = "here";
           loaded();
         }
       }
