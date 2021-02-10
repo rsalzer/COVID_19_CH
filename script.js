@@ -665,7 +665,7 @@ function filterAllCH(mode) {
 function addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp) {
   var place = "CH";
   var span = document.createElement("span");
-  addFilterLengthButtonCH(span, place, getDeviceState()==2?_('Letzte 30 Tage'):_('Letzte 50 Tage'), 2, true, chart, chartDeaths, chartHosp);
+  addFilterLengthButtonCH(span, place, _(`Letzte ${daysBack} Tage`), 2, true, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(span, place, _('Ab September'), 1, false, chart, chartDeaths, chartHosp);
   addFilterLengthButtonCH(span, place, _('Ganz'), 0, false, chart, chartDeaths, chartHosp);
   div.appendChild(span);
@@ -1102,7 +1102,7 @@ var dateNow = null;
 var daysBack = null;
 function getDateForMode(mode) {
   if(dateNow==null) {
-    daysBack = getDeviceState()==2?30:50;
+    daysBack = getDeviceState()==2?20:50;
     dateNow = new Date();
     dateNow.setDate(dateNow.getDate()-daysBack);
   }
@@ -1519,7 +1519,7 @@ function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
   div.className = "chartButtons";
   var span = document.createElement("span");
   addFilterLengthButton(span, placenr, _('Inz/100k'), -1, false, chart, chartHosp, true);
-  addFilterLengthButton(span, placenr, getDeviceState()==2?_('Letzte 30 Tage'):_('Letzte 50 Tage'), 2, true, chart, chartHosp, false);
+  addFilterLengthButton(span, placenr, _(`Letzte ${daysBack} Tage`), 2, true, chart, chartHosp, false);
   addFilterLengthButton(span, placenr, _('Ab September'), 1, false, chart, chartHosp, false);
   addFilterLengthButton(span, placenr, _('Ganz'), 0, false, chart, chartHosp, false);
   div.appendChild(span)
