@@ -3,7 +3,7 @@
     color-scheme: light dark;
     --color-main: #000;
     --color-background: #fff;
-    --canvas-minwidth: 2700px;
+    --canvas-minwidth: 750px;
     --maxwidth: 750px;
 }
 @media (prefers-color-scheme: dark) {
@@ -510,13 +510,15 @@ button {
 @media (max-width: 660px) {
 	canvas {
 	  width: 100%;
-		min-width: 600px;
+		min-width: 0px;
 	}
 	.chartButtons {
 		overflow-x: scroll;
-		min-width: 600px;
+		min-width: 0px;
 		width: 100%;
-	    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 	}
   .chartButton:hover {
   	border-bottom: 2px solid transparent;

@@ -115,7 +115,7 @@ function processData() {
   var start = new Date();
   //console.log("Process actual");
   prepareData();
-  var filter = filterAllCH(getDeviceState()==2 ? 2 : 1);
+  var filter = filterAllCH(2);
 
 
   processActualData(null, null);
@@ -642,7 +642,7 @@ function filterAllCH(mode) {
       dataPerDay = mainData.days.slice(99);
       break;
     case 2:
-      dataPerDay = mainData.days.slice(mainData.days.length-30);
+      dataPerDay = mainData.days.slice(mainData.days.length-daysBack);
       break;
   }
   var dateLabels = dataPerDay.map(function(d) {
@@ -664,9 +664,11 @@ function filterAllCH(mode) {
 
 function addFilterLengthButtonsCH(div, chart, chartDeaths, chartHosp) {
   var place = "CH";
-  if(getDeviceState()==2) addFilterLengthButtonCH(div, place, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartDeaths, chartHosp);
-  addFilterLengthButtonCH(div, place, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartDeaths, chartHosp);
-  addFilterLengthButtonCH(div, place, _('Ab März'), 0, false, chart, chartDeaths, chartHosp);
+  var span = document.createElement("span");
+  addFilterLengthButtonCH(span, place, getDeviceState()==2?_('Letzte 30 Tage'):_('Letzte 50 Tage'), 2, true, chart, chartDeaths, chartHosp);
+  addFilterLengthButtonCH(span, place, _('Ab September'), 1, false, chart, chartDeaths, chartHosp);
+  addFilterLengthButtonCH(span, place, _('Ganz'), 0, false, chart, chartDeaths, chartHosp);
+  div.appendChild(span);
 }
 
 function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, chartDeaths, chartHosp) {
@@ -689,7 +691,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chart.data.datasets[1].backgroundColor = backgroundColors;
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_conf");
-    chart.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.options.plugins.datalabels = (mode!=2) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.update(0);
 
     var deathDiff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_deceased});
@@ -701,7 +703,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartDeaths.data.datasets[1].data = deathDiff;
     chartDeaths.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartDeaths.options.tooltips.callbacks = getCHCallbacks(filter, "ncumul_deceased");
-    chartDeaths.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chartDeaths.options.plugins.datalabels = (mode!=2) ? false : { display: false, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chartDeaths.update(0);
 
     var totalHosp = filter.dataPerDay.map(function(d) {return d["total_"+hospitalisationMode]});
@@ -709,7 +711,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     chartHosp.data.datasets[0].data = totalHosp;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, hospitalisationMode);
-    chartHosp.options.plugins.datalabels = (mode==0 || (getDeviceState()==2 && mode!=2)) ? false : getDataLabels();
+    chartHosp.options.plugins.datalabels = (mode!=2) ? false : getDataLabels();
     chartHosp.update(0);
 
     // chartHosp.data.labels = filter.dateLabels;
@@ -834,7 +836,7 @@ function barChartAllCH(filter) {
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "ncumul_conf")
       },
-      scales: getScales((getDeviceState()==2) ? 2 : 1),
+      scales: getScales(2),
       plugins: {
         datalabels: {
           display: false,
@@ -922,7 +924,7 @@ function barChartAllCHDeaths(filter) {
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "ncumul_deceased")
       },
-      scales: getScales((getDeviceState()==2) ? 2 : 1),
+      scales: getScales(2),
       plugins: {
         datalabels: {
           display: false,
@@ -1002,7 +1004,7 @@ function barChartAllCHHospitalisations(filter) {
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCHCallbacks(filter, "current_hosp")
       },
-      scales: getScales((getDeviceState()==2) ? 2 : 1),
+      scales: getScales(2),
       plugins: {
         datalabels: getDataLabels()
       }
@@ -1096,18 +1098,23 @@ function getNumConf(canton, date, variable) {
   return null;
 }
 
-var dateNOW = new Date();
-dateNOW.setDate(dateNOW.getDate()-30);
+var dateNow = null;
+var daysBack = null;
 function getDateForMode(mode) {
+  if(dateNow==null) {
+    daysBack = getDeviceState()==2?30:50;
+    dateNow = new Date();
+    dateNow.setDate(dateNow.getDate()-daysBack);
+  }
   switch(mode) {
     case 0:
       //return new Date("2020-02-24T23:00:00");
       return new Date(Date.UTC(2020,1,25))
     case 1:
       //return new Date("2020-05-31T23:00:00");
-      return new Date(Date.UTC(2020,5,2))
+      return new Date(Date.UTC(2020,8,1))
     case 2:
-      return dateNOW;
+      return dateNow;
   }
 }
 
@@ -1233,7 +1240,7 @@ function barChartCases(placenr) {
   article.appendChild(div);
   section.appendChild(article);
   div.scrollLeft = 1700;
-  var filter = filterCases(placenr, (getDeviceState()==2) ? 2 : 1);
+  var filter = filterCases(placenr, 2);
   var chart = new Chart(canvas.id, {
     type: 'bar',
     options: {
@@ -1256,7 +1263,7 @@ function barChartCases(placenr) {
         bodyFontFamily: 'IBM Plex Mono',
         callbacks: getCallbacks(filter),
       },
-      scales: getScales((getDeviceState()==2) ? 2 : 1),
+      scales: getScales(2),
       plugins: {
         datalabels: {
           display: false,
@@ -1361,7 +1368,7 @@ function barChartCases(placenr) {
           }
         }
       },
-      scales: getScales((getDeviceState()==2) ? 2 : 1),
+      scales: getScales(2),
       plugins: {
         datalabels: false
       }
@@ -1510,10 +1517,12 @@ function setLanguageNav() {
 function addFilterLengthButtons(elementAfter, placenr, chart, chartHosp) {
   var div = document.createElement('div');
   div.className = "chartButtons";
-  addFilterLengthButton(div, placenr, _('Inz/100k'), -1, false, chart, chartHosp, true);
-  if(getDeviceState()==2) addFilterLengthButton(div, placenr, _('Letzte 30 Tage'), 2, getDeviceState()==2, chart, chartHosp, false);
-  addFilterLengthButton(div, placenr, _('Ab Juni'), 1, getDeviceState()!=2, chart, chartHosp, false);
-  addFilterLengthButton(div, placenr, _('Ab März'), 0, false, chart, chartHosp, false);
+  var span = document.createElement("span");
+  addFilterLengthButton(span, placenr, _('Inz/100k'), -1, false, chart, chartHosp, true);
+  addFilterLengthButton(span, placenr, getDeviceState()==2?_('Letzte 30 Tage'):_('Letzte 50 Tage'), 2, true, chart, chartHosp, false);
+  addFilterLengthButton(span, placenr, _('Ab September'), 1, false, chart, chartHosp, false);
+  addFilterLengthButton(span, placenr, _('Ganz'), 0, false, chart, chartHosp, false);
+  div.appendChild(span)
   elementAfter.before(div);
 }
 
@@ -1538,7 +1547,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
       getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
     }
     if(mode==-1) {
-      chart.mode = chart.mode!=undefined?chart.mode:(getDeviceState()==2?2:1);
+      chart.mode = chart.mode!=undefined?chart.mode:2;
     }
     else {
       chart.mode = mode;
@@ -1553,7 +1562,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chart.data.datasets[0].pointRadius = chart.showIncidences?4:0;
     chart.data.datasets[1].data = chart.showIncidences?null:filter.diff;
     chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
-    chart.data.datasets[1].datalabels.display = (chart.mode==0 || (getDeviceState()==2 && chart.mode!=2)) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
+    chart.data.datasets[1].datalabels.display = (chart.mode!=2) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
     chart.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chart.options.tooltips.callbacks = getCallbacks(filter);
     chart.update(0);
