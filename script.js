@@ -105,7 +105,21 @@ function getCanton(i) {
         alert("Daten konnten nicht geladen werden");
       }
       else {
-        data = csvdata;
+        data = csvdata.filter(d=>d.abbreviation_canton_and_fl!="AR");
+        getAR();
+      }
+  });
+}
+
+function getAR() {
+  var url = "https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/ar.csv";
+  d3.csv(url, function(error, csvdata) {
+      if(error!=null) {
+        alert("Daten konnten nicht geladen werden");
+      }
+      else {
+        csvdata.pop();
+        data = data.concat(csvdata);
         processData();
       }
   });
