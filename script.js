@@ -779,7 +779,7 @@ function getCHCallbacks(filter, variable) {
             emptyCantons.push(item.canton);
             return;
           }
-          var tabbing = 5-(""+singleItem).length;
+          var tabbing = 6-(""+singleItem).length;
           var padding = " ".repeat(tabbing);
           var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
           multistringText.push(item.canton+":"+padding+singleItem+" ("+date+") "+diffStr);
@@ -788,7 +788,7 @@ function getCHCallbacks(filter, variable) {
       emptyCantons.forEach(function(item) {
         var date = _("Keine Daten");
         var singleItem = 0;
-        var tabbing = 5-(""+singleItem).length;
+        var tabbing = 6-(""+singleItem).length;
         var padding = " ".repeat(tabbing);
         var diffStr = item["diff_"+variable]!=null?(item["diff_"+variable]>=0?"+"+item["diff_"+variable]:item["diff_"+variable]):""
         multistringText.push(item+":"+padding+singleItem+" ("+date+") "+diffStr);
