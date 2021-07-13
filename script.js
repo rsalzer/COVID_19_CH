@@ -102,7 +102,7 @@ function getCanton(i) {
   var url = "https://raw.githubusercontent.com/openZH/covid_19/master/COVID19_Fallzahlen_CH_total_v2.csv";
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
-        alert("Daten konnten nicht geladen werden");
+        alert("Daten von OpenZH konnten nicht geladen werden");
       }
       else {
         data = csvdata.filter(d=>d.abbreviation_canton_and_fl!="AR");
@@ -115,7 +115,21 @@ function getAR() {
   var url = "https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/ar.csv";
   d3.csv(url, function(error, csvdata) {
       if(error!=null) {
-        alert("Daten konnten nicht geladen werden");
+        alert("Daten des BAG konnten nicht geladen werden");
+      }
+      else {
+        csvdata.pop();
+        data = data.concat(csvdata);
+        getVD();
+      }
+  });
+}
+
+function getVD() {
+  var url = "https://raw.githubusercontent.com/rsalzer/COVID_19_BAG/master/data/vd.csv";
+  d3.csv(url, function(error, csvdata) {
+      if(error!=null) {
+        alert("Daten des BAG konnten nicht geladen werden");
       }
       else {
         csvdata.pop();
@@ -1573,7 +1587,7 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
     chart.data.datasets[0].label = chart.showIncidences?_('Inz/100k'):_('7d-Avg');
     chart.data.datasets[0].pointBackgroundColor = pointBackgroundColor;
     chart.data.datasets[0].pointBorderColor = pointBackgroundColor;
-    chart.data.datasets[0].pointRadius = chart.showIncidences?4:0;
+    chart.data.datasets[0].pointRadius = chart.showIncidences?(chart.mode!=2?1:4):0;
     chart.data.datasets[1].data = chart.showIncidences?null:filter.diff;
     chart.options.title.text = chart.showIncidences?_('Inzidenz per 100k über die letzten 14 Tage'):_('Bestätigte Fälle');
     chart.data.datasets[1].datalabels.display = (chart.mode!=2) ? false : true; //{ display: true, color: inDarkMode() ? '#ccc' : 'black', font: { weight: 'bold'} };
