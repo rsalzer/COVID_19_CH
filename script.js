@@ -708,6 +708,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     this.classList.add('active');
     getSiblings(this, '.chartButton.active').forEach(element => element.classList.remove('active'));
     var filter = filterAllCH(mode);
+    var pointRadius = mode==2?4:0;
     var diff = filter.dataPerDay.map(function(d) {return d.diffTotal_ncumul_conf});
     var avgs = filter.dataPerDay.map(d => d.diffAvg7Days);
     var completeIndex = mainData.completeIndex;
@@ -737,6 +738,7 @@ function addFilterLengthButtonCH(container, place, name, mode, isActive, chart, 
     var totalHosp = filter.dataPerDay.map(function(d) {return d["total_"+hospitalisationMode]});
     chartHosp.data.labels = filter.dateLabels;
     chartHosp.data.datasets[0].data = totalHosp;
+    chartHosp.data.datasets[0].pointRadius = pointRadius;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.options.tooltips.callbacks = getCHCallbacks(filter, hospitalisationMode);
     chartHosp.options.plugins.datalabels = (mode!=2) ? false : getDataLabels();
@@ -1597,6 +1599,9 @@ function addFilterLengthButton(container, placenr, name, mode, isActive, chart, 
 
     chartHosp.data.labels = filter.dateLabels;
     chartHosp.data.datasets = filter.datasets;
+    if(chartHosp.data.datasets[0]) chartHosp.data.datasets[0].pointRadius = chart.mode!=2?1:4;
+    if(chartHosp.data.datasets[1]) chartHosp.data.datasets[1].pointRadius = chart.mode!=2?1:4;
+    if(chartHosp.data.datasets[2]) chartHosp.data.datasets[2].pointRadius = chart.mode!=2?1:4;
     chartHosp.options.scales.xAxes[0].ticks.min = getDateForMode(mode);
     chartHosp.update(0);
   });
