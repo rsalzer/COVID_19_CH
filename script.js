@@ -105,7 +105,7 @@ function getCanton(i) {
         alert("Daten von OpenZH konnten nicht geladen werden");
       }
       else {
-        data = csvdata.filter(d=>d.abbreviation_canton_and_fl!="AR");
+        data = csvdata.filter(d=>d.abbreviation_canton_and_fl!="AR" && d.abbreviation_canton_and_fl!="VD");
         getAR();
       }
   });
@@ -141,8 +141,9 @@ function getVD() {
 
 function processData() {
   var start = new Date();
-  //console.log("Process actual");
+  console.log("Prepare actual");
   prepareData();
+  console.log("End prepare actual");
   var filter = filterAllCH(2);
 
 
@@ -158,11 +159,11 @@ function processData() {
   // console.log("End Deaths CH / Start Hosp");
   //barChartAllCHHospitalisations();
   // console.log("End Hosp CH");
-  //console.log("Start Cantons");
+  console.log("Start Cantons");
   for(var i=0; i<cantons.length; i++) {
     barChartCases(i);
   }
-  //console.log("End Single Cantons");
+  console.log("End Single Cantons");
   document.getElementById("loadingspinner").style.display = 'none';
   document.getElementById("loaded").style.display = 'block';
 }
@@ -554,6 +555,7 @@ function prepareData() {
   var completeIndex = 0;
   // console.log("Start preping CH cases");
   while(date<now) {
+    //console.log("Starting: "+completeIndex);
     var dateString = date.toISOString();
     dateString = dateString.substring(0,10);
     // if(dateString=="2020-06-02") {
@@ -562,9 +564,10 @@ function prepareData() {
     var singleDayObject = {};
     singleDayObject.date = dateString;
     singleDayObject.data = [];
+    var filteredForDate = data.filter(d => d.date==dateString);
     for(var i=0; i<cantons.length; i++) {
       var canton = cantons[i];
-      var cantonTotal = getDataForDay(canton, date);
+      var cantonTotal = getDataForDay(canton, filteredForDate, dateString);
       if(cantonTotal==null) {
         cantonTotal = Object.assign({}, dataPerDay[dataPerDay.length-1].data[i]);
         cantonTotal.diff_ncumul_deceased = null;
@@ -590,7 +593,7 @@ function prepareData() {
               var diff7Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-7].data[i].ncumul_conf;
               cantonTotal.diffAvg7Days = Math.round(diff7Days / 7);
               if(dataPerDay.length>15) {
-                var diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-14].data[i].ncumul_conf;
+                var diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-15].data[i].ncumul_conf;
                 cantonTotal.incidences14Days = Math.round(diff14Days / population[canton] * 100000);
               }
             }
@@ -1090,10 +1093,8 @@ function addHospitalisationButton(container, name, mode, isActive, chartHosp, co
 }
 
 
-function getDataForDay(canton, date) {
-  var dateString = date.toISOString();
-  dateString = dateString.substring(0,10);
-  var filteredData = data.filter(function(d) { if(d.abbreviation_canton_and_fl==canton && d.date==dateString) return d});
+function getDataForDay(canton, dateFiltered, dateString) {
+  var filteredData = dateFiltered.filter(function(d) { if(d.abbreviation_canton_and_fl==canton) return d});
   if(filteredData.length>0) {
     if(filteredData.length>1) console.log("More then 1 line for "+canton+" date: "+dateString);
     var obj = {
