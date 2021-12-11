@@ -4,7 +4,7 @@
     --color-main: #000;
     --color-background: #fff;
     --canvas-minwidth: 750px;
-    --maxwidth: 750px;
+    --maxwidth: 800px;
 }
 @media (prefers-color-scheme: dark) {
     :root {
@@ -80,7 +80,7 @@ body {
   display: none;
 }
 
-@media (max-width: 660px) {
+@media (max-width: 800px) {
 
   #page-nav .menu {
     display: block;
@@ -354,7 +354,7 @@ table img {
 
     z-index: 1;
 }
-@media (max-width: 660px) {
+@media (max-width: 800px) {
 	.state-indicator {
 	   z-index: 2;
 	}
@@ -401,7 +401,7 @@ table.wide {
 	width: 100%;
 	max-width: 500px;
 }
-@media (max-width: 660px) {
+@media (max-width: 800px) {
 	table.wide {
 		min-width: 100%;
 	}
@@ -507,7 +507,7 @@ button {
 .chartButton:focus {
     outline: none;
 }
-@media (max-width: 660px) {
+@media (max-width: 800px) {
 	canvas {
 	  width: 100%;
 		min-width: 0px;

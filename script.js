@@ -201,25 +201,35 @@ function processActualData(mode, chosenDay) {
   // var timeNow = new Date();
   // timeNow.setMinutes(timeNow.getMinutes()-timeNow.getTimezoneOffset()); //correct offset to UTC
   // timeNow.setHours(timeNow.getHours()-7); //show old date till 7am
+  var cases14DaysTotal = 0;
   for(var j=0; j<todaysData.length; j++) {
     var today = todaysData[j];
     var perCantonToday = today.ncumul_conf;
     var perCanton14DaysAgo = 0;
     if(today.date_ncumul_conf!="Keine Daten") {
-      var dateSplit = today.date_ncumul_conf.split("-");
-      var day = parseInt(dateSplit[2]);
-      var month = parseInt(dateSplit[1])-1;
-      var year = parseInt(dateSplit[0]);
-      var d = new Date(Date.UTC(year,month,day))
-      d.setDate(d.getDate() - 14);
-      dateString = d.toISOString();
-      dateString = dateString.substring(0,10);
-      var dayObject14DaysAgo = mainData.days.filter(d => d.date == dateString);
-      if(dayObject14DaysAgo.length>0)
-        perCanton14DaysAgo = dayObject14DaysAgo[0].data[j].ncumul_conf;
+      // var dateSplit = today.date_ncumul_conf.split("-");
+      // var day = parseInt(dateSplit[2]);
+      // var month = parseInt(dateSplit[1])-1;
+      // var year = parseInt(dateSplit[0]);
+      // var d = new Date(Date.UTC(year,month,day))
+      // d.setDate(d.getDate() - 14);
+      // dateString = d.toISOString();
+      // dateString = dateString.substring(0,10);
+      // var dayObject14DaysAgo = mainData.days.filter(d => d.date == dateString);
+      // if(dayObject14DaysAgo.length>0)
+      //   perCanton14DaysAgo = dayObject14DaysAgo[0].data[j].ncumul_conf;
+      var dateString = today.date_ncumul_conf
+      var dayObjectWithIncidences = mainData.days.filter(d => d.date == dateString);
+      if(dayObjectWithIncidences.length>0) {
+        today.cases14DaysDiff =  dayObjectWithIncidences[0].data[j].diff14Days;
+        today.incidence = dayObjectWithIncidences[0].data[j].incidences14Days;
+      }
     }
-    today.cases14DaysDiff = perCantonToday - perCanton14DaysAgo;
-    today.incidence = Math.round(today.cases14DaysDiff / population[cantons[j]] * 100000);
+    else {
+      today.cases14DaysDiff = perCantonToday - perCanton14DaysAgo;
+      today.incidence = Math.round(today.cases14DaysDiff / population[cantons[j]] * 100000);
+    }
+    cases14DaysTotal += today.cases14DaysDiff
     //console.log("Canton: "+cantons[j]+" Two weeks: "+today.cases14DaysDiff+" incidence: "+today.incidence);
   }
   var sortedActual = Array.from(todaysData).sort(function(a, b){return b[mode]-a[mode]});
@@ -227,11 +237,18 @@ function processActualData(mode, chosenDay) {
   firstTable.innerHTML = "";
   var secondTable = document.getElementById("confirmed_2");
   secondTable.innerHTML = "";
-  var diffTotal = 0;
-  var cases14DaysTotal = 0;
+  var formattedTotal = mainData.days[mainData.days.length-1+chosenDay].total_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formatted14DayCases = cases14DaysTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var formattedDiff = mainData.days[mainData.days.length-1+chosenDay].diffTotal_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+  var incidenceCH = Math.round(cases14DaysTotal / population["CH"] * 100000);
+  var formattedTotalLength = formattedTotal.length;
   for(var i=0; i<sortedActual.length; i++) {
     var table;
-    if(i<sortedActual.length/2) table = firstTable;
+    var isFirst = false;
+    if(i<sortedActual.length/2) {
+      table = firstTable;
+      isFirst = true;
+    }
     else table = secondTable;
     var actual = sortedActual[i];
     var now = actual.ncumul_conf;
@@ -247,18 +264,23 @@ function processActualData(mode, chosenDay) {
     td.appendChild(document.createTextNode(actual.date_ncumul_conf.replace("2020-", "").replace("2021-", "")));
     tr.appendChild(td);
     td = document.createElement("td");
-    var text = document.createTextNode(now);
+    var formattedNow = now.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+    if(i==0) {
+      var paddingDiff = formattedTotalLength-formattedNow.length;
+      if(paddingDiff>0)
+        formattedNow = "\xa0"+formattedNow; //TODO: Same with other variables
+    }
+    var text = document.createTextNode(formattedNow);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.diff_ncumul_conf!=null?actual.diff_ncumul_conf:""));
+    td.appendChild(document.createTextNode(actual.diff_ncumul_conf!=null?actual.diff_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’"):""));
     tr.appendChild(td);
     var risk = "low";
     if(actual.incidence>=60) risk = "medium";
     if(actual.incidence>=120) risk = "high";
-    cases14DaysTotal += actual.cases14DaysDiff
     td = document.createElement("td");
-    td.innerHTML = actual.cases14DaysDiff;
+    td.innerHTML = actual.cases14DaysDiff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
     tr.appendChild(td);
     td = document.createElement("td");
     td.innerHTML = "<span class=\"newrisk "+risk+"\">"+actual.incidence+"</span>";
@@ -283,10 +305,6 @@ function processActualData(mode, chosenDay) {
     table.appendChild(tr);
   }
   var tr = document.createElement("tr");
-  var formattedTotal = mainData.days[mainData.days.length-1+chosenDay].total_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  var formatted14DayCases = cases14DaysTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  var formattedDiff = mainData.days[mainData.days.length-1+chosenDay].diffTotal_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
-  var incidenceCH = Math.round(cases14DaysTotal / population["CH"] * 100000);
   var riskCH = "low";
   if(incidenceCH>=60) riskCH = "medium";
   if(incidenceCH>=120) riskCH = "high";
@@ -585,6 +603,7 @@ function prepareData() {
             cantonTotal.diff_ncumul_conf = null;
             cantonTotal.diffAvg7Days = null;
             cantonTotal.incidences14Days = null;
+            cantonTotal.diff14Days = null;
             //console.log("Old ncumul conf for: "+canton+" date: "+dateString);
           }
           else {
@@ -593,8 +612,8 @@ function prepareData() {
               var diff7Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-7].data[i].ncumul_conf;
               cantonTotal.diffAvg7Days = Math.round(diff7Days / 7);
               if(dataPerDay.length>15) {
-                var diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-15].data[i].ncumul_conf;
-                cantonTotal.incidences14Days = Math.round(diff14Days / population[canton] * 100000);
+                cantonTotal.diff14Days = cantonTotal.ncumul_conf - dataPerDay[dataPerDay.length-14].data[i].ncumul_conf;
+                cantonTotal.incidences14Days = Math.round(cantonTotal.diff14Days / population[canton] * 100000);
               }
             }
           }
@@ -774,7 +793,7 @@ function getCHCallbacks(filter, variable) {
       var index = tooltipItems.index;
       var totalPerDay = filter.dataPerDay[index]["total_"+variable];
       var changeStr = "";
-      var tabbing = 6-(""+totalPerDay).length;
+      var tabbing = 7-(""+totalPerDay).length;
       var padding = " ".repeat(tabbing);
       var diffString = filter.dataPerDay[index]["diffTotal_"+variable];
       if(filter.dataPerDay[index]["diffTotal_"+variable]>=0) diffString = "+"+diffString;
