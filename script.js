@@ -265,22 +265,33 @@ function processActualData(mode, chosenDay) {
     tr.appendChild(td);
     td = document.createElement("td");
     var formattedNow = now.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+    var formattedNew = actual.diff_ncumul_conf!=null?actual.diff_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’"):""
+    var formatted14d = actual.cases14DaysDiff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
     if(i==0) {
       var paddingDiff = formattedTotalLength-formattedNow.length;
-      if(paddingDiff>0)
+      // console.log("PaddingDiff Total: "+paddingDiff);
+      for(let j=0; j<paddingDiff; j++)
         formattedNow = "\xa0"+formattedNow; //TODO: Same with other variables
+      paddingDiff = formattedDiff.length - formattedNew.length;
+      // console.log("PaddingDiff New: "+paddingDiff);
+      for(let j=0; j<paddingDiff; j++)
+        formattedNew = "\xa0"+formattedNew;
+      paddingDiff = formatted14DayCases.length - formatted14d.length;
+      // console.log("PaddingDiff 14d: "+paddingDiff);
+      for(let j=0; j<paddingDiff; j++)
+        formatted14d = "\xa0"+formatted14d;
     }
     var text = document.createTextNode(formattedNow);
     td.appendChild(text);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.diff_ncumul_conf!=null?actual.diff_ncumul_conf.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’"):""));
+    td.appendChild(document.createTextNode(formattedNew));
     tr.appendChild(td);
     var risk = "low";
     if(actual.incidence>=60) risk = "medium";
     if(actual.incidence>=120) risk = "high";
     td = document.createElement("td");
-    td.innerHTML = actual.cases14DaysDiff.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
+    td.innerHTML = formatted14d;
     tr.appendChild(td);
     td = document.createElement("td");
     td.innerHTML = "<span class=\"newrisk "+risk+"\">"+actual.incidence+"</span>";
