@@ -261,7 +261,7 @@ function processActualData(mode, chosenDay) {
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(actual.date_ncumul_conf.replace("2020-", "").replace("2021-", "")));
+    td.appendChild(document.createTextNode(actual.date_ncumul_conf.replace("2020-", "").replace("2021-", "").replace("2022-", "")));
     tr.appendChild(td);
     td = document.createElement("td");
     var formattedNow = now.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "’");
@@ -463,7 +463,7 @@ function processActualHospitalisation(filter) {
     td.appendChild(a);
     tr.appendChild(td);
     td = document.createElement("td");
-    td.appendChild(document.createTextNode(getDeviceState()==2?actual.date_current_hosp.replace("2020-", "").replace("2021-", ""):actual.date_current_hosp));
+    td.appendChild(document.createTextNode(getDeviceState()==2?actual.date_current_hosp.replace("2020-", "").replace("2021-", "").replace("2022-", ""):actual.date_current_hosp));
     tr.appendChild(td);
     td = document.createElement("td");
     var text = document.createTextNode(now);
